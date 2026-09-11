@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cicids-bruteforce-3days"
+version = "0.1.0"
+description = "A small, auditable temporal CICIDS2017 experiment"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+  "numpy>=1.26,<2.4", "pandas>=2.2,<2.3", "scikit-learn>=1.6,<1.9",
+  "xgboost==3.0.5", "PyYAML>=6,<7", "joblib>=1.4,<2",
+  "matplotlib>=3.9,<3.11"
+]
+
+[project.optional-dependencies]
+xai = ["shap==0.48.0"]
+
+[project.scripts]
+ids = "ids.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

@@ -1,0 +1,23 @@
+test_boundary_crossing_flow_is_purged (test_protocol.ProtocolTests.test_boundary_crossing_flow_is_purged) ... ok
+test_conflicting_record_labels_stop (test_protocol.ProtocolTests.test_conflicting_record_labels_stop) ... ok
+test_date_format_is_explicit (test_protocol.ProtocolTests.test_date_format_is_explicit) ... ok
+test_duplicate_records_removed_but_recurring_feature_patterns_retained (test_protocol.ProtocolTests.test_duplicate_records_removed_but_recurring_feature_patterns_retained) ... ok
+test_end_to_end_core_does_not_read_test_during_training_and_locks_after (test_protocol.ProtocolTests.test_end_to_end_core_does_not_read_test_during_training_and_locks_after) ... Training decision_tree on 3,795 rows / 13 raw features
+Training random_forest on 3,795 rows / 13 raw features
+ok
+test_full_three_model_experiment (test_protocol.ProtocolTests.test_full_three_model_experiment) ... skipped 'xgboost unavailable; full three-model integration not verified'
+test_label_scope_and_identifier_allowlist (test_protocol.ProtocolTests.test_label_scope_and_identifier_allowlist) ... ok
+test_missing_timestamp_does_not_fall_back_to_row_order (test_protocol.ProtocolTests.test_missing_timestamp_does_not_fall_back_to_row_order) ... ok
+test_partition_hash_detects_changed_bytes (test_protocol.ProtocolTests.test_partition_hash_detects_changed_bytes) ... ok
+test_prepare_requires_clock_and_cutoff_review (test_protocol.ProtocolTests.test_prepare_requires_clock_and_cutoff_review) ... ok
+test_preprocessing_rejects_numeric_label_column (test_protocol.ProtocolTests.test_preprocessing_rejects_numeric_label_column) ... ok
+test_shap_on_frozen_winner (test_protocol.ProtocolTests.test_shap_on_frozen_winner) ... skipped 'shap unavailable; actual explanation not verified'
+test_single_class_partition_stops (test_protocol.ProtocolTests.test_single_class_partition_stops) ... ok
+test_threshold_tuning_uses_validation_targets (test_protocol.ProtocolTests.test_threshold_tuning_uses_validation_targets) ... ok
+test_training_only_median_and_constant_selection (test_protocol.ProtocolTests.test_training_only_median_and_constant_selection) ... ok
+test_undefined_subtype_recall_is_null (test_protocol.ProtocolTests.test_undefined_subtype_recall_is_null) ... ok
+
+----------------------------------------------------------------------
+Ran 16 tests in 6.682s
+
+OK (skipped=2)

@@ -1,0 +1,42 @@
+# Paths are relative to this repository, not the calling shell.
+experiment_id: tuesday_temporal_v1
+seed: 42
+input:
+  csv: data/raw/Tuesday-WorkingHours.pcap_ISCX.csv
+  source_url: https://www.unb.ca/cic/datasets/ids-2017.html
+  source_note: "REPLACE: actual archive/mirror URL, downloaded date, file variant"
+  encoding: utf-8-sig
+  chunksize: 50000
+  timestamp_formats: ["%d/%m/%Y %H:%M:%S", "%d/%m/%Y %H:%M"]
+  expected_date: "2017-07-04"
+  duration_unit: us
+  timestamp_precision_seconds: 60
+  clock_basis: "REPLACE: verify local capture clock / export timezone"
+  clock_reviewed: false
+  synthetic: false
+features:
+  # Explicit allowlist in schema.py. Both ports and Protocol excluded by design.
+  min_present: 20
+split:
+  # ILLUSTRATIVE ONLY. Confirm from audit, not from model scores.
+  train_end: "2017-07-04 14:20:00"
+  validation_end: "2017-07-04 14:40:00"
+  embargo_seconds: 120
+  min_per_binary_class: 30
+  cutoffs_reviewed: false
+  cutoff_reason: "REPLACE: reference audit timeline and observed label coverage"
+  # Preserve original temporal population; report feature overlap separately.
+  duplicate_policy: exact_record_keep_earliest
+training:
+  models: [decision_tree, random_forest, xgboost]
+  n_jobs: 2
+  thresholds: [0.05, 0.10, 0.15, 0.20, 0.25, 0.30, 0.35, 0.40, 0.45, 0.50, 0.55, 0.60, 0.65, 0.70, 0.75, 0.80, 0.85, 0.90, 0.95]
+  selection_metric: f1_attack
+  decision_tree: {max_depth: 8, min_samples_leaf: 10}
+  random_forest: {n_estimators: 150, max_depth: 16, min_samples_leaf: 5, max_features: sqrt}
+  xgboost: {n_estimators: 200, max_depth: 4, learning_rate: 0.08, min_child_weight: 5, subsample: 0.8, colsample_bytree: 0.8, reg_lambda: 1.0}
+explain:
+  max_rows: 500
+paths:
+  processed: data/processed/tuesday_temporal_v1
+  run: artifacts/tuesday_temporal_v1

@@ -1,0 +1,15 @@
+.venv/
+__pycache__/
+.pytest_cache/
+*.egg-info/
+build/
+dist/
+data/raw/*
+!data/raw/README.md
+data/processed/*
+!data/processed/.gitkeep
+artifacts/*
+!artifacts/.gitkeep
+demo_workspace/
+.DS_Store
+
