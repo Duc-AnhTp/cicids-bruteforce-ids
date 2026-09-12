@@ -102,9 +102,9 @@
     "Bwd Packet Length Min": 0.0,
     "Bwd Packet Length Mean": 79.0,
     "Bwd Packet Length Std": 0.0,
-    "Flow Bytes/s": 2501.8071265,
-    "Flow Packets/s": 120.40757965,
-    "Flow IAT Mean": 10834.33333,
+    "Flow Bytes/s": 2501.447344,
+    "Flow Packets/s": 120.440209,
+    "Flow IAT Mean": 10832.37857,
     "Flow IAT Std": 116.9144987,
     "Flow IAT Max": 30865.0,
     "Flow IAT Min": 4.0,
@@ -121,8 +121,8 @@
     "Fwd PSH Flags": 0.0,
     "Fwd Header Length": 64.0,
     "Bwd Header Length": 40.0,
-    "Fwd Packets/s": 63.11935871,
-    "Bwd Packets/s": 28.21551007,
+    "Fwd Packets/s": 63.12068678,
+    "Bwd Packets/s": 28.216934035,
     "Min Packet Length": 0.0,
     "Max Packet Length": 90.0,
     "Packet Length Mean": 58.8,
@@ -157,17 +157,17 @@
     "Idle Min": 0.0
   },
   "rows": {
-    "train": 91845,
-    "validation": 207375,
-    "test": 146668
+    "train": 91852,
+    "validation": 207465,
+    "test": 146571
   },
   "class_support": {
-    "train_normal": 88995,
+    "train_normal": 89002,
     "train_attack": 2850,
-    "validation_normal": 200941,
-    "validation_attack": 6434,
-    "test_normal": 142117,
-    "test_attack": 4551
+    "validation_normal": 201028,
+    "validation_attack": 6437,
+    "test_normal": 142023,
+    "test_attack": 4548
   },
   "excluded_fixed": [
     "BinaryLabel",

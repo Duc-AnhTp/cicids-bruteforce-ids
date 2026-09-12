@@ -3,11 +3,46 @@
   "strategy": "stratified random split",
   "random_seed": 42,
   "stratify_by": "Label",
-  "source_clean_rows": 445888,
-  "train_rows": 91845,
-  "validation_rows": 207375,
-  "test_rows": 146668,
-  "train_attack": 2850,
-  "validation_attack": 6434,
-  "test_attack": 4551
+  "source": {
+    "path": "data\\raw\\cicids2017\\GeneratedLabelledFlows\\Tuesday-WorkingHours.pcap_ISCX.csv",
+    "sha256": "ae9c88e10c41a8eb1ff454ae98bc513454925097d0b0b57180f94e79de445815"
+  },
+  "cleaning": {
+    "negative_or_invalid_duration_removed": 17,
+    "raw_duplicates_removed": 4,
+    "infinity_converted_to_nan": 327,
+    "duplicated_feature_removed": "Fwd Header Length.1",
+    "imputation_performed": false
+  },
+  "splits": [
+    {
+      "split": "Train",
+      "rows": 91852,
+      "BENIGN": 89002,
+      "FTP_Patator": 1635,
+      "SSH_Patator": 1215,
+      "Attack": 2850,
+      "Attack_percent": 3.102818
+    },
+    {
+      "split": "Validation",
+      "rows": 207465,
+      "BENIGN": 201028,
+      "FTP_Patator": 3693,
+      "SSH_Patator": 2744,
+      "Attack": 6437,
+      "Attack_percent": 3.102692
+    },
+    {
+      "split": "Test",
+      "rows": 146571,
+      "BENIGN": 142023,
+      "FTP_Patator": 2610,
+      "SSH_Patator": 1938,
+      "Attack": 4548,
+      "Attack_percent": 3.102933
+    }
+  ],
+  "checkpoint_format": "csv.gz",
+  "note": "Random split is a mandatory control (protocol §5.2). Results from random split are NOT the primary result. Primary results use Time-based split."
 }

@@ -57,22 +57,19 @@ def load_split(split_dir: Path):
     Important:
     Test is loaded here only to APPLY already-fitted preprocessing.
     No statistics or decisions are learned from Test.
+
+    Supports both .csv.gz (new) and .csv (legacy) files.
     """
 
-    train = pd.read_csv(
-        split_dir / "train.csv",
-        index_col=0,
-    )
+    def _read(name):
+        gz = split_dir / f"{name}.csv.gz"
+        plain = split_dir / f"{name}.csv"
+        path = gz if gz.exists() else plain
+        return pd.read_csv(path)
 
-    val = pd.read_csv(
-        split_dir / "validation.csv",
-        index_col=0,
-    )
-
-    test = pd.read_csv(
-        split_dir / "test.csv",
-        index_col=0,
-    )
+    train = _read("train")
+    val = _read("validation")
+    test = _read("test")
 
     for df in (train, val, test):
         df.columns = (
@@ -160,6 +157,53 @@ def fit_transform_preprocessing(
     X_train_raw = train[initial_features].copy()
     X_val_raw = val[initial_features].copy()
     X_test_raw = test[initial_features].copy()
+
+    # --------------------------------------------------------
+    # Guard: CICFlowMeter 32-bit integer overflow → NaN
+    # Values exceeding float32 range are overflow artifacts
+    # (e.g. Fwd Header Length = -32 billion).
+    # Mirrors src/ids/preprocess.py NumericGuard.
+    # --------------------------------------------------------
+
+    f32_max = np.finfo(np.float32).max
+
+    # Columns that represent sizes/lengths and cannot physically be negative
+    non_negative_size_cols = [
+        "Fwd Header Length",
+        "Bwd Header Length",
+        "min_seg_size_forward",
+        "Fwd Header Length.1",
+    ]
+
+    for label, X_raw in [
+        ("train", X_train_raw),
+        ("validation", X_val_raw),
+        ("test", X_test_raw),
+    ]:
+        # 1. Float32 unrepresentable overflow
+        overflow_mask = X_raw.abs() > f32_max
+        
+        # 2. Negative artifacts in size/length columns (CICFlowMeter 32-bit signed int overflow)
+        for col in non_negative_size_cols:
+            if col in X_raw.columns:
+                neg_mask = X_raw[col] < 0
+                overflow_mask[col] = overflow_mask[col] | neg_mask
+
+        n_overflow = int(
+            overflow_mask.sum().sum()
+        )
+
+        if n_overflow > 0:
+            print(
+                f"  {label}: {n_overflow} "
+                f"overflow/invalid size values -> NaN"
+            )
+
+            X_raw.where(
+                ~overflow_mask,
+                other=np.nan,
+                inplace=True,
+            )
 
     # --------------------------------------------------------
     # Check numeric schema
@@ -329,17 +373,17 @@ def save_scenario(
 
     X_train_df.to_csv(
         out_dir / "X_train.csv",
-        index=True,
+        index=False,
     )
 
     X_val_df.to_csv(
         out_dir / "X_validation.csv",
-        index=True,
+        index=False,
     )
 
     X_test_df.to_csv(
         out_dir / "X_test.csv",
-        index=True,
+        index=False,
     )
 
     # --------------------------------------------------------
@@ -354,21 +398,21 @@ def save_scenario(
         "BinaryLabel"
     ).to_csv(
         out_dir / "y_train.csv",
-        index=True,
+        index=False,
     )
 
     y_val.to_frame(
         "BinaryLabel"
     ).to_csv(
         out_dir / "y_validation.csv",
-        index=True,
+        index=False,
     )
 
     y_test.to_frame(
         "BinaryLabel"
     ).to_csv(
         out_dir / "y_test.csv",
-        index=True,
+        index=False,
     )
 
     # --------------------------------------------------------

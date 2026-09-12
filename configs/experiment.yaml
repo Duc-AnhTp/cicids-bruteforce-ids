@@ -4,27 +4,37 @@ seed: 42
 input:
   csv: data/raw/Tuesday-WorkingHours.pcap_ISCX.csv
   source_url: https://www.unb.ca/cic/datasets/ids-2017.html
-  source_note: "REPLACE: actual archive/mirror URL, downloaded date, file variant"
+  source_note: >-
+    GeneratedLabelledFlows/Tuesday-WorkingHours.pcap_ISCX.csv
+    from CICIDS2017 dataset (UNB).
+    SHA256: ae9c88e10c41a8eb1ff454ae98bc513454925097d0b0b57180f94e79de445815
   encoding: utf-8-sig
   chunksize: 50000
   timestamp_formats: ["%d/%m/%Y %H:%M:%S", "%d/%m/%Y %H:%M"]
   expected_date: "2017-07-04"
   duration_unit: us
   timestamp_precision_seconds: 60
-  clock_basis: "REPLACE: verify local capture clock / export timezone"
-  clock_reviewed: false
+  clock_basis: >-
+    CICFlowMeter export with minute-level precision.
+    Raw hours 1-5 mapped to 13-17 based on EDA timeline audit.
+    No raw PCAP clock available for independent verification.
+  clock_reviewed: true
   synthetic: false
 features:
   # Explicit allowlist in schema.py. Both ports and Protocol excluded by design.
   min_present: 20
 split:
-  # ILLUSTRATIVE ONLY. Confirm from audit, not from model scores.
-  train_end: "2017-07-04 14:20:00"
-  validation_end: "2017-07-04 14:40:00"
+  # Audited cutoffs from EDA timeline (docs/quy_trinh_thu_thap_tien_xu_ly_CICIDS2017.md)
+  train_end: "2017-07-04 10:00:00"
+  validation_end: "2017-07-04 14:30:00"
   embargo_seconds: 120
   min_per_binary_class: 30
-  cutoffs_reviewed: false
-  cutoff_reason: "REPLACE: reference audit timeline and observed label coverage"
+  cutoffs_reviewed: true
+  cutoff_reason: >-
+    EDA timeline audit confirmed FTP-Patator 09:20-10:16,
+    SSH-Patator 14:01-14:55. A=10:00 ensures all FTP in Train.
+    B=14:30 gives Validation both subtypes (FTP+SSH).
+    Test receives SSH only (known limitation in split_metadata.json).
   # Preserve original temporal population; report feature overlap separately.
   duplicate_policy: exact_record_keep_earliest
 training:

@@ -103,6 +103,6 @@
       "end": "2017-07-04T17:00:00"
     }
   ],
-  "checkpoint_format": "csv",
+  "checkpoint_format": "csv.gz",
   "known_limitation": "Train contains FTP-Patator but no SSH-Patator; Test contains SSH-Patator but no FTP-Patator. Primary task remains binary Normal vs Attack."
 }

@@ -468,17 +468,35 @@ def main():
         df["StartTime"] >= B + g
     )
 
-    train = df.loc[
-        train_mask
-    ].copy()
+    train = (
+        df.loc[train_mask]
+        .copy()
+        .sort_values(
+            ["StartTime", "Flow ID"],
+            kind="stable",
+        )
+        .reset_index(drop=True)
+    )
 
-    validation = df.loc[
-        val_mask
-    ].copy()
+    validation = (
+        df.loc[val_mask]
+        .copy()
+        .sort_values(
+            ["StartTime", "Flow ID"],
+            kind="stable",
+        )
+        .reset_index(drop=True)
+    )
 
-    test = df.loc[
-        test_mask
-    ].copy()
+    test = (
+        df.loc[test_mask]
+        .copy()
+        .sort_values(
+            ["StartTime", "Flow ID"],
+            kind="stable",
+        )
+        .reset_index(drop=True)
+    )
 
     kept_mask = (
         train_mask
@@ -578,31 +596,31 @@ def main():
             "Split does not preserve total row count."
         )
 
-    if len(
-        train.index.intersection(
-            validation.index
-        )
+    # After sort + reset_index, integer indices overlap by
+    # design. Verify non-overlap via time boundaries instead.
+
+    if (
+        train["StartTime"].max()
+        >= validation["StartTime"].min()
     ):
         raise AssertionError(
-            "Train/Validation overlap detected."
+            "Train/Validation time overlap detected."
         )
 
-    if len(
-        train.index.intersection(
-            test.index
-        )
+    if (
+        train["StartTime"].max()
+        >= test["StartTime"].min()
     ):
         raise AssertionError(
-            "Train/Test overlap detected."
+            "Train/Test time overlap detected."
         )
 
-    if len(
-        validation.index.intersection(
-            test.index
-        )
+    if (
+        validation["StartTime"].max()
+        >= test["StartTime"].min()
     ):
         raise AssertionError(
-            "Validation/Test overlap detected."
+            "Validation/Test time overlap detected."
         )
 
     # Both binary classes must exist in each split
@@ -693,17 +711,17 @@ def main():
     try:
         train_save.to_parquet(
             OUTPUT_DIR / "train.parquet",
-            index=True
+            index=False
         )
 
         val_save.to_parquet(
             OUTPUT_DIR / "validation.parquet",
-            index=True
+            index=False
         )
 
         test_save.to_parquet(
             OUTPUT_DIR / "test.parquet",
-            index=True
+            index=False
         )
 
         checkpoint_format = "parquet"
@@ -711,25 +729,28 @@ def main():
     except ImportError:
         print(
             "pyarrow/fastparquet unavailable; "
-            "falling back to CSV."
+            "falling back to CSV (gzip)."
         )
 
         train_save.to_csv(
-            OUTPUT_DIR / "train.csv",
-            index=True
+            OUTPUT_DIR / "train.csv.gz",
+            index=False,
+            compression="gzip",
         )
 
         val_save.to_csv(
-            OUTPUT_DIR / "validation.csv",
-            index=True
+            OUTPUT_DIR / "validation.csv.gz",
+            index=False,
+            compression="gzip",
         )
 
         test_save.to_csv(
-            OUTPUT_DIR / "test.csv",
-            index=True
+            OUTPUT_DIR / "test.csv.gz",
+            index=False,
+            compression="gzip",
         )
 
-        checkpoint_format = "csv"
+        checkpoint_format = "csv.gz"
 
     # --------------------------------------------------------
     # 15. Save metadata
