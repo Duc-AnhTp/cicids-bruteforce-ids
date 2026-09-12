@@ -1,0 +1,13 @@
+{
+  "split_version": "random_v1",
+  "strategy": "stratified random split",
+  "random_seed": 42,
+  "stratify_by": "Label",
+  "source_clean_rows": 445888,
+  "train_rows": 91845,
+  "validation_rows": 207375,
+  "test_rows": 146668,
+  "train_attack": 2850,
+  "validation_attack": 6434,
+  "test_attack": 4551
+}

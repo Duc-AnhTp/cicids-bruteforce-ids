@@ -4,12 +4,19 @@ __pycache__/
 *.egg-info/
 build/
 dist/
+
+# Dữ liệu gốc CICIDS2017 không đẩy lên repo
 data/raw/*
 !data/raw/README.md
-data/processed/*
-!data/processed/.gitkeep
+
+
 artifacts/*
 !artifacts/.gitkeep
+
 demo_workspace/
+.ipynb_checkpoints/
 .DS_Store
 
+*.zip
+*.pcap
+*.pcapng

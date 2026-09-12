@@ -1,0 +1,108 @@
+{
+  "source": {
+    "path": "data\\raw\\cicids2017\\GeneratedLabelledFlows\\Tuesday-WorkingHours.pcap_ISCX.csv",
+    "sha256": "ae9c88e10c41a8eb1ff454ae98bc513454925097d0b0b57180f94e79de445815",
+    "raw_rows": 445909
+  },
+  "split_version": "time_v1",
+  "timestamp_policy": {
+    "raw_format": "d/m/YYYY h:mm",
+    "observed_raw_hours": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      8,
+      9,
+      10,
+      11,
+      12
+    ],
+    "rule": "hours 1-5 -> +12 hours; hours 8-12 unchanged",
+    "uses_label": false,
+    "uses_destination_port": false,
+    "limitation": "Timestamp_fixed is reconstructed from Tuesday CSV metadata and is not an absolute PCAP timestamp."
+  },
+  "cleaning": {
+    "negative_or_invalid_duration_removed": 17,
+    "raw_duplicates_removed": 4,
+    "infinity_converted_to_nan": 327,
+    "duplicated_feature_removed": "Fwd Header Length.1",
+    "imputation_performed": false
+  },
+  "time_split": {
+    "a": "2017-07-04T10:00:00",
+    "b": "2017-07-04T14:30:00",
+    "q_seconds": 60,
+    "g_seconds": 120
+  },
+  "boundary_audit": [
+    {
+      "reason": "purge_at_a",
+      "rows": 1102,
+      "BENIGN": 970,
+      "FTP": 132,
+      "SSH": 0
+    },
+    {
+      "reason": "embargo_after_a",
+      "rows": 2863,
+      "BENIGN": 2609,
+      "FTP": 254,
+      "SSH": 0
+    },
+    {
+      "reason": "purge_at_b",
+      "rows": 1487,
+      "BENIGN": 1396,
+      "FTP": 0,
+      "SSH": 91
+    },
+    {
+      "reason": "embargo_after_b",
+      "rows": 2180,
+      "BENIGN": 1992,
+      "FTP": 0,
+      "SSH": 188
+    }
+  ],
+  "removed_by_purge_embargo": 7632,
+  "splits": [
+    {
+      "split": "Train",
+      "rows": 90273,
+      "BENIGN": 85139,
+      "FTP_Patator": 5134,
+      "SSH_Patator": 0,
+      "Attack": 5134,
+      "Attack_percent": 5.687193,
+      "start": "2017-07-04T08:53:00",
+      "end": "2017-07-04T09:58:00"
+    },
+    {
+      "split": "Validation",
+      "rows": 203826,
+      "BENIGN": 199522,
+      "FTP_Patator": 2418,
+      "SSH_Patator": 1886,
+      "Attack": 4304,
+      "Attack_percent": 2.111605,
+      "start": "2017-07-04T10:02:00",
+      "end": "2017-07-04T14:28:00"
+    },
+    {
+      "split": "Test",
+      "rows": 144157,
+      "BENIGN": 140425,
+      "FTP_Patator": 0,
+      "SSH_Patator": 3732,
+      "Attack": 3732,
+      "Attack_percent": 2.588844,
+      "start": "2017-07-04T14:32:00",
+      "end": "2017-07-04T17:00:00"
+    }
+  ],
+  "checkpoint_format": "csv",
+  "known_limitation": "Train contains FTP-Patator but no SSH-Patator; Test contains SSH-Patator but no FTP-Patator. Primary task remains binary Normal vs Attack."
+}
