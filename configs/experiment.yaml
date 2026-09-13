@@ -31,10 +31,10 @@ split:
   min_per_binary_class: 30
   cutoffs_reviewed: true
   cutoff_reason: >-
-    EDA timeline audit confirmed FTP-Patator 09:20-10:16,
-    SSH-Patator 14:01-14:55. A=10:00 ensures all FTP in Train.
-    B=14:30 gives Validation both subtypes (FTP+SSH).
-    Test receives SSH only (known limitation in split_metadata.json).
+    EDA timeline audit confirmed FTP-Patator 09:20-10:16 and SSH-Patator 14:01-14:55.
+    A=10:00:00 places early FTP in Train (~68%) and tail FTP in Validation (~32%),
+    providing attack diversity to Validation. B=14:30:00 places early SSH in Validation (~34%)
+    and main SSH in Test (~66%). Test evaluates SSH-Patator only (zero-shot transfer evaluation).
   # Preserve original temporal population; report feature overlap separately.
   duplicate_policy: exact_record_keep_earliest
 training:

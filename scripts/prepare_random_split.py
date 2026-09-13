@@ -22,10 +22,27 @@ from sklearn.model_selection import train_test_split
 # CONFIG — must match prepare_splits.py
 # ============================================================
 
-DATA_PATH = Path(
-    "data/raw/cicids2017/GeneratedLabelledFlows/"
-    "Tuesday-WorkingHours.pcap_ISCX.csv"
-)
+def resolve_data_path() -> Path:
+    candidates = [
+        Path("data/raw/Tuesday-WorkingHours.pcap_ISCX.csv"),
+        Path("data/raw/cicids2017/GeneratedLabelledFlows/Tuesday-WorkingHours.pcap_ISCX.csv"),
+    ]
+    cfg_file = Path("configs/experiment.yaml")
+    if cfg_file.exists():
+        try:
+            import yaml
+            with cfg_file.open("r", encoding="utf-8") as f:
+                cfg = yaml.safe_load(f)
+            if "input" in cfg and "csv" in cfg["input"]:
+                candidates.insert(0, Path(cfg["input"]["csv"]))
+        except Exception:
+            pass
+    for candidate in candidates:
+        if candidate.is_file():
+            return candidate
+    return candidates[0]
+
+DATA_PATH = resolve_data_path()
 
 OUTPUT_DIR = Path(
     "data/processed/random_split_v1"
@@ -37,6 +54,8 @@ SOURCE_SHA256_EXPECTED = (
 )
 
 SEED = 42
+
+Q_SECONDS = 60
 
 VALID_LABELS = {
     "BENIGN",
@@ -269,6 +288,18 @@ def main():
     print(
         "Fwd Header Length.1 removed:",
         duplicate_feature_removed,
+    )
+
+    # Compute EndTime for exact schema parity with split_v1
+    q = pd.Timedelta(seconds=Q_SECONDS)
+    df["FlowDuration_td"] = pd.to_timedelta(
+        df["Flow Duration"],
+        unit="us"
+    )
+    df["EndTime"] = (
+        df["StartTime"]
+        + df["FlowDuration_td"]
+        + q
     )
 
     # --------------------------------------------------------

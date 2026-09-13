@@ -10,10 +10,27 @@ import pandas as pd
 # CONFIG
 # ============================================================
 
-DATA_PATH = Path(
-    "data/raw/cicids2017/GeneratedLabelledFlows/"
-    "Tuesday-WorkingHours.pcap_ISCX.csv"
-)
+def resolve_data_path() -> Path:
+    candidates = [
+        Path("data/raw/Tuesday-WorkingHours.pcap_ISCX.csv"),
+        Path("data/raw/cicids2017/GeneratedLabelledFlows/Tuesday-WorkingHours.pcap_ISCX.csv"),
+    ]
+    cfg_file = Path("configs/experiment.yaml")
+    if cfg_file.exists():
+        try:
+            import yaml
+            with cfg_file.open("r", encoding="utf-8") as f:
+                cfg = yaml.safe_load(f)
+            if "input" in cfg and "csv" in cfg["input"]:
+                candidates.insert(0, Path(cfg["input"]["csv"]))
+        except Exception:
+            pass
+    for candidate in candidates:
+        if candidate.is_file():
+            return candidate
+    return candidates[0]
+
+DATA_PATH = resolve_data_path()
 
 OUTPUT_DIR = Path(
     "data/processed/split_v1"
@@ -448,6 +465,8 @@ def main():
         + q
     )
 
+    df["_row_id"] = np.arange(len(df), dtype=np.int64)
+
     # --------------------------------------------------------
     # 10. Time-based split
     # --------------------------------------------------------
@@ -596,31 +615,69 @@ def main():
             "Split does not preserve total row count."
         )
 
-    # After sort + reset_index, integer indices overlap by
-    # design. Verify non-overlap via time boundaries instead.
+    # 1. Row disjointness check via _row_id
+    train_ids = set(train["_row_id"])
+    val_ids = set(validation["_row_id"])
+    test_ids = set(test["_row_id"])
+    purged_ids = set(removed_boundary["_row_id"])
 
-    if (
-        train["StartTime"].max()
-        >= validation["StartTime"].min()
-    ):
+    if train_ids & val_ids:
         raise AssertionError(
-            "Train/Validation time overlap detected."
+            f"Train/Validation row overlap detected: {len(train_ids & val_ids)} rows."
         )
 
-    if (
-        train["StartTime"].max()
-        >= test["StartTime"].min()
-    ):
+    if train_ids & test_ids:
         raise AssertionError(
-            "Train/Test time overlap detected."
+            f"Train/Test row overlap detected: {len(train_ids & test_ids)} rows."
         )
 
-    if (
-        validation["StartTime"].max()
-        >= test["StartTime"].min()
-    ):
+    if val_ids & test_ids:
         raise AssertionError(
-            "Validation/Test time overlap detected."
+            f"Validation/Test row overlap detected: {len(val_ids & test_ids)} rows."
+        )
+
+    if (train_ids | val_ids | test_ids) & purged_ids:
+        raise AssertionError(
+            "Kept partitions overlap with purged/embargoed rows."
+        )
+
+    # 2. Strict flow completion and embargo boundary checks
+    if train["EndTime"].max() >= validation["StartTime"].min():
+        raise AssertionError(
+            f"Train/Validation time overlap: train EndTime max ({train['EndTime'].max()}) "
+            f">= validation StartTime min ({validation['StartTime'].min()})"
+        )
+
+    if validation["EndTime"].max() >= test["StartTime"].min():
+        raise AssertionError(
+            f"Validation/Test time overlap: validation EndTime max ({validation['EndTime'].max()}) "
+            f">= test StartTime min ({test['StartTime'].min()})"
+        )
+
+    if train["EndTime"].max() >= test["StartTime"].min():
+        raise AssertionError(
+            f"Train/Test time overlap: train EndTime max ({train['EndTime'].max()}) "
+            f">= test StartTime min ({test['StartTime'].min()})"
+        )
+
+    if train["EndTime"].max() >= A:
+        raise AssertionError(
+            f"Train EndTime max ({train['EndTime'].max()}) >= cutoff A ({A})"
+        )
+
+    if validation["StartTime"].min() < A + g:
+        raise AssertionError(
+            f"Validation StartTime min ({validation['StartTime'].min()}) < A + embargo ({A + g})"
+        )
+
+    if validation["EndTime"].max() >= B:
+        raise AssertionError(
+            f"Validation EndTime max ({validation['EndTime'].max()}) >= cutoff B ({B})"
+        )
+
+    if test["StartTime"].min() < B + g:
+        raise AssertionError(
+            f"Test StartTime min ({test['StartTime'].min()}) < B + embargo ({B + g})"
         )
 
     # Both binary classes must exist in each split
@@ -690,9 +747,10 @@ def main():
         exist_ok=True
     )
 
-    # Remove temporary timedelta helper before saving
+    # Remove temporary timedelta helper and audit row ID before saving
     columns_to_drop = [
         "FlowDuration_td",
+        "_row_id",
     ]
 
     train_save = train.drop(
@@ -822,11 +880,14 @@ def main():
             checkpoint_format,
 
         "known_limitation": (
-            "Train contains FTP-Patator but no "
-            "SSH-Patator; Test contains "
-            "SSH-Patator but no FTP-Patator. "
-            "Primary task remains binary "
-            "Normal vs Attack."
+            "Train contains early FTP-Patator (~68%) but no "
+            "SSH-Patator; Validation contains tail FTP-Patator (~32%) "
+            "and early SSH-Patator (~34%); Test contains tail "
+            "SSH-Patator (~66%) but no FTP-Patator. "
+            "Cutoff A=10:00 intentionally places early FTP in Train and tail FTP "
+            "in Validation so Validation has both subtypes for model selection, "
+            "with the trade-off of evaluating the same campaign across Train and Validation. "
+            "Primary task remains binary Normal vs Attack."
         ),
     }
 

@@ -1,6 +1,23 @@
 {
   "split": "random",
   "scenario": "with_port",
+  "subtypes": {
+    "train": {
+      "BENIGN": 89002,
+      "FTP-Patator": 1635,
+      "SSH-Patator": 1215
+    },
+    "validation": {
+      "BENIGN": 201028,
+      "FTP-Patator": 3693,
+      "SSH-Patator": 2744
+    },
+    "test": {
+      "BENIGN": 142023,
+      "FTP-Patator": 2610,
+      "SSH-Patator": 1938
+    }
+  },
   "preprocessing_version": "preprocess_v1",
   "fit_policy": "all learned preprocessing fitted on Train only",
   "initial_feature_count": 77,
@@ -182,6 +199,9 @@
     "Subtype",
     "TimeBin10",
     "Timestamp",
-    "Timestamp_fixed"
+    "Timestamp_fixed",
+    "Unnamed: 0",
+    "_row_id",
+    "index"
   ]
 }

@@ -35,8 +35,13 @@ def audit_dataset():
         else:
             with open(meta_file, "r", encoding="utf-8") as f:
                 meta = json.load(f)
-            print(f"  [PASS] Metadata loaded: {meta.get('strategy', 'N/A')}")
-        
+            strategy = (
+                meta.get("strategy")
+                or meta.get("split_version")
+                or meta.get("split_strategy", {}).get("name", "N/A")
+            )
+            print(f"  [PASS] Metadata loaded: strategy/version={strategy}")
+
         for p in ["train", "validation", "test"]:
             gz_path = sdir / f"{p}.csv.gz"
             if not gz_path.exists():
@@ -51,6 +56,11 @@ def audit_dataset():
                     print(f"  [FAIL] {p} has unnamed index column!")
                 else:
                     print(f"  [PASS] {p}.csv.gz: {len(df)} rows, {len(df.columns)} cols (No extra index col)")
+
+                # Check for EndTime schema presence
+                if "EndTime" not in df.columns:
+                    errors.append(f"{gz_path} is missing EndTime column")
+                    print(f"  [FAIL] {p} missing EndTime column!")
 
     # Check 2: Model Ready Data
     scenarios = [
@@ -109,6 +119,27 @@ def audit_dataset():
                 errors.append(f"{x_path} contains overflow negative value: {min_val}")
                 print(f"  [FAIL] Extreme negative value: {min_val}")
                 
+            # Check Flow IAT Min non-negative
+            if "Flow IAT Min" in X.columns:
+                iat_min = float(X["Flow IAT Min"].min())
+                if iat_min < 0:
+                    errors.append(f"{x_path} contains negative Flow IAT Min: {iat_min}")
+                    print(f"  [FAIL] Negative Flow IAT Min: {iat_min}")
+
+            # Check for subtype companion file
+            y_sub_path = mr_dir / f"y_{split_part}_subtype.csv.gz" if (mr_dir / f"y_{split_part}_subtype.csv.gz").exists() else mr_dir / f"y_{split_part}_subtype.csv"
+            if not y_sub_path.exists():
+                errors.append(f"Missing subtype target file: {y_sub_path}")
+                print(f"  [FAIL] Missing subtype target: {y_sub_path}")
+            else:
+                y_sub = pd.read_csv(y_sub_path)
+                if len(y_sub) != len(y):
+                    errors.append(f"Row count mismatch in {y_sub_path}: {len(y_sub)} vs {len(y)}")
+                    print(f"  [FAIL] Subtype row mismatch: {len(y_sub)} vs {len(y)}")
+                if list(y_sub.columns) != ["BinaryLabel", "Subtype"]:
+                    errors.append(f"Invalid columns in {y_sub_path}: {list(y_sub.columns)}")
+                    print(f"  [FAIL] Subtype columns mismatch: {list(y_sub.columns)}")
+
             print(f"  [PASS] {split_part}: X shape={X.shape}, y shape={y.shape}, NaNs={nan_count}, Infs={inf_count}, Min={min_val:.1f}, Max={max_val:.1f}")
 
     print("\n" + "=" * 80)

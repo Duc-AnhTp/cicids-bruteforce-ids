@@ -22,6 +22,32 @@ ATTACK_LABELS = {
     "SSH-Patator",
 }
 
+# 76 canonical features matching src/ids/schema.py
+CANONICAL_FEATURES = [
+    "Flow Duration", "Total Fwd Packets", "Total Backward Packets",
+    "Total Length of Fwd Packets", "Total Length of Bwd Packets",
+    "Fwd Packet Length Max", "Fwd Packet Length Min", "Fwd Packet Length Mean",
+    "Fwd Packet Length Std", "Bwd Packet Length Max", "Bwd Packet Length Min",
+    "Bwd Packet Length Mean", "Bwd Packet Length Std", "Flow Bytes/s",
+    "Flow Packets/s", "Flow IAT Mean", "Flow IAT Std", "Flow IAT Max",
+    "Flow IAT Min", "Fwd IAT Total", "Fwd IAT Mean", "Fwd IAT Std",
+    "Fwd IAT Max", "Fwd IAT Min", "Bwd IAT Total", "Bwd IAT Mean",
+    "Bwd IAT Std", "Bwd IAT Max", "Bwd IAT Min", "Fwd PSH Flags",
+    "Bwd PSH Flags", "Fwd URG Flags", "Bwd URG Flags", "Fwd Header Length",
+    "Bwd Header Length", "Fwd Packets/s", "Bwd Packets/s", "Min Packet Length",
+    "Max Packet Length", "Packet Length Mean", "Packet Length Std",
+    "Packet Length Variance", "FIN Flag Count", "SYN Flag Count",
+    "RST Flag Count", "PSH Flag Count", "ACK Flag Count", "URG Flag Count",
+    "CWE Flag Count", "ECE Flag Count", "Down/Up Ratio", "Average Packet Size",
+    "Avg Fwd Segment Size", "Avg Bwd Segment Size", "Fwd Avg Bytes/Bulk",
+    "Fwd Avg Packets/Bulk", "Fwd Avg Bulk Rate", "Bwd Avg Bytes/Bulk",
+    "Bwd Avg Packets/Bulk", "Bwd Avg Bulk Rate", "Subflow Fwd Packets",
+    "Subflow Fwd Bytes", "Subflow Bwd Packets", "Subflow Bwd Bytes",
+    "Init_Win_bytes_forward", "Init_Win_bytes_backward", "act_data_pkt_fwd",
+    "min_seg_size_forward", "Active Mean", "Active Std", "Active Max",
+    "Active Min", "Idle Mean", "Idle Std", "Idle Max", "Idle Min"
+]
+
 FIXED_EXCLUDE = {
     # metadata / leakage-prone
     "Flow ID",
@@ -31,6 +57,9 @@ FIXED_EXCLUDE = {
     "Timestamp_fixed",
     "StartTime",
     "EndTime",
+    "_row_id",
+    "Unnamed: 0",
+    "index",
 
     # EDA-only
     "TimeBin10",
@@ -65,7 +94,14 @@ def load_split(split_dir: Path):
         gz = split_dir / f"{name}.csv.gz"
         plain = split_dir / f"{name}.csv"
         path = gz if gz.exists() else plain
-        return pd.read_csv(path)
+        df = pd.read_csv(path)
+        unnamed = [
+            c for c in df.columns
+            if c.startswith("Unnamed:") or c.lower() in ("index", "unnamed: 0")
+        ]
+        if unnamed:
+            df = df.drop(columns=unnamed)
+        return df
 
     train = _read("train")
     val = _read("validation")
@@ -113,23 +149,22 @@ def get_initial_features(
     with_destination_port: bool,
 ):
     """
-    Feature schema is decided from Train schema only.
+    Feature schema is strictly derived using CANONICAL_FEATURES allowlist.
     """
+    allowed = list(CANONICAL_FEATURES)
+    if with_destination_port:
+        allowed = ["Destination Port"] + allowed
 
-    features = [
-        c
-        for c in train.columns
-        if c not in FIXED_EXCLUDE
+    missing = [c for c in allowed if c not in train.columns]
+    if missing:
+        raise ValueError(
+            f"Required canonical features missing from Train: {missing}"
+        )
+
+    return [
+        c for c in allowed
+        if c in train.columns and c not in FIXED_EXCLUDE
     ]
-
-    if not with_destination_port:
-        features = [
-            c
-            for c in features
-            if c != "Destination Port"
-        ]
-
-    return features
 
 
 # ============================================================
@@ -172,7 +207,6 @@ def fit_transform_preprocessing(
         "Fwd Header Length",
         "Bwd Header Length",
         "min_seg_size_forward",
-        "Fwd Header Length.1",
     ]
 
     for label, X_raw in [
@@ -182,7 +216,7 @@ def fit_transform_preprocessing(
     ]:
         # 1. Float32 unrepresentable overflow
         overflow_mask = X_raw.abs() > f32_max
-        
+
         # 2. Negative artifacts in size/length columns (CICFlowMeter 32-bit signed int overflow)
         for col in non_negative_size_cols:
             if col in X_raw.columns:
@@ -205,20 +239,33 @@ def fit_transform_preprocessing(
                 inplace=True,
             )
 
+        # 3. Flow IAT Min packet capture jitter (clip negative to 0.0)
+        if "Flow IAT Min" in X_raw.columns:
+            neg_iat = int((X_raw["Flow IAT Min"] < 0).sum())
+            if neg_iat > 0:
+                print(
+                    f"  {label}: {neg_iat} "
+                    f"negative Flow IAT Min values clipped to 0.0"
+                )
+                X_raw["Flow IAT Min"] = X_raw["Flow IAT Min"].clip(lower=0.0)
+
     # --------------------------------------------------------
-    # Check numeric schema
+    # Check numeric schema across all partitions
     # --------------------------------------------------------
 
-    non_numeric = (
-        X_train_raw
-        .select_dtypes(exclude=[np.number])
-        .columns.tolist()
-    )
-
-    if non_numeric:
-        raise ValueError(
-            f"Non-numeric features remain: {non_numeric}"
+    for split_label, X_part in [
+        ("train", X_train_raw),
+        ("validation", X_val_raw),
+        ("test", X_test_raw),
+    ]:
+        non_numeric = (
+            X_part.select_dtypes(exclude=[np.number])
+            .columns.tolist()
         )
+        if non_numeric:
+            raise ValueError(
+                f"Non-numeric features in {split_label}: {non_numeric}"
+            )
 
     # --------------------------------------------------------
     # All-missing - Train only
@@ -387,33 +434,37 @@ def save_scenario(
     )
 
     # --------------------------------------------------------
-    # Save y
+    # Save y (both binary target and subtype reference)
     # --------------------------------------------------------
 
     y_train = make_target(train)
     y_val = make_target(val)
     y_test = make_target(test)
 
-    y_train.to_frame(
-        "BinaryLabel"
-    ).to_csv(
-        out_dir / "y_train.csv",
-        index=False,
-    )
+    def get_subtype_series(part):
+        return part["Subtype"] if "Subtype" in part.columns else part["Label"]
 
-    y_val.to_frame(
-        "BinaryLabel"
-    ).to_csv(
-        out_dir / "y_validation.csv",
-        index=False,
-    )
+    for name, part, y_part in [
+        ("train", train, y_train),
+        ("validation", val, y_val),
+        ("test", test, y_test),
+    ]:
+        # Standard 1-column binary target for model training
+        y_part.to_frame(
+            "BinaryLabel"
+        ).to_csv(
+            out_dir / f"y_{name}.csv",
+            index=False,
+        )
 
-    y_test.to_frame(
-        "BinaryLabel"
-    ).to_csv(
-        out_dir / "y_test.csv",
-        index=False,
-    )
+        # 2-column target + subtype for detailed evaluation / audit
+        pd.DataFrame({
+            "BinaryLabel": y_part.values,
+            "Subtype": get_subtype_series(part).values,
+        }).to_csv(
+            out_dir / f"y_{name}_subtype.csv",
+            index=False,
+        )
 
     # --------------------------------------------------------
     # Metadata
@@ -422,6 +473,12 @@ def save_scenario(
     metadata = {
         "split": split_name,
         "scenario": scenario_name,
+
+        "subtypes": {
+            "train": {str(k): int(v) for k, v in get_subtype_series(train).value_counts().items()},
+            "validation": {str(k): int(v) for k, v in get_subtype_series(val).value_counts().items()},
+            "test": {str(k): int(v) for k, v in get_subtype_series(test).value_counts().items()},
+        },
 
         "preprocessing_version":
             "preprocess_v1",
