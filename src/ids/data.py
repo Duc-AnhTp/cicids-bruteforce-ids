@@ -104,7 +104,7 @@ def audit(cfg: dict) -> dict:
     out.mkdir(parents=True, exist_ok=True)
     timeline = frame.groupby([frame["_start"].dt.floor("5min"), "_label"]).size().unstack(fill_value=0)
     timeline.to_csv(out / "timeline_5min.csv", index_label="timestamp")
-    windows = frame.groupby("_label").agg(n=("_label", "size"), start=("_start", "min"), end=("_start", "max"))
+    windows = frame.groupby("_label").agg(n=("_label", "size"), start=("_start", "min"), end=("_end", "max"))
     windows.to_csv(out / "label_windows.csv")
     summary["exact_record_duplicate_rows"] = int(frame["_record_hash"].duplicated().sum())
     summary["feature_duplicate_rows"] = int(frame["_feature_hash"].duplicated().sum())
@@ -115,7 +115,7 @@ def audit(cfg: dict) -> dict:
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
     axes = timeline.plot(subplots=True, figsize=(11, 7), sharex=True, legend=True)
-    for ax in axes:
+    for ax in np.atleast_1d(axes).ravel():
         ax.set_ylabel("Flow count")
     plt.suptitle("SYNTHETIC fixture" if cfg["input"]["synthetic"] else "Tuesday: label counts by 5-minute bin")
     plt.tight_layout()

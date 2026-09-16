@@ -18,7 +18,9 @@ def main():
         if args.command == "audit":
             from .data import audit
             result = audit(cfg)
-            result = {k: result[k] for k in ["raw_rows", "selected_rows", "raw_label_counts", "start_min", "start_max", "synthetic"]}
+            keys = ["raw_rows", "selected_rows", "raw_label_counts", "start_min", "start_max",
+                    "exact_record_duplicate_rows", "feature_duplicate_rows", "synthetic"]
+            result = {k: result[k] for k in keys if k in result}
         elif args.command == "prepare":
             from .split import prepare
             result = prepare(cfg)["split"]

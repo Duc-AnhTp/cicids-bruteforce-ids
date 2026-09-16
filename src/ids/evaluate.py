@@ -126,9 +126,12 @@ def build_report(cfg: dict) -> dict:
         lines += ["**DỮ LIỆU GIẢ LẬP — chỉ kiểm tra phần mềm; không phải kết quả CICIDS2017.**", ""]
     lines += [f"Mô hình đã chọn trên Validation: **{result['winner']}**. Không chọn lại theo bảng Test.", "",
               "| Model | Ngưỡng | Precision | Recall | F1 | AP | FPR | FP | FN |", "|---|---:|---:|---:|---:|---:|---:|---:|---:|"]
+    def _fmt(val, prec=4):
+        return "N/A" if val is None else f"{val:.{prec}f}"
+
     for name in frozen["models"]:
         r = result["models"][name]["overall"]
-        lines.append(f"| {name} | {r['threshold']:.2f} | {r['precision_attack']:.4f} | {r['recall_attack']:.4f} | {r['f1_attack']:.4f} | {r['average_precision']:.4f} | {r['fpr']:.4f} | {r['fp']} | {r['fn']} |")
+        lines.append(f"| {name} | {_fmt(r['threshold'], 2)} | {_fmt(r['precision_attack'])} | {_fmt(r['recall_attack'])} | {_fmt(r['f1_attack'])} | {_fmt(r['average_precision'])} | {_fmt(r['fpr'])} | {r['fp']} | {r['fn']} |")
     lines += ["", "AP = average_precision_score, không phải diện tích PR tích phân hình thang.", "",
               "| Model | Nhãn tấn công | Support | Recall |", "|---|---|---:|---:|"]
     for name in frozen["models"]:

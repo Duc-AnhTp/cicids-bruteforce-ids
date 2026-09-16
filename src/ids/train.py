@@ -60,7 +60,7 @@ def fit_models(cfg: dict) -> dict:
         path = model_dir / f"{name}.joblib"
         joblib.dump(pipeline, path)
         entries[name] = {
-            "file": str(path.relative_to(run)), "sha256": file_sha256(path),
+            "file": path.relative_to(run).as_posix(), "sha256": file_sha256(path),
             "threshold": threshold, "validation": metrics,
             "validation_at_0_5": binary_metrics(yv, scores, 0.5),
             "validation_subtypes": subtype_recall(val["_label"], scores, threshold),

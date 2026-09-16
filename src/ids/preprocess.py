@@ -8,6 +8,7 @@ from sklearn.pipeline import Pipeline
 from sklearn.utils.validation import check_is_fitted
 
 from .common import ProtocolError
+from .data import numeric_frame
 from .schema import FEATURES, FORBIDDEN
 
 
@@ -27,7 +28,7 @@ class NumericGuard(TransformerMixin, BaseEstimator):
         names = list(self.feature_names_in_)
         if list(X.columns) != names:
             raise ProtocolError("Feature columns/order differ from the fitted pipeline.")
-        frame = X.apply(pd.to_numeric, errors="coerce").replace([np.inf, -np.inf], np.nan)
+        frame = numeric_frame(X)
         # Tree implementations use float32 internally. Treat unrepresentable values
         # as invalid rather than learning a clipping threshold from all data.
         return frame.where(frame.abs() <= np.finfo(np.float32).max).astype("float64")
