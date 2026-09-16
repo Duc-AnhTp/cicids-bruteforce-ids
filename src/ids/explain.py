@@ -35,9 +35,8 @@ def explain_winner(cfg: dict) -> dict:
         values = values[:, :, 1]
     if values.shape != transformed.shape:
         raise ProtocolError(f"Unexpected SHAP shape {values.shape}, input shape {transformed.shape}.")
-    if np.asarray(expected).size == 2:
-        expected = np.asarray(expected).ravel()[1]
-    expected = float(np.asarray(expected).ravel()[0])
+    expected_arr = np.asarray(expected).ravel()
+    expected = float(expected_arr[1] if expected_arr.size == 2 else expected_arr[0])
     target_output = (model.predict(transformed, output_margin=True) if name == "xgboost"
                      else model.predict_proba(transformed)[:, 1])
     max_additivity_error = float(np.max(np.abs(expected + values.sum(axis=1) - target_output)))

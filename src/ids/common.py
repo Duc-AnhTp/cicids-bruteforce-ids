@@ -74,7 +74,12 @@ def load_config(path: str | Path) -> dict:
         raise ProtocolError("Unknown/duplicated model names.")
     if not cfg["input"]["synthetic"] and models != expected_models:
         raise ProtocolError("The real experiment requires all three models in the declared order.")
-    cfg["_root"] = str(path.parent.parent)
+    root = path.parent.parent
+    for candidate in [path.parent, path.parent.parent]:
+        if (candidate / "pyproject.toml").exists() or (candidate / "src" / "ids").exists():
+            root = candidate
+            break
+    cfg["_root"] = str(root)
     cfg["_config_path"] = str(path)
     return cfg
 
@@ -106,7 +111,10 @@ def environment() -> dict:
 
 
 def code_hash() -> str:
-    return digest_json({p.name: file_sha256(p) for p in sorted(Path(__file__).parent.glob("*.py"))})
+    return digest_json({
+        p.name: hashlib.sha256(p.read_bytes().replace(b"\r\n", b"\n")).hexdigest()
+        for p in sorted(Path(__file__).parent.glob("*.py"))
+    })
 
 
 def require_unopened(run: Path) -> None:

@@ -1,0 +1,31 @@
+# Top Decision Rules for DecisionTree (max_depth=4 preview)
+# Total Depth: 9, Leaves: 17
+
+|--- Average Packet Size <= 14.12
+|   |--- Average Packet Size <= 9.29
+|   |   |--- SYN Flag Count <= 0.50
+|   |   |   |--- Total Length of Bwd Packets <= 57.00
+|   |   |   |   |--- Flow IAT Min <= 36509.50
+|   |   |   |   |   |--- class: 0
+|   |   |   |   |--- Flow IAT Min >  36509.50
+|   |   |   |   |   |--- truncated branch of depth 5
+|   |   |   |--- Total Length of Bwd Packets >  57.00
+|   |   |   |   |--- class: 1
+|   |   |--- SYN Flag Count >  0.50
+|   |   |   |--- Fwd Packet Length Mean <= 5.25
+|   |   |   |   |--- class: 0
+|   |   |   |--- Fwd Packet Length Mean >  5.25
+|   |   |   |   |--- class: 1
+|   |--- Average Packet Size >  9.29
+|   |   |--- Packet Length Std <= 14.32
+|   |   |   |--- Fwd Packet Length Std <= 14.42
+|   |   |   |   |--- Flow IAT Max <= 1.50
+|   |   |   |   |   |--- truncated branch of depth 4
+|   |   |   |   |--- Flow IAT Max >  1.50
+|   |   |   |   |   |--- class: 1
+|   |   |   |--- Fwd Packet Length Std >  14.42
+|   |   |   |   |--- class: 0
+|   |   |--- Packet Length Std >  14.32
+|   |   |   |--- class: 0
+|--- Average Packet Size >  14.12
+|   |--- class: 0

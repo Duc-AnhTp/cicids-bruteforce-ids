@@ -1,0 +1,26 @@
+TEST SET EVALUATION RESULTS
+================================================================================
+
+Accuracy:           0.9741
+Precision:          0.7000
+Recall:             0.0019
+F1 Score:           0.0037
+ROC-AUC:            0.5009
+Average Precision:  0.0272
+
+Confusion Matrix:
+                 Predicted
+               BENIGN  Attack
+Actual BENIGN   140422       3
+       Attack     3725       7
+
+================================================================================
+
+              precision    recall  f1-score   support
+
+      BENIGN       0.97      1.00      0.99    140425
+      Attack       0.70      0.00      0.00      3732
+
+    accuracy                           0.97    144157
+   macro avg       0.84      0.50      0.50    144157
+weighted avg       0.97      0.97      0.96    144157

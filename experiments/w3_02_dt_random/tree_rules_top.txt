@@ -1,0 +1,37 @@
+# Top Decision Rules for DecisionTree (max_depth=4 preview)
+# Total Depth: 12, Leaves: 33
+
+|--- Init_Win_bytes_forward <= 225.50
+|   |--- class: 0
+|--- Init_Win_bytes_forward >  225.50
+|   |--- min_seg_size_forward <= 30.00
+|   |   |--- Bwd Packets/s <= 3817.02
+|   |   |   |--- class: 0
+|   |   |--- Bwd Packets/s >  3817.02
+|   |   |   |--- Fwd IAT Min <= 257.50
+|   |   |   |   |--- class: 0
+|   |   |   |--- Fwd IAT Min >  257.50
+|   |   |   |   |--- class: 0
+|   |--- min_seg_size_forward >  30.00
+|   |   |--- Init_Win_bytes_forward <= 259.50
+|   |   |   |--- Flow IAT Mean <= 229.00
+|   |   |   |   |--- Down/Up Ratio <= 1.50
+|   |   |   |   |   |--- truncated branch of depth 8
+|   |   |   |   |--- Down/Up Ratio >  1.50
+|   |   |   |   |   |--- class: 0
+|   |   |   |--- Flow IAT Mean >  229.00
+|   |   |   |   |--- Init_Win_bytes_forward <= 232.00
+|   |   |   |   |   |--- truncated branch of depth 4
+|   |   |   |   |--- Init_Win_bytes_forward >  232.00
+|   |   |   |   |   |--- truncated branch of depth 3
+|   |   |--- Init_Win_bytes_forward >  259.50
+|   |   |   |--- act_data_pkt_fwd <= 5.50
+|   |   |   |   |--- Bwd IAT Min <= 707.00
+|   |   |   |   |   |--- truncated branch of depth 3
+|   |   |   |   |--- Bwd IAT Min >  707.00
+|   |   |   |   |   |--- truncated branch of depth 2
+|   |   |   |--- act_data_pkt_fwd >  5.50
+|   |   |   |   |--- Average Packet Size <= 100.11
+|   |   |   |   |   |--- truncated branch of depth 3
+|   |   |   |   |--- Average Packet Size >  100.11
+|   |   |   |   |   |--- truncated branch of depth 4
