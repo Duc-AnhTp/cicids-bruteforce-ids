@@ -1,0 +1,60 @@
+{
+  "model": "RandomForestClassifier",
+  "class_weight": "balanced",
+  "max_features": "sqrt",
+  "seed": 42,
+  "selection": "validation f1_attack then average_precision",
+  "test_opened": false,
+  "grid": {
+    "n_estimators": [
+      100,
+      150,
+      300
+    ],
+    "max_depth": [
+      10,
+      16,
+      null
+    ],
+    "min_samples_leaf": [
+      5
+    ]
+  },
+  "timebased": {
+    "job": "W3-03",
+    "split": "time",
+    "scenario": "with_port",
+    "n_estimators": 100,
+    "max_depth": 16,
+    "min_samples_leaf": 5,
+    "f1_attack": 0.7181,
+    "precision_attack": 1.0,
+    "recall_attack": 0.5602,
+    "accuracy": 0.9907,
+    "average_precision": 0.7326,
+    "roc_auc": 0.8892,
+    "fpr": 0.0,
+    "ftp_recall": 0.9971050454921423,
+    "ssh_recall": 0.0,
+    "fit_seconds": 2.3
+  },
+  "random": {
+    "job": "W3-04",
+    "split": "random",
+    "scenario": "with_port",
+    "n_estimators": 100,
+    "max_depth": "None",
+    "min_samples_leaf": 5,
+    "f1_attack": 0.9997,
+    "precision_attack": 1.0,
+    "recall_attack": 0.9994,
+    "accuracy": 1.0,
+    "average_precision": 0.9998,
+    "roc_auc": 0.9999,
+    "fpr": 0.0,
+    "ftp_recall": 0.9997292174383969,
+    "ssh_recall": 0.9989067055393586,
+    "fit_seconds": 2.9
+  },
+  "note": "Train time-based has FTP-Patator only; Test has SSH-Patator only. Primary result is time/with_port. Random split is control."
+}

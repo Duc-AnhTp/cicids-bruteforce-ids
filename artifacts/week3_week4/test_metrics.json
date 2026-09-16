@@ -1,0 +1,393 @@
+{
+  "opened_utc": "2026-09-14T15:29:51.020580+00:00",
+  "frozen_sha256": "180de418270ad0bf7bad7c105f268ae5c1970af6547d8f1054a5bf5be41482a0",
+  "winner_key": "time/with_port/random_forest",
+  "winner_selected_on": "Validation, before Test opened",
+  "models": {
+    "time/with_port/decision_tree": {
+      "overall": {
+        "accuracy": 0.9740352532308525,
+        "precision_attack": 0.0,
+        "recall_attack": 0.0,
+        "f1_attack": 0.0,
+        "fpr": 7.833363005162899e-05,
+        "tn": 140414,
+        "fp": 11,
+        "fn": 3732,
+        "tp": 0,
+        "n": 144157,
+        "n_attack": 3732,
+        "threshold": 0.5,
+        "average_precision": 0.025888441074661653,
+        "roc_auc": 0.4999608331849742,
+        "ftp_recall": null,
+        "ftp_support": 0,
+        "ssh_recall": 0.0,
+        "ssh_support": 3732
+      },
+      "subtype": {
+        "FTP-Patator": {
+          "support": 0,
+          "recall": null
+        },
+        "SSH-Patator": {
+          "support": 3732,
+          "recall": 0.0
+        }
+      }
+    },
+    "time/with_port/random_forest": {
+      "overall": {
+        "accuracy": 0.9741601170945566,
+        "precision_attack": 1.0,
+        "recall_attack": 0.0018756698821007502,
+        "f1_attack": 0.003744316662209147,
+        "fpr": 0.0,
+        "tn": 140425,
+        "fp": 0,
+        "fn": 3725,
+        "tp": 7,
+        "n": 144157,
+        "n_attack": 3732,
+        "threshold": 0.5,
+        "average_precision": 0.35907455545763656,
+        "roc_auc": 0.748332195118135,
+        "ftp_recall": null,
+        "ftp_support": 0,
+        "ssh_recall": 0.0018756698821007502,
+        "ssh_support": 3732
+      },
+      "subtype": {
+        "FTP-Patator": {
+          "support": 0,
+          "recall": null
+        },
+        "SSH-Patator": {
+          "support": 3732,
+          "recall": 0.0018756698821007502
+        }
+      }
+    },
+    "time/with_port/xgboost": {
+      "overall": {
+        "accuracy": 0.9741115589253383,
+        "precision_attack": 0.0,
+        "recall_attack": 0.0,
+        "f1_attack": 0.0,
+        "fpr": 0.0,
+        "tn": 140425,
+        "fp": 0,
+        "fn": 3732,
+        "tp": 0,
+        "n": 144157,
+        "n_attack": 3732,
+        "threshold": 0.5,
+        "average_precision": 0.08785172107803771,
+        "roc_auc": 0.750322936362417,
+        "ftp_recall": null,
+        "ftp_support": 0,
+        "ssh_recall": 0.0,
+        "ssh_support": 3732
+      },
+      "subtype": {
+        "FTP-Patator": {
+          "support": 0,
+          "recall": null
+        },
+        "SSH-Patator": {
+          "support": 3732,
+          "recall": 0.0
+        }
+      }
+    },
+    "time/without_port/decision_tree": {
+      "overall": {
+        "accuracy": 0.9740976851627046,
+        "precision_attack": 0.4375,
+        "recall_attack": 0.0018756698821007502,
+        "f1_attack": 0.003735325506937033,
+        "fpr": 6.409115186042371e-05,
+        "tn": 140416,
+        "fp": 9,
+        "fn": 3725,
+        "tp": 7,
+        "n": 144157,
+        "n_attack": 3732,
+        "threshold": 0.5,
+        "average_precision": 0.027152851822913895,
+        "roc_auc": 0.5009058294364013,
+        "ftp_recall": null,
+        "ftp_support": 0,
+        "ssh_recall": 0.0018756698821007502,
+        "ssh_support": 3732
+      },
+      "subtype": {
+        "FTP-Patator": {
+          "support": 0,
+          "recall": null
+        },
+        "SSH-Patator": {
+          "support": 3732,
+          "recall": 0.0018756698821007502
+        }
+      }
+    },
+    "time/without_port/random_forest": {
+      "overall": {
+        "accuracy": 0.9739034524858314,
+        "precision_attack": 0.2413793103448276,
+        "recall_attack": 0.0037513397642015005,
+        "f1_attack": 0.007387862796833773,
+        "fpr": 0.00031333452020651596,
+        "tn": 140381,
+        "fp": 44,
+        "fn": 3718,
+        "tp": 14,
+        "n": 144157,
+        "n_attack": 3732,
+        "threshold": 0.5,
+        "average_precision": 0.026839295143437567,
+        "roc_auc": 0.4932023212339054,
+        "ftp_recall": null,
+        "ftp_support": 0,
+        "ssh_recall": 0.0037513397642015005,
+        "ssh_support": 3732
+      },
+      "subtype": {
+        "FTP-Patator": {
+          "support": 0,
+          "recall": null
+        },
+        "SSH-Patator": {
+          "support": 3732,
+          "recall": 0.0037513397642015005
+        }
+      }
+    },
+    "time/without_port/xgboost": {
+      "overall": {
+        "accuracy": 0.9739520106550497,
+        "precision_attack": 0.2653061224489796,
+        "recall_attack": 0.0034833869239013935,
+        "f1_attack": 0.006876487701666226,
+        "fpr": 0.00025636460744169485,
+        "tn": 140389,
+        "fp": 36,
+        "fn": 3719,
+        "tp": 13,
+        "n": 144157,
+        "n_attack": 3732,
+        "threshold": 0.5,
+        "average_precision": 0.24474153229134388,
+        "roc_auc": 0.9304475475517306,
+        "ftp_recall": null,
+        "ftp_support": 0,
+        "ssh_recall": 0.0034833869239013935,
+        "ssh_support": 3732
+      },
+      "subtype": {
+        "FTP-Patator": {
+          "support": 0,
+          "recall": null
+        },
+        "SSH-Patator": {
+          "support": 3732,
+          "recall": 0.0034833869239013935
+        }
+      }
+    },
+    "random/with_port/decision_tree": {
+      "overall": {
+        "accuracy": 0.9996384005021457,
+        "precision_attack": 0.9903993017674013,
+        "recall_attack": 0.9980211081794196,
+        "f1_attack": 0.9941955974153981,
+        "fpr": 0.0003098089746027052,
+        "tn": 141979,
+        "fp": 44,
+        "fn": 9,
+        "tp": 4539,
+        "n": 146571,
+        "n_attack": 4548,
+        "threshold": 0.5,
+        "average_precision": 0.9963176267952678,
+        "roc_auc": 0.9989819638885525,
+        "ftp_recall": 1.0,
+        "ftp_support": 2610,
+        "ssh_recall": 0.9953560371517027,
+        "ssh_support": 1938
+      },
+      "subtype": {
+        "FTP-Patator": {
+          "support": 2610,
+          "recall": 1.0
+        },
+        "SSH-Patator": {
+          "support": 1938,
+          "recall": 0.9953560371517027
+        }
+      }
+    },
+    "random/with_port/random_forest": {
+      "overall": {
+        "accuracy": 0.999979532103895,
+        "precision_attack": 1.0,
+        "recall_attack": 0.9993403693931399,
+        "f1_attack": 0.999670075882547,
+        "fpr": 0.0,
+        "tn": 142023,
+        "fp": 0,
+        "fn": 3,
+        "tp": 4545,
+        "n": 146571,
+        "n_attack": 4548,
+        "threshold": 0.5,
+        "average_precision": 0.9999991805046795,
+        "roc_auc": 0.9999999736809758,
+        "ftp_recall": 1.0,
+        "ftp_support": 2610,
+        "ssh_recall": 0.9984520123839009,
+        "ssh_support": 1938
+      },
+      "subtype": {
+        "FTP-Patator": {
+          "support": 2610,
+          "recall": 1.0
+        },
+        "SSH-Patator": {
+          "support": 1938,
+          "recall": 0.9984520123839009
+        }
+      }
+    },
+    "random/with_port/xgboost": {
+      "overall": {
+        "accuracy": 0.999979532103895,
+        "precision_attack": 0.999340804218853,
+        "recall_attack": 1.0,
+        "f1_attack": 0.9996702934388394,
+        "fpr": 2.112333917745717e-05,
+        "tn": 142020,
+        "fp": 3,
+        "fn": 0,
+        "tp": 4548,
+        "n": 146571,
+        "n_attack": 4548,
+        "threshold": 0.5,
+        "average_precision": 0.9999999033508269,
+        "roc_auc": 0.9999999969036442,
+        "ftp_recall": 1.0,
+        "ftp_support": 2610,
+        "ssh_recall": 1.0,
+        "ssh_support": 1938
+      },
+      "subtype": {
+        "FTP-Patator": {
+          "support": 2610,
+          "recall": 1.0
+        },
+        "SSH-Patator": {
+          "support": 1938,
+          "recall": 1.0
+        }
+      }
+    },
+    "random/without_port/decision_tree": {
+      "overall": {
+        "accuracy": 0.9988879109782972,
+        "precision_attack": 0.969989281886388,
+        "recall_attack": 0.9949428320140721,
+        "f1_attack": 0.9823076088136329,
+        "fpr": 0.0009857558282813346,
+        "tn": 141883,
+        "fp": 140,
+        "fn": 23,
+        "tp": 4525,
+        "n": 146571,
+        "n_attack": 4548,
+        "threshold": 0.5,
+        "average_precision": 0.9890395525252749,
+        "roc_auc": 0.997371344884363,
+        "ftp_recall": 0.9969348659003832,
+        "ftp_support": 2610,
+        "ssh_recall": 0.9922600619195047,
+        "ssh_support": 1938
+      },
+      "subtype": {
+        "FTP-Patator": {
+          "support": 2610,
+          "recall": 0.9969348659003832
+        },
+        "SSH-Patator": {
+          "support": 1938,
+          "recall": 0.9922600619195047
+        }
+      }
+    },
+    "random/without_port/random_forest": {
+      "overall": {
+        "accuracy": 0.9996520457662157,
+        "precision_attack": 0.9934167215273206,
+        "recall_attack": 0.9953825857519789,
+        "f1_attack": 0.9943986820428337,
+        "fpr": 0.00021123339177457173,
+        "tn": 141993,
+        "fp": 30,
+        "fn": 21,
+        "tp": 4527,
+        "n": 146571,
+        "n_attack": 4548,
+        "threshold": 0.5,
+        "average_precision": 0.9994488185050492,
+        "roc_auc": 0.9999654090613279,
+        "ftp_recall": 0.9973180076628353,
+        "ftp_support": 2610,
+        "ssh_recall": 0.9927760577915377,
+        "ssh_support": 1938
+      },
+      "subtype": {
+        "FTP-Patator": {
+          "support": 2610,
+          "recall": 0.9973180076628353
+        },
+        "SSH-Patator": {
+          "support": 1938,
+          "recall": 0.9927760577915377
+        }
+      }
+    },
+    "random/without_port/xgboost": {
+      "overall": {
+        "accuracy": 0.9998976605194752,
+        "precision_attack": 0.998022412656559,
+        "recall_attack": 0.9986807387862797,
+        "f1_attack": 0.9983514671941972,
+        "fpr": 6.337001753237152e-05,
+        "tn": 142014,
+        "fp": 9,
+        "fn": 6,
+        "tp": 4542,
+        "n": 146571,
+        "n_attack": 4548,
+        "threshold": 0.5,
+        "average_precision": 0.9998704763110784,
+        "roc_auc": 0.9999917095073809,
+        "ftp_recall": 0.9992337164750957,
+        "ftp_support": 2610,
+        "ssh_recall": 0.9979360165118679,
+        "ssh_support": 1938
+      },
+      "subtype": {
+        "FTP-Patator": {
+          "support": 2610,
+          "recall": 0.9992337164750957
+        },
+        "SSH-Patator": {
+          "support": 1938,
+          "recall": 0.9979360165118679
+        }
+      }
+    }
+  },
+  "note": "Train time-based chỉ có FTP-Patator; Test chỉ có SSH-Patator. Kết quả chính là time/with_port. Random split là đối chứng rò rỉ."
+}
