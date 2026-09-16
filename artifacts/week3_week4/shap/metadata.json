@@ -1,0 +1,50 @@
+{
+  "model_key": "time/with_port/random_forest",
+  "partition": "validation",
+  "n": 500,
+  "seed": 42,
+  "output_unit": "uncalibrated model score",
+  "limitation": "Giải thích hành vi mô hình đã fit; không phải bằng chứng nhân quả hay bước chọn feature.",
+  "top10": [
+    {
+      "feature": "Destination Port",
+      "mean_abs_shap": 0.12367858920301253
+    },
+    {
+      "feature": "Fwd Packet Length Std",
+      "mean_abs_shap": 0.03392381534141711
+    },
+    {
+      "feature": "Avg Fwd Segment Size",
+      "mean_abs_shap": 0.029166989608427476
+    },
+    {
+      "feature": "Max Packet Length",
+      "mean_abs_shap": 0.028946211059930952
+    },
+    {
+      "feature": "Packet Length Mean",
+      "mean_abs_shap": 0.02748831022689315
+    },
+    {
+      "feature": "min_seg_size_forward",
+      "mean_abs_shap": 0.027221077603185883
+    },
+    {
+      "feature": "Packet Length Std",
+      "mean_abs_shap": 0.027127327898717902
+    },
+    {
+      "feature": "Fwd Packet Length Mean",
+      "mean_abs_shap": 0.027118862731074517
+    },
+    {
+      "feature": "Average Packet Size",
+      "mean_abs_shap": 0.026203867908035312
+    },
+    {
+      "feature": "Packet Length Variance",
+      "mean_abs_shap": 0.020814328103743947
+    }
+  ]
+}
