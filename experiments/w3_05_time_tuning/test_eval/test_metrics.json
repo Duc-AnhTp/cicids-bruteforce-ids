@@ -1,0 +1,27 @@
+{
+  "accuracy": 0.9995491027144017,
+  "precision": 0.9991832289681459,
+  "recall": 0.9833869239013934,
+  "f1_score": 0.9912221471978393,
+  "roc_auc": 0.9999479035182776,
+  "average_precision": 0.9985774998335751,
+  "confusion_matrix": [
+    [
+      140422,
+      3
+    ],
+    [
+      62,
+      3670
+    ]
+  ],
+  "test_size": 144157,
+  "test_attack": 3732,
+  "test_normal": 140425,
+  "confusion_matrix_breakdown": {
+    "true_negative": 140422,
+    "false_positive": 3,
+    "false_negative": 62,
+    "true_positive": 3670
+  }
+}
