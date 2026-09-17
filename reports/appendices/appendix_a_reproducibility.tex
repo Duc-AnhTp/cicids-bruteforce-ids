@@ -1,0 +1,53 @@
+% ==============================================================================
+% reports/appendices/appendix_a_reproducibility.tex
+% PHỤ LỤC A: HƯỚNG DẪN CÀI ĐẶT VÀ TÁI LẬP THỰC NGHIỆM
+% ==============================================================================
+
+\chapter{Hướng Dẫn Cài Đặt và Tái Lập Thực Nghiệm}
+\label{app:reproducibility}
+
+\section{Yêu Cầu Môi Trường và Cài Đặt Phụ Thuộc}
+
+Để tái lập toàn bộ các kết quả thực nghiệm trong báo cáo, người nghiên cứu cần chuẩn bị môi trường Python $\ge 3.11$ và thực hiện các bước sau:
+
+\begin{lstlisting}[language=bash, caption={Thiết lập môi trường ảo và cài đặt thư viện}]
+# 1. Clone repository
+git clone https://github.com/Duc-AnhTp/cicids-bruteforce-ids.git
+cd cicids-bruteforce-ids
+
+# 2. Tao va kich hoat moi truong ao
+python -m venv .venv
+# Tren Linux / macOS:
+source .venv/bin/activate
+# Tren Windows PowerShell:
+.\.venv\Scripts\Activate.ps1
+
+# 3. Cai dat cac thu vien phu thuoc da kiem chung
+pip install -e .
+\end{lstlisting}
+
+\section{Chuẩn Bị Dữ Liệu và Phân Tách}
+
+\begin{lstlisting}[language=bash, caption={Thực hiện làm sạch và phân tách dữ liệu chuẩn mực}]
+# Kiem tra ma bam SHA-256 cua tep CSV goc
+python -m ids check-integrity data/raw/Tuesday-WorkingHours.pcap_ISCX.csv
+
+# Chay quy trinh phuc hoi timestamp va chia tach du lieu theo thoi gian
+python scripts/prepare_splits.py
+
+# Tien xu ly Train-only va loai bo 10 dac trung hang so
+python scripts/preprocess_data.py
+\end{lstlisting}
+
+\section{Chạy Thực Nghiệm và Kiểm Thử Đóng Băng}
+
+\begin{lstlisting}[language=bash, caption={Huấn luyện, tìm kiếm siêu tham số và đánh giá tập Test}]
+# Chay toan bo quy trinh benchmark W3-W4 (dong bang va danh gia Test)
+python scripts/run_remaining.py
+
+# Sinh lai toan bo macro so lieu va bang LaTeX tu artifact
+python scripts/report/generate_latex_registry.py
+
+# Chay bo kiem thu tu dong (Unit tests)
+pytest tests/ -v
+\end{lstlisting}

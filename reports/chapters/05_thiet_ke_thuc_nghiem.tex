@@ -1,0 +1,100 @@
+% ==============================================================================
+% reports/chapters/05_thiet_ke_thuc_nghiem.tex
+% CHƯƠNG 5: THIẾT KẾ THỰC NGHIỆM
+% ==============================================================================
+
+\chapter{Thiết Kế Thực Nghiệm}
+\label{chap:thiet_ke}
+
+\section{Môi Trường Thực Thi Phần Cứng và Phần Mềm}
+
+Toàn bộ các thực nghiệm trong nghiên cứu này được triển khai trên môi trường máy trạm độc lập với các thông số kỹ thuật được kiểm soát chặt chẽ:
+\begin{itemize}
+    \item \textbf{Phần cứng}: Vi xử lý đa nhân x86\_64, bộ nhớ RAM 32 GB, hỗ trợ tập lệnh SIMD AVX2.
+    \item \textbf{Hệ điều hành}: Windows 11 / Linux POSIX tương thích.
+    \item \textbf{Nền tảng phần mềm}: Python 3.12, \texttt{numpy==1.26.4}, \texttt{pandas==2.2.2}, \texttt{scikit-learn==1.6.1}, \texttt{xgboost==3.0.5}, \texttt{shap==0.48.0}, \texttt{matplotlib==3.9.2}.
+\end{itemize}
+
+\section{Kiểm Soát Tính Ngẫu Nhiên}
+
+Để đảm bảo khả năng tái lập tuyệt đối (Reproducibility), toàn bộ các tiến trình sinh số giả ngẫu nhiên từ quá trình phân chia dữ liệu, lấy mẫu bootstrap của Random Forest, khởi tạo trọng số của XGBoost và lấy mẫu nền của SHAP đều được khóa cứng với một hạt giống ngẫu nhiên duy nhất:
+\begin{equation}
+    \texttt{random\_state} = 42
+\end{equation}
+
+\section{Xử Lý Mất Cân Bằng Lớp Trên Tập Huấn Luyện}
+
+Như đã phân tích tại Bảng \ref{tab:dataset_splits}, trong tập $\Dtrain$ theo thời gian, số lượng mẫu bình thường là \DataTrainBenign\ mẫu trong khi số lượng mẫu tấn công chỉ có \DataTrainAttack\ mẫu (tỷ lệ tấn công là \DataTrainAttackPercent). Tỷ lệ mất cân bằng lớp xấp xỉ $1 : 16.58$.
+
+Để khắc phục hiện tượng mô hình bị thiên lệch về lớp đa số mà không làm biến dạng phân phối không gian mẫu (như các phương pháp tổng hợp dữ liệu SMOTE thường gây nhiễu ranh giới mạng), dự án áp dụng kỹ thuật gán trọng số lớp (Cost-sensitive Weighting) tính toán duy nhất từ $\Dtrain$:
+\begin{itemize}
+    \item \textbf{Đối với Decision Tree và Random Forest}: Sử dụng tham số \texttt{class\_weight='balanced'}:
+    \begin{equation}
+        w_c = \frac{N_{\text{train}}}{2 \cdot N_{\text{train}, c}} \implies w_0 = \frac{90,273}{2 \times 85,139} \approx 0.53, \quad w_1 = \frac{90,273}{2 \times 5,134} \approx 8.79
+    \end{equation}
+    \item \textbf{Đối với XGBoost}: Sử dụng tham số \texttt{scale\_pos\_weight}:
+    \begin{equation}
+        \text{scale\_pos\_weight} = \frac{N_{\text{train, normal}}}{N_{\text{train, attack}}} = \frac{85,139}{5,134} \approx 16.5834
+    \end{equation}
+\end{itemize}
+
+\section{Thiết Lập Không Gian Tìm Kiếm Siêu Tham Số}
+
+Quá trình tinh chỉnh siêu tham số được thực hiện thông qua tìm kiếm lưới (Grid Search) hoặc tìm kiếm ngẫu nhiên có kiểm soát (Randomized Search) trên không gian các tham số quan trọng nhất của từng thuật toán:
+
+\begin{enumerate}
+    \item \textbf{Cây Quyết Định (Decision Tree)}:
+    \begin{itemize}
+        \item Tiêu chuẩn phân tách (\texttt{criterion}): \texttt{['gini', 'entropy']}
+        \item Độ sâu tối đa (\texttt{max\_depth}): \texttt{[4, 6, 8, 12, None]}
+        \item Số mẫu tối thiểu tại nút lá (\texttt{min\_samples\_leaf}): \texttt{[5, 10, 20]}
+    \end{itemize}
+    \item \textbf{Rừng Ngẫu Nhiên (Random Forest)}:
+    \begin{itemize}
+        \item Số lượng cây (\texttt{n\_estimators}): \texttt{[100, 150, 300]}
+        \item Độ sâu tối đa (\texttt{max\_depth}): \texttt{[10, 16, None]}
+        \item Số mẫu tối thiểu tại nút lá (\texttt{min\_samples\_leaf}): \texttt{[5, 10]}
+        \item Số đặc trưng tại mỗi nút (\texttt{max\_features}): \texttt{'sqrt'}
+    \end{itemize}
+    \item \textbf{XGBoost}:
+    \begin{itemize}
+        \item Số lượng cây (\texttt{n\_estimators}): \texttt{[100, 200]}
+        \item Độ sâu cây (\texttt{max\_depth}): \texttt{[3, 4, 6]}
+        \item Tốc độ học (\texttt{learning\_rate}): \texttt{[0.05, 0.08, 0.1]}
+        \item Tỷ lệ lấy mẫu đặc trưng (\texttt{colsample\_bytree}): \texttt{0.8}
+        \item Tỷ lệ lấy mẫu dòng (\texttt{subsample}): \texttt{0.8}
+    \end{itemize}
+\end{enumerate}
+
+\section{Tiêu Chí Lựa Chọn Mô Hình Chiến Thắng (Validation Selection)}
+
+Trên tập kiểm định $\Dval$, các cấu hình được đánh giá theo thứ tự ưu tiên nghiêm ngặt:
+\begin{enumerate}
+    \item \textbf{Ưu tiên 1}: Điểm \textbf{F1-Score} trên lớp tấn công (tại ngưỡng mặc định $\tau = 0.5$).
+    \item \textbf{Ưu tiên 2}: Điểm \textbf{Average Precision (AP)} trên đường cong Precision-Recall nếu F1 tương đương.
+    \item \textbf{Ưu tiên 3}: Tỷ lệ báo động giả \textbf{FPR} thấp hơn nếu cả F1 và AP đều xấp xỉ nhau.
+\end{enumerate}
+
+Mô hình đạt điểm số tối ưu trên $\Dval$ sẽ được lựa chọn làm đại diện duy nhất của kịch bản đó để chuyển sang bước đánh giá trên tập kiểm thử $\Dtest$.
+
+\section{Phân Định Rõ Hai Chế Độ Huấn Luyện (Model Regimes)}
+
+Nhằm đảm bảo tính minh bạch khoa học và tránh việc diễn giải sai lệch kết quả, nghiên cứu phân định rõ ràng \textbf{hai chế độ thực nghiệm} độc lập đã được thực hiện:
+
+\subsection{Chế độ 1: Canonical Strict Zero-Shot Regime (Chuẩn Mực Chính)}
+Đây là giao thức đánh giá trung tâm của đồ án được triển khai trong \texttt{scripts/run\_remaining.py} và lưu trữ tại \texttt{artifacts/week3\_week4/test\_comparison.csv}:
+\begin{itemize}
+    \item Mô hình được \textbf{fit duy nhất trên tập $\Dtrain$} (chỉ chứa \FTP).
+    \item Tập $\Dval$ chỉ được đưa vào phương thức \texttt{predict\_proba} để lựa chọn cấu hình tham số tốt nhất.
+    \item Sau khi chọn được tham số, mô hình chiến thắng được huấn luyện lại \textbf{chỉ trên $\Dtrain$}, hoàn toàn không đụng tới $\Dval$.
+    \item Đánh giá trên tập $\Dtest$ (chỉ chứa \SSH) $\rightarrow$ Đánh giá đúng năng lực Zero-Shot Subtype Transfer thực sự của mô hình.
+\end{itemize}
+
+\subsection{Chế độ 2: Subtype-Aware / Refit Regime (Case Study Mở Rộng)}
+Đây là chế độ thực nghiệm phát sinh từ script tuning \texttt{src/ids/tune\_xgboost.py}:
+\begin{itemize}
+    \item Hàm \texttt{RandomizedSearchCV} sử dụng phân tách tùy biến trên tập gộp $\mathbf{X}_{\text{combined}} = \text{concat}([\mathbf{X}_{\text{train}}, \mathbf{X}_{\text{val}}])$.
+    \item Do cờ \texttt{refit} mặc định của scikit-learn là \texttt{True}, sau khi tìm kiếm tham số tối ưu, thư viện đã \textbf{tự động huấn luyện lại mô hình tốt nhất trên toàn bộ tập gộp $\mathbf{X}_{\text{combined}}$}.
+    \item Do $\mathbf{X}_{\text{val}}$ có chứa 1,886 mẫu \SSH, mô hình XGBoost trong chế độ này \textbf{đã được tiếp xúc và học trước các mẫu tấn công SSH} trước khi bước vào tập Test.
+    \item Chế độ này được sử dụng như một \textbf{Case Study chuyên sâu về MLOps} trong Chương 7 để minh chứng cho tầm quan trọng của việc kiểm soát ranh giới dữ liệu và cờ refit trong NIDS.
+\end{itemize}

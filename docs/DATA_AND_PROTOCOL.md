@@ -1,159 +1,135 @@
-# Dữ liệu và protocol thực nghiệm
+# Quy chuẩn Dữ liệu và Protocol Thực nghiệm (Canonical Protocol)
 
-## 1. Dữ kiện đã xác minh và việc còn phải kiểm tra
+Tài liệu này xác định chuẩn mực khoa học và giao thức thực nghiệm duy nhất được áp dụng cho toàn bộ đồ án nghiên cứu phát hiện tấn công Brute Force (FTP/SSH) trên tập dữ liệu **CICIDS2017 Tuesday**.
 
-Trang gốc UNB phân biệt `GeneratedLabelledFlows.zip` với `MachineLearningCSV.zip`, mô tả labelled flows có metadata và công bố lịch tấn công Tuesday. Tên bản mirror không bảo đảm schema hay cách biểu diễn đồng hồ. Repo chưa được cung cấp CSV thật nên **chưa xác minh header, số dòng, phân bố nhãn, múi giờ hay chất lượng timestamp của file nhóm sẽ dùng**. [UNB CICIDS2017](https://www.unb.ca/cic/datasets/ids-2017.html)
+---
 
-Quy trình nhận dữ liệu:
+## 1. Dữ liệu Nguồn & Xác minh Tính Toàn vẹn
 
-1. Ghi URL thực lấy file, ngày tải, tên archive, tên member Tuesday, nguồn gốc/bản đã sửa nếu có.
-2. Kiểm tra header có `Label`, `Timestamp`, `Flow Duration`, và tối thiểu số feature trong config.
-3. Xem vài dòng Timestamp đầu/cuối và theo nhãn; không mặc định thứ tự dòng là thứ tự thời gian.
-4. Khai báo `timestamp_formats` chính xác. `%d/%m/%Y` và `%m/%d/%Y` khác nhau ngay với `04/07/2017`.
-5. Kiểm tra 24 giờ/AM-PM, múi giờ nguồn và độ chính xác đến phút/giây. Nếu file mất AM/PM, không suy giờ bằng `Label` hoặc `Destination Port`. Tìm nguồn có timestamp đáng tin cậy; nếu cần hiệu chỉnh, phải có metadata độc lập, quy tắc và phiên bản riêng.
-6. Kiểm tra đơn vị duration: repo hỗ trợ microsecond cho bản CIC2017 đang nhắm đến. Sai đơn vị làm sai purge, kể cả model vẫn train được.
+- **Tệp nguồn chuẩn**: `Tuesday-WorkingHours.pcap_ISCX.csv` (Trích xuất từ gói `GeneratedLabelledFlows.zip` của Canadian Institute for Cybersecurity, UNB).
+- **Mã băm SHA-256 đã xác minh**:
+  ```text
+  ae9c88e10c41a8eb1ff454ae98bc513454925097d0b0b57180f94e79de445815
+  ```
+- **Định dạng Timestamp gốc**: `dd/MM/yyyy HH:mm:ss` hoặc `dd/MM/yyyy H:mm`.
+- **Đơn vị thời lượng flow (Flow Duration)**: Microseconds ($\mu s$).
 
-Không tự gán giờ từ lịch tấn công vào các dòng mất Timestamp. Không ghép hai bản CSV theo số thứ tự dòng trừ khi đã chứng minh tương ứng một-một bằng provenance độc lập; repo không cung cấp thao tác ghép đó.
+### ⚠️ Quy tắc Phục hồi Đồng hồ 24 Giờ (Timestamp Reconstruction Policy)
+Trong quá trình Khám phá Dữ liệu (EDA) trên tệp CSV Tuesday gốc, hệ thống ghi nhận lỗi chuyển đổi AM/PM của công cụ xuất CICFlowMeter:
+- Các flow diễn ra trong khoảng giờ **8:00 – 12:00** thuộc buổi sáng/trưa (giữ nguyên).
+- Các flow ghi nhận giờ **1:00 – 5:00** thực chất diễn ra vào buổi chiều. Quy tắc phục hồi chuẩn mực được triển khai tại `scripts/prepare_splits.py` (hàm `reconstruct_timestamp()`): **cộng thêm 12 giờ để đưa về khung 13:00 – 17:00**.
+- **Lưu ý kiểm soát leakage**: Quy tắc phục hồi này áp dụng độc lập với nhãn tấn công (`Label`) và cổng mạng (`Destination Port`), chỉ dựa thuần túy trên phân bố dòng thời gian EDA của toàn bộ traffic trong ngày.
 
-## 2. Định nghĩa bài toán
+---
 
-| Nhãn gốc sau chuẩn hóa | Nhãn nhị phân | Cách xử lý |
-|---|---:|---|
-| BENIGN | 0 | Giữ |
-| FTP-PATATOR | 1 | Giữ, lưu subtype riêng |
-| SSH-PATATOR | 1 | Giữ, lưu subtype riêng |
-| Nhãn khác / thiếu | — | Loại khỏi phạm vi, thống kê số loại |
+## 2. Định nghĩa Bài toán & Không gian Nhãn
 
-Một dòng là một flow hoàn tất. Các chỉ số tổng packet/byte, duration và IAT thường cần quan sát toàn flow. Do đó đầu ra là **phân loại sau khi có thống kê flow**, không phải phát hiện ngay packet đầu hay đo detection latency.
+Bài toán được định nghĩa là **phân loại nhị phân offline trên các flow mạng đã hoàn tất**:
 
-Không kết luận một flow “Normal” có nghĩa người dùng/host an toàn. Đây là dự đoán theo hai lớp và phân bố trong thí nghiệm.
+| Nhãn gốc trong dữ liệu | Nhãn nhị phân ($y$) | Xử lý | Ghi chú bảo mật |
+|---|:---:|---|---|
+| `BENIGN` | 0 | Giữ nguyên | Traffic mạng bình thường |
+| `FTP-Patator` | 1 | Gán nhãn 1, lưu subtype riêng | Tấn công dò quét mật khẩu FTP (Port 21) |
+| `SSH-Patator` | 1 | Gán nhãn 1, lưu subtype riêng | Tấn công dò quét mật khẩu SSH (Port 22) |
+| Nhãn khác / thiếu | — | Loại khỏi tập dữ liệu | Đảm bảo tính nhất quán bài toán |
 
-## 3. Thứ tự dữ liệu và ranh giới fit
+> **Bản chất kỹ thuật**: Vì các đặc trưng thống kê (tổng byte, tổng packet, IAT, duration) chỉ được tính toán sau khi flow đã đóng (kết thúc bằng cờ FIN/RST hoặc timeout), hệ thống phân loại này hoạt động ở tầng **Post-Flow Inspection**, không đo đạc độ trễ phát hiện thời gian thực (detection latency) ở từng packet đầu tiên.
+
+---
+
+## 3. Thiết kế Phân tách Dữ liệu (Splitting Strategies)
+
+Dự án thiết kế **2 chiến lược phân tách dữ liệu song song** nhằm trả lời trực tiếp các câu hỏi nghiên cứu:
 
 ```mermaid
 flowchart TD
-    A["Tuesday CSV"] --> B["Kiểm tra schema và đồng hồ"]
-    B --> C["Chốt mốc thời gian"]
-    C --> D["Train"]
-    C --> E["Validation"]
-    C --> F["Test đóng"]
-    D --> G["Fit tiền xử lý và 3 model"]
-    G --> H["Chọn model và ngưỡng"]
-    E --> H
-    H --> I["Khóa quyết định"]
-    I --> J["Đánh giá cuối"]
-    F --> J
+    RAW["CICIDS2017 Tuesday Raw CSV"] --> EDA["Phục hồi Timestamp 24h (1-5h -> 13-17h)"]
+    EDA --> TIME["1. Time-based Split (Thực nghiệm Chính)"]
+    EDA --> RAND["2. Random Split (Đối chứng Độ lệch)"]
+    
+    TIME --> T_TR["Train: Trước 10:00 (100% FTP)"]
+    TIME --> T_VA["Validation: 10:02 - 14:30 (FTP tail + SSH early)"]
+    TIME --> T_TE["Test: Sau 14:32 (100% SSH)"]
+    
+    RAND --> R_TR["Train (Ngẫu nhiên)"]
+    RAND --> R_VA["Validation (Ngẫu nhiên)"]
+    RAND --> R_TE["Test (Ngẫu nhiên)"]
 ```
 
-**Trước split được phép:** strip/canonical tên cột, lọc đúng định nghĩa nhãn, parse thời gian theo format đã khai báo, ép số, đổi `NaN/Infinity` thành thiếu theo quy tắc cố định, audit metadata, nhận diện bản ghi xuất trùng. Những thao tác này không học tham số thống kê từ cả tập.
+### 3.1. Phân tách theo Thời gian (Time-based Split) — Kết quả Đánh giá Chính
+- **Mục tiêu**: Đánh giá khả năng tổng quát hóa thực tế của mô hình khi triển khai trong môi trường mạng sản xuất (huấn luyện trên dữ liệu quá khứ, kiểm định và vận hành trên dữ liệu tương lai).
+- **Quy tắc Purge và Embargo**:
+  - Với mỗi flow có thời điểm bắt đầu $s$ và thời lượng $d$, thời điểm hoàn tất bảo thủ là $e = s + d + q$ (với sai số làm tròn phút $q = 60s$).
+  - Embargo $g = 120s$ được áp dụng tại ranh giới các tập để ngăn cách các flow chồng lấn.
+- **Các mốc thời gian chốt trước (Audited Cutoffs)**:
+  - **Mốc A** = `2017-07-04 10:00:00`
+  - **Mốc B** = `2017-07-04 14:30:00`
+- **Phân bố Subtype thực tế qua các tập**:
+  - **Train** ($e < A$): Chỉ chứa `FTP-Patator` (~68% chiến dịch FTP buổi sáng). Hoàn toàn **không có `SSH-Patator`**.
+  - **Validation** ($s \ge A + g$ và $e < B$): Chứa đoạn đuôi của `FTP-Patator` (~32%) và giai đoạn đầu của `SSH-Patator` (~34%). Dùng để tinh chỉnh siêu tham số và chọn ngưỡng.
+  - **Test** ($s \ge B + g$): Chỉ chứa `SSH-Patator` (~66% chiến dịch SSH buổi chiều). Hoàn toàn **không có `FTP-Patator`**.
 
-**Chỉ fit trên Train:** quyết định cột hằng/toàn thiếu, median điền thiếu, trọng số lớp, cây và ensemble. Mỗi mô hình là một `sklearn.Pipeline`; Validation/Test chỉ đi qua `transform` và `predict_proba`. Cách dùng Pipeline và fit trên Train phù hợp hướng dẫn tránh leakage của scikit-learn. [scikit-learn: Common pitfalls](https://scikit-learn.org/stable/common_pitfalls.html)
+👉 **Ý nghĩa học thuật**: Tập Test theo thời gian tạo thành một bài toán **Zero-Shot Subtype Transfer** khắt khe: Mô hình được huấn luyện hoàn toàn trên tấn công FTP nhưng phải phát hiện tấn công SSH chưa từng xuất hiện trong tập Train!
 
-**Chỉ chọn trên Validation:** threshold và model trong tập ứng viên đã công bố. Bản 3 ngày không grid-search tham số, không dùng SHAP để chọn thêm feature, không retrain Train+Validation sau khi chốt threshold. Nếu refit model thì score scale có thể đổi và threshold cũ không còn được kiểm chứng; đây là lý do giữ nguyên các model đã fit.
+### 3.2. Phân tách Ngẫu nhiên (Random Split) — Thực nghiệm Đối chứng
+- **Mục tiêu**: Làm đối chứng đo lường **Hiện tượng ước lượng hiệu năng quá lạc quan (Optimistic Evaluation Bias)**.
+- **Cơ chế**: Xáo trộn ngẫu nhiên toàn bộ các flow trong ngày Tuesday thành 3 phần tỷ lệ tương ứng.
+- **Diễn giải khoa học**: Không vội kết luận là "chứng minh data leakage"; điểm số F1 cao (~99.9%) trong Random split phản ánh rằng **các flow thuộc cùng một đợt tấn công brute force (cùng IP, cùng nhịp gõ, cùng cấu hình công cụ) đã bị chia đều vào cả Train và Test**. Mô hình chỉ cần "học thuộc lòng" đặc trưng chiến dịch thay vì học quy luật tổng quát.
 
-## 4. Quy tắc split chính xác
+---
 
-Với từng flow: `s = Timestamp`; `e = s + Flow Duration + q`, trong đó `q` là sai số độ chính xác timestamp khai báo, tính bằng giây. Với timestamp chỉ ghi phút, ví dụ `q=60` tạo cận trên bảo thủ khi thời điểm thật đã bị làm tròn xuống. Nếu kiểu làm tròn/đồng hồ khác, phải xác minh thay vì xem công thức là tự động đúng.
+## 4. Không gian Đặc trưng & Thực nghiệm Loại bỏ Cổng (Port Ablation)
 
-Gọi `a` là mốc hết Train, `b` là mốc hết Validation, `g` là embargo:
+Mọi pipeline chỉ sử dụng các cột thống kê đặc trưng mạng nằm trong **Allowlist**:
+- **Bị loại bỏ từ đầu**: Các cột định danh (`Flow ID`, `Source IP`, `Destination IP`, `Timestamp`, `Protocol`).
+- **Thực nghiệm Port Ablation**:
+  1. **Nhánh `with_port` (67 đặc trưng)**: Bao gồm cột `Destination Port` (Cổng 21 cho FTP, Cổng 22 cho SSH).
+  2. **Nhánh `without_port` (66 đặc trưng)**: Loại bỏ hoàn toàn `Destination Port`, chỉ giữ lại các đặc trưng thống kê hành vi gói tin (Packet lengths, Flow IAT, Flags, Header lengths).
+- **Mục đích**: Kiểm chứng xem mô hình có bị "học vẹt" (overfit) vào cổng dịch vụ hay không. Khi không còn thông tin cổng, mô hình có nhận diện được hành vi brute force qua thống kê kích thước gói tin và thời gian hay không.
 
-| Tập | Điều kiện giữ |
-|---|---|
-| Train | `e < a` |
-| Validation | `s >= a + g` và `e < b` |
-| Test | `s >= b + g` |
-| Bị loại ở ranh giới | Không thỏa điều kiện tập nào |
+---
 
-Purge tránh để một flow bắt đầu trong Train nhưng hoàn tất sau khi giai đoạn Validation đã bắt đầu. Embargo bỏ vùng bắt đầu ngay sau mỗi mốc. Repo báo số dòng và nhãn bị loại; không âm thầm bỏ.
+## 5. Ranh giới Fit & Hai Chế độ Đánh giá Mô hình (Model Regimes)
 
-`embargo_seconds=120` là **lựa chọn kỹ thuật minh họa**, không có bằng chứng nó làm các flow độc lập hay xóa mọi leakage. Các flow của cùng campaign vẫn có thể tương tự nhau dù cách nhau hơn hai phút.
+Để đảm bảo tính minh bạch và tránh gây hiểu lầm trong báo cáo, dự án phân định rõ ràng **2 chế độ huấn luyện (Regimes)** đã được triển khai:
 
-Mốc minh họa, **chỉ dùng khi audit của CSV thật xác nhận phù hợp**:
+### Chế độ 1: Canonical Strict Zero-Shot Regime (Chuẩn mực Khoa học Chính)
+- **Áp dụng trong**: Benchmark hợp nhất `artifacts/week3_week4/test_comparison.csv` và `RESULTS.md`.
+- **Nguyên tắc**: Mô hình **chỉ được fit trên tập Train** (duy nhất `FTP-Patator`).
+- **Validation**: Chỉ đi qua `predict_proba` để chọn cấu hình siêu tham số và ngưỡng tối ưu.
+- **Test**: Đánh giá đúng một lần duy nhất trên tập Test (duy nhất `SSH-Patator`).
+- **Kết quả thực tế**: Cả Decision Tree, Random Forest và XGBoost đều có **Test F1 $\le$ 0.0037 và SSH Recall $\le$ 0.19%** (thất bại hoàn toàn trước zero-shot transfer khi có port).
 
-| Tập | Phần ngày minh họa | Subtype dự kiến theo lịch công bố |
-|---|---|---|
-| Train | Flow hoàn tất trước 14:20 | BENIGN, FTP, SSH đoạn đầu |
-| Validation | Flow bắt đầu từ 14:22, hoàn tất trước 14:40 | BENIGN, SSH |
-| Test | Flow bắt đầu từ 14:42 tới cuối dữ liệu | BENIGN, SSH nếu còn support |
+### Chế độ 2: Subtype-Aware / Refit Regime (Thực nghiệm Mở rộng có tiếp xúc SSH)
+- **Áp dụng trong**: Script tuning `src/ids/tune_xgboost.py` (TV4).
+- **Cơ chế**: Sử dụng `RandomizedSearchCV` với custom CV trên `X_combined = pd.concat([X_train, X_val])`. Do mặc định của thư viện là `refit=True`, mô hình sau khi chọn tham số tối ưu đã được **tự động fit lại trên toàn bộ tập gộp Train + Validation**.
+- **Tác động**: Vì tập Validation có chứa 1,886 flow `SSH-Patator`, mô hình XGBoost trong chế độ này **đã được học trước mẫu SSH** trước khi đánh giá trên Test.
+- **Kết quả thực tế**: Test F1 nhảy vọt lên **~0.9910**.
+- **Quy tắc báo cáo**: Báo cáo **bắt buộc phải ghi rõ đây là chế độ đã tiếp xúc với subtype SSH (Seen Subtype Evaluation)**, dùng làm đối chứng chuyên sâu để giải thích tầm quan trọng của việc kiểm soát ranh giới dữ liệu trong MLOps/NIDS, tuyệt đối không trình bày lẫn lộn với kết quả Zero-Shot của Chế độ 1.
 
-Chia như vậy đánh giá phần muộn của cùng chiến dịch, không chứng minh tổng quát hóa sang chiến dịch mới. Hai lớp nhị phân đều hiện diện là điều kiện cần để tính chỉ số, không bảo đảm đủ số sự kiện độc lập.
+---
 
-`min_per_binary_class=30` chỉ là ngưỡng dừng vận hành do repo đề xuất. Không có định lý “30 flow là đủ ý nghĩa thống kê”; các flow phụ thuộc có thể tương ứng rất ít sự kiện độc lập. Luôn báo support thực tế và độ tập trung trong thời gian. Không báo khoảng tin cậy iid/bootstrap theo dòng như thể mọi flow độc lập.
+## 6. Xử lý Mất cân bằng Lớp & Lựa chọn Siêu tham số
 
-## 5. Nhìn nhãn toàn ngày trước khi split có phải leakage không?
+- **Trọng số lớp**: Chỉ được tính toán từ phân bố tập **Train**:
+  - Decision Tree & Random Forest: `class_weight='balanced'` tính theo công thức:
+    $$w_c = \frac{N_{train}}{2 \cdot N_{train, c}}$$
+  - XGBoost: `scale_pos_weight = N_Normal_train / N_Attack_train`.
+- **Không gian Siêu tham số cốt lõi**:
+  - **Decision Tree**: `criterion` (`gini`, `entropy`), `max_depth` (4, 6, 8, 12, None), `min_samples_leaf` (5, 10, 20).
+  - **Random Forest**: `n_estimators` (100, 150, 300), `max_depth` (10, 16, None), `min_samples_leaf` (5, 10).
+  - **XGBoost**: `n_estimators` (100, 200), `max_depth` (3, 4, 6), `learning_rate` (0.05, 0.08, 0.1).
 
-Đây là **thiết kế hồi cứu có audit nhãn/thời gian**: dùng lịch và số lượng nhãn để đặt câu hỏi đánh giá có thể thực hiện. Nó khác với xem điểm dự đoán Test rồi dời mốc cho điểm đẹp. Vẫn phải công khai rằng mốc không hoàn toàn độc lập với phân bố nhãn.
+---
 
-Sau khi audit, khóa mốc và cấu hình. Không thử nhiều cutoffs dựa trên F1/Test. Nếu lựa chọn mốc được tối ưu theo hiệu năng thì Test không còn độc lập với quá trình chọn thiết kế.
+## 7. Quy tắc Đánh giá & Báo cáo Khoa học (Evaluation Protocol)
 
-## 6. Chính sách feature và duplicate
-
-| Vấn đề | Chính sách trong code | Giới hạn |
-|---|---|---|
-| Flow ID, IP, Timestamp, Label | Không nằm trong allowlist | Timestamp và Label vẫn giữ ở metadata cho audit |
-| Destination/Source Port | Bỏ từ đầu, không ablation | Không có bằng chứng định lượng việc bỏ cổng làm tốt hơn |
-| Protocol | Bỏ để giữ schema chỉ gồm thống kê flow | Đây là lựa chọn thu hẹp, không kết luận protocol vô ích |
-| Cột số lạ, `Unnamed`, nhãn mã hóa | Không tự động thêm vào model | Bản export tên cột khác cần map có kiểm chứng |
-| Fwd Header Length bản lặp `.1` | Không thuộc allowlist | Không học hai cột tên khác nhưng thực chất trùng |
-| Cột hằng/toàn thiếu trên Train | Loại bằng transformer được fit trên Train | Không dùng variance Validation/Test để giữ lại |
-| Bản ghi raw trùng cả metadata/feature | Giữ bản sớm nhất trong thứ tự đã định | Fingerprint không phát hiện mọi lỗi gần-trùng |
-| Cùng bản ghi nhưng nhãn mâu thuẫn | Dừng, điều tra provenance | Không vote nhãn theo đa số |
-| Feature vector giống nhau, flow khác | Giữ trong phân bố chính; gắn cờ xuất hiện ở tập trước | Không tự xóa Test chỉ vì giống Train |
-
-Lý do không xóa mọi feature duplicate xuyên tập: traffic hợp lệ có thể lặp lại; xóa chúng sẽ đổi phân bố Test thành “chỉ các mẫu mới” mà không báo. Repo giữ kết quả Test chính và thêm một thống kê mô tả trên phần feature vector chưa xuất hiện trong các tập sớm hơn. Thống kê này không phải split đối chứng mới, không phải kiểm định campaign độc lập và không là căn cứ chọn model.
-
-Các cột được bỏ dựa trên quy tắc thiết kế trước khi chạy. Cổng dịch vụ có thể là thông tin hữu ích trong IDS thật; ở đây bỏ để hạn chế shortcut gắn với setup thí nghiệm, không tuyên bố cổng luôn là leakage.
-
-## 7. Mô hình, trọng số và chọn threshold
-
-| Mô hình | Preset | Xử lý mất cân bằng |
-|---|---|---|
-| Decision Tree | depth 8, leaf tối thiểu 10 | `class_weight="balanced"` |
-| Random Forest | 150 cây, depth 16, leaf tối thiểu 5, 2 luồng | `class_weight="balanced"` |
-| XGBoost | 200 cây, depth 4, learning rate 0.08, CPU histogram, 2 luồng | `scale_pos_weight = N_Normal_train / N_Attack_train` |
-
-Đây là preset khởi đầu có giới hạn chi phí, không phải tham số tối ưu đã chứng minh. Trọng số được tính từ Train; không tính trên cả dữ liệu. Không thêm sample_weight lặp lại cùng trọng số để tránh nhân đôi tác động. XGBoost mô tả `scale_pos_weight` và lựa chọn `hist` trong tài liệu tham số. [XGBoost 3.0](https://xgboost.readthedocs.io/en/release_3.0.0/parameter.html)
-
-Threshold grid cố định 0.05, 0.10, …, 0.95. Với mỗi model: chọn F1 Attack cao nhất trên Validation; nếu bằng nhau ưu tiên FPR thấp, Recall cao, rồi ngưỡng lớn hơn. Chọn giữa các model theo F1, AP, FPR, cuối cùng thứ tự model đã khai báo. Các quy tắc đều khóa trước Test.
-
-Đồng thời lưu chỉ số tại threshold 0.5 để thấy tác động của việc chọn threshold. Không gọi `model_score=0.8` là “80% chắc chắn bị tấn công” vì chưa hiệu chuẩn; class weights càng khiến diễn giải xác suất trực tiếp cần thận trọng.
-
-Validation nằm trong đợt tấn công, còn Test có thể kéo dài nhiều giờ BENIGN sau đó. Tỷ lệ Attack vì vậy có thể khác mạnh, khiến Precision/F1 và ngưỡng chọn theo Validation kém ổn định trên Test. Báo tỷ lệ lớp từng tập, FPR và số FP; không chỉnh ngưỡng lại theo Test để che khác biệt này. Đây là giới hạn thực nghiệm phải thảo luận.
-
-## 8. Đánh giá và diễn giải
-
-| Chỉ số | Cần đọc như thế nào |
-|---|---|
-| Precision Attack | Trong các flow báo Attack, phần nào đúng |
-| Recall Attack | Trong các flow Attack có nhãn, phát hiện được bao nhiêu |
-| F1 Attack | Cân bằng Precision/Recall, dùng chọn model ở thí nghiệm này |
-| Average Precision (AP) | Chất lượng xếp hạng qua các threshold; ghi rõ hàm `average_precision_score` |
-| FPR = FP/(FP+TN) | Tỷ lệ flow BENIGN bị báo nhầm; không đồng nhất `1 - Precision` |
-| FP, FN và support | Số báo nhầm/bỏ sót và mẫu thật; tránh chỉ nhìn tỷ lệ |
-| Accuracy / ROC-AUC | Bổ sung, không thay thế các chỉ số trên |
-| Recall theo FTP/SSH | Chỉ tính khi subtype đó có support; ngược lại N/A |
-
-Một lần mở Test có thể tính tất cả model đã khóa và nhiều metric đã khai báo trong cùng phiên. Điều không được làm là chọn lại model/ngưỡng sau khi biết Test. Nếu model thua Validation lại thắng Test, vẫn ghi model đã chọn ban đầu và thảo luận tính không ổn định.
-
-Dummy majority là đối chiếu rẻ: luôn dự đoán lớp đông hơn trong Train. Baseline này giúp phát hiện trường hợp Accuracy cao chỉ vì dữ liệu nhiều BENIGN; nó không thay thế Decision Tree baseline.
-
-Không tự đặt ngưỡng “F1 > 99% mới đạt”, không suy F1 cao thành không leakage, không suy F1 thấp hoàn toàn do pipeline sai. Sai timestamp, subtype chưa thấy, thay đổi phân bố, phụ thuộc giữa flow và chất lượng nhãn đều có thể ảnh hưởng.
-
-## 9. SHAP vừa đủ và đúng nghĩa
-
-Repo dùng `TreeExplainer`, `tree_path_dependent`, `model_output="raw"`. Lấy tối đa 500 dòng Validation ngẫu nhiên với seed cố định sau khi đã chọn model; sample ID và phân bố nhãn được lưu. Bắt đầu 100–500 dòng là đủ cho mục tiêu minh họa, không cần mặc định 2.000–5.000. Cần nhiều hơn thì quyết định trước khi chạy chính thức và dành thời gian tương ứng.
-
-Background ở chế độ này là số mẫu Train đi qua các nhánh đã lưu trong model, không phải toàn bộ Test. XGBoost giải thích raw margin/log-odds; cây sklearn giải thích đầu ra score của mô hình. Code xử lý chiều output Attack và kiểm tra tính cộng được: `base + sum(SHAP) ≈ output`. [SHAP TreeExplainer](https://shap.readthedocs.io/en/latest/generated/shap.TreeExplainer.html)
-
-SHAP giải thích model dùng gì để ra quyết định, không chứng minh feature gây ra tấn công. Feature tương quan làm attribution phụ thuộc giả định của explainer. Không xếp hạng SHAP rồi quay lại đổi feature sau khi đã mở Test.
-
-## 10. Điều kiện nghiệm thu thực tế
-
-- Đã xác minh timestamp của đúng file dùng; metadata còn nguyên trong checkpoint.
-- Cả ba tập giữ thứ tự và đủ hai lớp sau purge; ghi support từng subtype.
-- Schema đầu vào không có nhãn/định danh/cổng; mọi fit dựa trên Train.
-- Cả ba model chạy cùng split, giữ preprocessing trong file model.
-- Model/ngưỡng khóa bằng Validation; Test không dùng để chọn lại.
-- Bảng, hình và tệp dự đoán nhất quán; ghi phiên bản, seed, hash.
-- Báo cáo thừa nhận giới hạn cùng ngày/campaign, nhãn thiếu support và đánh giá sau flow.
-- SHAP/CLI thiếu thì ghi đúng trạng thái; không dùng output giả lập làm kết quả thật.
+1. **Nguyên tắc "Mở Test một lần" (Single-open Test Rule)**: Không tinh chỉnh siêu tham số, không đổi threshold, không refit mô hình sau khi đã mở tập Test.
+2. **Hệ thống chỉ số bắt buộc**:
+   - **F1-Score (Positive Class)**: Thước đo chính để cân bằng Precision và Recall trên lớp tấn công.
+   - **Average Precision (AP)**: Đánh giá chất lượng xếp hạng xác suất trên đường cong PR.
+   - **False Positive Rate (FPR)**: Tỷ lệ báo động giả trên tổng số flow bình thường ($FPR = \frac{FP}{FP + TN}$).
+   - **Tỷ lệ phát hiện theo dạng tấn công (Subtype Recall)**: Đo riêng rẽ cho `FTP-Patator` và `SSH-Patator`. Nếu tập dữ liệu không có support của subtype đó (như FTP trong Test), bắt buộc ghi nhận là **`N/A`** (không được ghi 0% hoặc 100%).
+3. **Phân tích Khả năng Diễn giải (Interpretability)**:
+   - Sử dụng **SHAP TreeExplainer** trên tập Validation để phân tích tầm quan trọng của đặc trưng (Mean Absolute SHAP Value).
+   - Sử dụng **Trực quan hóa Cây (`plot_tree`)** và **Trích xuất Quy tắc (`export_text`)** để làm rõ các lát cắt quyết định của Decision Tree.

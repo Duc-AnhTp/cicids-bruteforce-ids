@@ -1,0 +1,21 @@
+% ==============================================================================
+% reports/sections/results/06_04_random_control.tex
+% ==============================================================================
+
+\section{Kết Quả Thực Nghiệm Đối Chứng Trên Phân Tách Ngẫu Nhiên}
+
+Trái ngược hoàn toàn với bức tranh sụp đổ trên phân tách theo thời gian, kết quả của các mô hình trên tập kiểm thử phân tách ngẫu nhiên (\texttt{random/with\_port}) đạt mức điểm số gần như hoàn hảo (xem Phần B của Bảng \ref{tab:test_comparison}):
+\begin{itemize}
+    \item \textbf{Cây Quyết Định (Decision Tree)}: Đạt $\FOne = \textbf{\DTRandomFOne}$, $\Precision = \DTRandomPrecision$, $\Recall = \DTRandomRecall$, $\AP = \DTRandomAP$, $\ROCAUC = \DTRandomROCAUC$. Tỷ lệ phát hiện đạt \DTRandomFTPRecall\ đối với FTP và \DTRandomSSHRecall\ đối với SSH.
+    \item \textbf{Rừng Ngẫu Nhiên (Random Forest)}: Đạt $\FOne = \textbf{\RFRandomFOne}$, $\Precision = \RFRandomPrecision$, $\Recall = \RFRandomRecall$, $\AP = \RFRandomAP$, $\ROCAUC = \RFRandomROCAUC$. Tỷ lệ phát hiện đạt \RFRandomFTPRecall\ đối với FTP và \RFRandomSSHRecall\ đối với SSH.
+    \item \textbf{XGBoost}: Đạt $\FOne = \textbf{\XGBRandomFOne}$, $\Precision = \XGBRandomPrecision$, $\Recall = \XGBRandomRecall$, $\AP = \XGBRandomAP$, $\ROCAUC = \XGBRandomROCAUC$. Tỷ lệ phát hiện đạt \XGBRandomFTPRecall\ đối với FTP và \XGBRandomSSHRecall\ đối với SSH.
+\end{itemize}
+
+\subsection{Đo lường Định lượng Độ lệch Đánh giá (Optimistic Evaluation Bias)}
+Bảng \ref{tab:split_diff} trình bày sự chênh lệch trực tiếp giữa hai chiến lược phân tách dữ liệu trên tập kiểm định.
+
+\input{tables/generated/tab_split_diff.tex}
+
+Khoảng cách chênh lệch hiệu năng ($\Delta\FOne$) giữa Random Split và Time-based Split trên tập Validation dao động từ \textbf{0.2631 đến 0.2848}. Trên tập Test chính thức, khoảng cách này bị khuếch đại lên mức cực đại: đối với Random Forest, điểm F1 nhảy vọt từ \textbf{\RFTestFOne} (trên Time Split) lên \textbf{\RFRandomFOne} (trên Random Split).
+
+Hiện tượng này phản ánh trực tiếp kết luận của Arp et al. \cite{arp2022dos} và Pendlebury et al. \cite{pendlebury2019tesseract}: Việc xáo trộn ngẫu nhiên đã vô tình biến bài toán đánh giá năng lực khái quát hóa thành một bài toán "nhận dạng lại" (re-identification) các phiên kết nối thuộc cùng một chiến dịch tấn công đã xuất hiện trong tập huấn luyện.

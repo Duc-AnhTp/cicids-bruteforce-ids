@@ -1,0 +1,22 @@
+% ==============================================================================
+% reports/tables/manual/tab_feature_schema.tex
+% ==============================================================================
+\begin{table}[htbp]
+\centering
+\small
+\caption{Chính sách kiểm soát không gian đặc trưng và danh mục đặc trưng hằng số bị loại bỏ.}
+\label{tab:feature_schema}
+\begin{tabular}{lp{10cm}}
+\toprule
+\textbf{Nhóm đặc trưng} & \textbf{Chi tiết các trường thông tin và quy tắc xử lý} \\
+\midrule
+\textbf{Trường cấm tuyệt đối} & \texttt{Flow ID}, \texttt{Source IP}, \texttt{Destination IP}, \texttt{Source Port}, \texttt{Timestamp}, \texttt{Timestamp\_fixed}, \texttt{Protocol}, \texttt{TimeBin10}, \texttt{\_row\_id}, \texttt{index}. \\
+\textbf{Lý do cấm} & Ngăn chặn mô hình học thuộc lòng địa chỉ máy chủ tấn công hoặc ghi nhớ thời điểm diễn ra chiến dịch. \\
+\midrule
+\textbf{10 Đặc trưng hằng số} & \texttt{Bwd PSH Flags}, \texttt{Fwd URG Flags}, \texttt{Bwd URG Flags}, \texttt{CWE Flag Count}, \texttt{Fwd Avg Bytes/Bulk}, \texttt{Fwd Avg Packets/Bulk}, \texttt{Fwd Avg Bulk Rate}, \texttt{Bwd Avg Bytes/Bulk}, \texttt{Bwd Avg Packets/Bulk}, \texttt{Bwd Avg Bulk Rate}. \\
+\textbf{Cơ chế phát hiện} & Toàn bộ giá trị có phương sai bằng 0 trên tập Train ($\Dtrain$) $\rightarrow$ Loại bỏ đồng bộ trên Val và Test. \\
+\midrule
+\textbf{Không gian cuối cùng} & 67 đặc trưng (kịch bản \texttt{with\_port}) và 66 đặc trưng (kịch bản \texttt{without\_port}). \\
+\bottomrule
+\end{tabular}
+\end{table}

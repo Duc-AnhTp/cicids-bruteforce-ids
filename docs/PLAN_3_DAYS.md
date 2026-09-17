@@ -1,5 +1,7 @@
 # Phân tích và kế hoạch hoàn thành trong 3 ngày
 
+> **Ghi chú lịch sử thực hiện**: Tài liệu này phản ánh kế hoạch rút gọn phạm vi ban đầu (giai đoạn 3 ngày đầu). Trong các giai đoạn tiếp theo (Tuần 3 – Tuần 4), nhóm đã triển khai mở rộng đầy đủ toàn bộ các cam kết trong đề cương gốc bao gồm: **Random Split đối chứng**, **Port Ablation (có/không Destination Port)**, **Hyperparameter Tuning diện rộng** và **Trực quan hóa diễn giải chuyên sâu**. Vui lòng tham khảo [README.md](../README.md), [DATA_AND_PROTOCOL.md](DATA_AND_PROTOCOL.md) và [BAO_CAO_THUC_NGHIEM_W3_W4.md](BAO_CAO_THUC_NGHIEM_W3_W4.md) để xem quy chuẩn và kết quả thực nghiệm hoàn chỉnh hiện tại.
+
 ## 1. Sửa cách ước lượng nguồn lực
 
 Nếu giữ giả định gốc 5 người × 20 ngày làm việc, nguồn lực danh nghĩa là 100 person-day.

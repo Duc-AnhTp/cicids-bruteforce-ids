@@ -1,0 +1,90 @@
+% ==============================================================================
+% reports/appendices/appendix_c_feature_list.tex
+% PHỤ LỤC C: DANH MỤC ĐẦY ĐỦ CÁC ĐẶC TRƯNG MẠNG
+% ==============================================================================
+
+\chapter{Danh Mục Đầy Đủ Các Đặc Trưng Mạng}
+\label{app:feature_list}
+
+Bảng sau liệt kê đầy đủ 67 đặc trưng mạng được sử dụng trong kịch bản \texttt{with\_port} (trong kịch bản \texttt{without\_port}, đặc trưng số 1 \texttt{Destination Port} bị loại bỏ):
+
+\begin{longtable}{rlp{8.5cm}}
+\toprule
+\textbf{STT} & \textbf{Tên đặc trưng trong dữ liệu} & \textbf{Ý nghĩa giao thức và thống kê luồng mạng} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{STT} & \textbf{Tên đặc trưng trong dữ liệu} & \textbf{Ý nghĩa giao thức và thống kê luồng mạng} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+
+1 & \texttt{Destination Port} & Cổng dịch vụ mạng đích (21 FTP, 22 SSH, 80 HTTP, 443 HTTPS) \\
+2 & \texttt{Flow Duration} & Tổng thời lượng tồn tại của phiên truyền thông luồng ($\mu\text{s}$) \\
+3 & \texttt{Total Fwd Packets} & Tổng số lượng gói tin truyền theo hướng đi (Client $\to$ Server) \\
+4 & \texttt{Total Backward Packets} & Tổng số lượng gói tin truyền theo hướng về (Server $\to$ Client) \\
+5 & \texttt{Total Length of Fwd Packets} & Tổng kích thước dữ liệu gói tin truyền theo hướng đi (bytes) \\
+6 & \texttt{Total Length of Bwd Packets} & Tổng kích thước dữ liệu gói tin truyền theo hướng về (bytes) \\
+7 & \texttt{Fwd Packet Length Max} & Kích thước gói tin lớn nhất theo hướng đi (bytes) \\
+8 & \texttt{Fwd Packet Length Min} & Kích thước gói tin nhỏ nhất theo hướng đi (bytes) \\
+9 & \texttt{Fwd Packet Length Mean} & Kích thước gói tin trung bình theo hướng đi (bytes) \\
+10 & \texttt{Fwd Packet Length Std} & Độ lệch chuẩn kích thước gói tin theo hướng đi \\
+11 & \texttt{Bwd Packet Length Max} & Kích thước gói tin lớn nhất theo hướng về (bytes) \\
+12 & \texttt{Bwd Packet Length Min} & Kích thước gói tin nhỏ nhất theo hướng về (bytes) \\
+13 & \texttt{Bwd Packet Length Mean} & Kích thước gói tin trung bình theo hướng về (bytes) \\
+14 & \texttt{Bwd Packet Length Std} & Độ lệch chuẩn kích thước gói tin theo hướng về \\
+15 & \texttt{Flow Bytes/s} & Tốc độ truyền tải byte trên một đơn vị giây \\
+16 & \texttt{Flow Packets/s} & Tốc độ truyền tải gói tin trên một đơn vị giây \\
+17 & \texttt{Flow IAT Mean} & Thời gian trễ trung bình giữa các gói tin liên tiếp của flow \\
+18 & \texttt{Flow IAT Std} & Độ lệch chuẩn thời gian trễ giữa các gói tin của flow \\
+19 & \texttt{Flow IAT Max} & Thời gian trễ lớn nhất giữa hai gói tin liên tiếp của flow \\
+20 & \texttt{Flow IAT Min} & Thời gian trễ nhỏ nhất giữa hai gói tin liên tiếp của flow \\
+21 & \texttt{Fwd IAT Total} & Tổng thời gian trễ giữa các gói tin theo hướng đi \\
+22 & \texttt{Fwd IAT Mean} & Thời gian trễ trung bình giữa các gói tin theo hướng đi \\
+23 & \texttt{Fwd IAT Std} & Độ lệch chuẩn thời gian trễ giữa các gói tin theo hướng đi \\
+24 & \texttt{Fwd IAT Max} & Thời gian trễ lớn nhất giữa các gói tin theo hướng đi \\
+25 & \texttt{Fwd IAT Min} & Thời gian trễ nhỏ nhất giữa các gói tin theo hướng đi \\
+26 & \texttt{Bwd IAT Total} & Tổng thời gian trễ giữa các gói tin theo hướng về \\
+27 & \texttt{Bwd IAT Mean} & Thời gian trễ trung bình giữa các gói tin theo hướng về \\
+28 & \texttt{Bwd IAT Std} & Độ lệch chuẩn thời gian trễ giữa các gói tin theo hướng về \\
+29 & \texttt{Bwd IAT Max} & Thời gian trễ lớn nhất giữa các gói tin theo hướng về \\
+30 & \texttt{Bwd IAT Min} & Thời gian trễ nhỏ nhất giữa các gói tin theo hướng về \\
+31 & \texttt{Fwd PSH Flags} & Số lần cờ PSH được bật theo hướng đi \\
+32 & \texttt{Fwd Header Length} & Tổng độ dài phần header của các gói tin hướng đi (bytes) \\
+33 & \texttt{Bwd Header Length} & Tổng độ dài phần header của các gói tin hướng về (bytes) \\
+34 & \texttt{Fwd Packets/s} & Tốc độ truyền gói tin hướng đi trên mỗi giây \\
+35 & \texttt{Bwd Packets/s} & Tốc độ truyền gói tin hướng về trên mỗi giây \\
+36 & \texttt{Min Packet Length} & Kích thước gói tin nhỏ nhất quan sát được trong toàn bộ flow \\
+37 & \texttt{Max Packet Length} & Kích thước gói tin lớn nhất quan sát được trong toàn bộ flow \\
+38 & \texttt{Packet Length Mean} & Độ dài trung bình của tất cả các gói tin trong flow \\
+39 & \texttt{Packet Length Std} & Độ lệch chuẩn kích thước toàn bộ các gói tin trong flow \\
+40 & \texttt{Packet Length Variance} & Phương sai phân bố kích thước các gói tin trong flow \\
+41 & \texttt{FIN Flag Count} & Số lượng cờ FIN xuất hiện trong flow (báo hiệu đóng kết nối) \\
+42 & \texttt{SYN Flag Count} & Số lượng cờ SYN xuất hiện trong flow (báo hiệu bắt tay TCP) \\
+43 & \texttt{RST Flag Count} & Số lượng cờ RST xuất hiện trong flow (thiết lập lại kết nối) \\
+44 & \texttt{PSH Flag Count} & Số lượng cờ PSH xuất hiện trong flow (đẩy dữ liệu lên tầng app) \\
+45 & \texttt{ACK Flag Count} & Số lượng cờ ACK xuất hiện trong flow (xác nhận gói tin) \\
+46 & \texttt{URG Flag Count} & Số lượng cờ URG xuất hiện trong flow (dữ liệu khẩn cấp) \\
+47 & \texttt{ECE Flag Count} & Số lượng cờ ECE xuất hiện trong flow (thông báo nghẽn mạng) \\
+48 & \texttt{Down/Up Ratio} & Tỷ lệ lưu lượng tải xuống so với tải lên \\
+49 & \texttt{Average Packet Size} & Kích thước gói tin trung bình tổng thể của flow \\
+50 & \texttt{Avg Fwd Segment Size} & Kích thước phân đoạn TCP trung bình theo hướng đi \\
+51 & \texttt{Avg Bwd Segment Size} & Kích thước phân đoạn TCP trung bình theo hướng về \\
+52 & \texttt{Subflow Fwd Packets} & Số lượng gói tin trung bình trong một subflow hướng đi \\
+53 & \texttt{Subflow Fwd Bytes} & Số lượng byte trung bình trong một subflow hướng đi \\
+54 & \texttt{Subflow Bwd Packets} & Số lượng gói tin trung bình trong một subflow hướng về \\
+55 & \texttt{Subflow Bwd Bytes} & Số lượng byte trung bình trong một subflow hướng về \\
+56 & \texttt{Init\_Win\_bytes\_forward} & Kích thước cửa sổ TCP nhận ban đầu phía client (bytes) \\
+57 & \texttt{Init\_Win\_bytes\_backward} & Kích thước cửa sổ TCP nhận ban đầu phía server (bytes) \\
+58 & \texttt{act\_data\_pkt\_fwd} & Số lượng gói tin hướng đi thực sự có mang payload dữ liệu \\
+59 & \texttt{min\_seg\_size\_forward} & Kích thước phân đoạn tối thiểu được quan sát phía forward \\
+60 & \texttt{Active Mean} & Thời gian hoạt động trung bình trước khi chuyển sang trạng thái chờ \\
+61 & \texttt{Active Std} & Độ lệch chuẩn thời gian hoạt động của flow \\
+62 & \texttt{Active Max} & Thời gian hoạt động tối đa của flow \\
+63 & \texttt{Active Min} & Thời gian hoạt động tối thiểu của flow \\
+64 & \texttt{Idle Mean} & Thời gian chờ (không có traffic) trung bình của flow \\
+65 & \texttt{Idle Std} & Độ lệch chuẩn thời gian chờ của flow \\
+66 & \texttt{Idle Max} & Thời gian chờ tối đa của flow \\
+67 & \texttt{Idle Min} & Thời gian chờ tối thiểu của flow \\
+\end{longtable}

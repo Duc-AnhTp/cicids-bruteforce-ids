@@ -1,0 +1,30 @@
+% ==============================================================================
+% reports/tables/generated/tab_validation_winners.tex
+% ==============================================================================
+\begin{table}[htbp]
+\centering
+\small
+\caption{Kết quả đánh giá và lựa chọn cấu hình mô hình tối ưu trên tập Validation (Mốc 10:02 -- 14:28).}
+\label{tab:validation_winners}
+\begin{tabular}{lllrrrrrr}
+\toprule
+\textbf{Mô hình} & \textbf{Phân tách} & \textbf{Cổng} & \textbf{\FOne} & \textbf{\Precision} & \textbf{\Recall} & \textbf{\AP} & \textbf{\ROCAUC} & \textbf{\FPR} \\
+\midrule
+Decision Tree & Thời gian & Có cổng & 0.7170 & 0.9971 & 0.5597 & 0.5690 & 0.7798 & $3.51\times 10^{-5}$ \\
+\textbf{Random Forest} & \textbf{Thời gian} & \textbf{Có cổng} & \textbf{\WinnerValFOne} & \textbf{\WinnerValPrecision} & \textbf{\WinnerValRecall} & \textbf{\WinnerValAP} & \textbf{\WinnerValROCAUC} & \textbf{\WinnerValFPR} \\
+XGBoost & Thời gian & Có cổng & 0.7181 & 1.0000 & 0.5602 & 0.6045 & 0.8921 & 0.00 \\
+\midrule
+Decision Tree & Thời gian & Không cổng & 0.7169 & 0.9967 & 0.5597 & 0.5676 & 0.7798 & $4.01\times 10^{-5}$ \\
+Random Forest & Thời gian & Không cổng & 0.7134 & 0.9821 & 0.5602 & 0.5694 & 0.7759 & $2.21\times 10^{-4}$ \\
+XGBoost & Thời gian & Không cổng & 0.7136 & 0.9841 & 0.5597 & 0.6874 & 0.9704 & $1.95\times 10^{-4}$ \\
+\midrule
+Decision Tree & Ngẫu nhiên & Có cổng & 0.9939 & 0.9900 & 0.9978 & 0.9970 & 0.9989 & $3.23\times 10^{-4}$ \\
+Random Forest & Ngẫu nhiên & Có cổng & 0.9997 & 1.0000 & 0.9994 & 0.9998 & 0.9999 & 0.00 \\
+XGBoost & Ngẫu nhiên & Có cổng & 0.9995 & 0.9992 & 0.9998 & 0.9999 & 1.0000 & $2.49\times 10^{-5}$ \\
+\midrule
+Decision Tree & Ngẫu nhiên & Không cổng & 0.9799 & 0.9662 & 0.9941 & 0.9895 & 0.9970 & $1.11\times 10^{-3}$ \\
+Random Forest & Ngẫu nhiên & Không cổng & 0.9942 & 0.9930 & 0.9953 & 0.9993 & 0.9999 & $2.24\times 10^{-4}$ \\
+XGBoost & Ngẫu nhiên & Không cổng & 0.9984 & 0.9984 & 0.9983 & 0.9999 & 1.0000 & $4.97\times 10^{-5}$ \\
+\bottomrule
+\end{tabular}
+\end{table}

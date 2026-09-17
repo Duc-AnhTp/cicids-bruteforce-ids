@@ -10,8 +10,12 @@ from .common import ProtocolError, file_sha256, resolve, write_json
 from .schema import LABELS, normalize_columns, pick_features
 
 
-def parse_timestamps(values: pd.Series, formats: list[str]) -> pd.Series:
-    """Explicit formats only. Never infer dates from labels or CSV row order."""
+def parse_timestamps(values: pd.Series, formats: list[str], reconstruct_12h: bool = False) -> pd.Series:
+    """Explicit formats only. Never infer dates from labels or CSV row order.
+
+    If reconstruct_12h is True, raw hours 1-5 (afternoon without PM marker in CICIDS2017 Tuesday)
+    are shifted by +12 hours (mapping to 13-17) independent of label or port.
+    """
     result = pd.Series(pd.NaT, index=values.index, dtype="datetime64[ns]")
     values = values.astype("string").str.strip()
     for fmt in formats:
@@ -20,6 +24,10 @@ def parse_timestamps(values: pd.Series, formats: list[str]) -> pd.Series:
     if result.isna().any():
         examples = values.loc[result.isna()].head(4).tolist()
         raise ProtocolError(f"Unparseable Timestamp values: {examples}. Specify exact formats; do not guess.")
+    if reconstruct_12h:
+        afternoon = result.dt.hour.between(1, 5)
+        if afternoon.any():
+            result.loc[afternoon] += pd.Timedelta(hours=12)
     return result
 
 
@@ -62,7 +70,11 @@ def read_flows(cfg: dict) -> tuple[pd.DataFrame, list[str], dict]:
                 raise ProtocolError("Flow Duration has missing/nonfinite/negative values; cannot establish completion time. Investigate source before splitting.")
             if (duration > pd.Timedelta(days=1).total_seconds() * 1e6).any():
                 raise ProtocolError("Flow Duration exceeds one day. Verify duration units/export.")
-            start = parse_timestamps(raw["timestamp"], cfg["input"]["timestamp_formats"])
+            reconstruct_12h = (
+                cfg["input"].get("reconstruct_12h_afternoon", False)
+                or "1-5" in str(cfg["input"].get("clock_basis", ""))
+            )
+            start = parse_timestamps(raw["timestamp"], cfg["input"]["timestamp_formats"], reconstruct_12h=reconstruct_12h)
             expected = cfg["input"].get("expected_date")
             if expected and not (start.dt.date == pd.Timestamp(expected).date()).all():
                 raise ProtocolError(f"Timestamp dates disagree with expected_date={expected}. Check day/month order.")

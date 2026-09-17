@@ -1,0 +1,32 @@
+% ==============================================================================
+% reports/sections/discussion/07_02_bias_analysis.tex
+% ==============================================================================
+
+\section{Bản Chất Của Phép Chia Ngẫu Nhiên: Vi Phạm Giả Thiết I.I.D và Độ Lệch Đánh Giá}
+
+Kết quả đối chứng trên phép chia ngẫu nhiên (Random Split) với $\FOne > 99.9\%$ đặt ra một dấu hỏi lớn: Tại sao cùng một tập dữ liệu, cùng một thuật toán mà hai cách chia lại dẫn đến hai kết luận hoàn toàn trái ngược?
+
+\subsection{Vi Phạm Giả Thiết Độc Lập và Phân Phối Đồng Nhất (I.I.D Violation)}
+Hầu hết các lý thuyết nền tảng của học máy thống kê đều dựa trên giả định rằng các mẫu dữ liệu trong tập huấn luyện và kiểm thử được lấy mẫu độc lập và có cùng phân phối ($i.i.d.$):
+\begin{equation}
+    (\mathbf{x}_i, y_i) \stackrel{\text{i.i.d.}}{\sim} \mathcal{D}
+\end{equation}
+
+Tuy nhiên, trong an ninh mạng, lưu lượng phát sinh từ một chiến dịch tấn công (Attack Campaign) \textbf{hoàn toàn không độc lập}:
+\begin{itemize}
+    \item Một chiến dịch tấn công brute force kéo dài liên tục hàng giờ sử dụng một công cụ duy nhất (\texttt{patator}) chạy trên một máy trạm duy nhất.
+    \item Công cụ này có cấu hình cố định về: kích thước buffer socket, thuật toán tạo luồng song song (threading model), thời gian trễ giữa các yêu cầu (delay interval) và chuỗi lệnh thử mật khẩu.
+    \item Máy chủ phản hồi cũng có cấu hình cố định về kích thước TCP window (\texttt{Init\_Win\_bytes}) và các cờ giao thức.
+\end{itemize}
+
+Hệ quả là hàng nghìn flow được sinh ra trong chiến dịch đó có sự tự tương quan nội tại (Intra-campaign Autocorrelation) cực kỳ mạnh mẽ. Chúng chia sẻ chung một "dấu vân tay thống kê" (Statistical Footprint) gần như đồng nhất.
+
+\subsection{Cơ Chế Nội Suy Thay Vì Khái Quát Hóa}
+Khi áp dụng phép chia ngẫu nhiên (Random Split):
+\begin{enumerate}
+    \item Các flow thuộc cùng một chiến dịch tấn công bị xé lẻ và phân tán đều vào cả tập Train và tập Test.
+    \item Tập Train nhận được 50--70\% các flow của chiến dịch FTP và SSH; tập Test nhận 30--50\% các flow còn lại của \textbf{chính chiến dịch đó}.
+    \item Thay vì phải học cách tổng quát hóa để phát hiện một cuộc tấn công mới, mô hình cây chỉ cần ghi nhớ "dấu vân tay" của chiến dịch đã thấy trong tập Train để nhận diện lại các flow của chính chiến dịch đó trong tập Test.
+\end{enumerate}
+
+Đây chính là cơ chế tạo ra \textbf{Độ lệch đánh giá quá lạc quan (Optimistic Evaluation Bias)}. Điểm số F1 trên 99.9\% không chứng minh rằng mô hình học máy thông minh hay có khả năng bảo vệ mạng, mà chỉ chứng minh rằng mô hình đã "học thuộc lòng" thành công một chiến dịch cụ thể đã qua!

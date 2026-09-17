@@ -1,0 +1,78 @@
+% ==============================================================================
+% reports/chapters/04_phuong_phap_de_xuat.tex
+% CHƯƠNG 4: PHƯƠNG PHÁP VÀ KIẾN TRÚC HỆ THỐNG
+% ==============================================================================
+
+\chapter{Phương Pháp và Kiến Trúc Hệ Thống}
+\label{chap:phuong_phap}
+
+\section{Kiến Trúc Tổng Thể của Hệ Thống Thực Nghiệm}
+
+Nhằm đảm bảo tính khách quan và kiểm soát triệt để mọi rủi ro rò rỉ dữ liệu (Data Leakage), hệ thống nghiên cứu thực nghiệm được thiết kế theo một kiến trúc đường ống (Pipeline Architecture) gồm 5 giai đoạn độc lập:
+\begin{enumerate}
+    \item \textbf{Giai đoạn 1: Chuẩn bị dữ liệu và Phân tách (Data Splitting)}: Áp dụng phục hồi dòng thời gian và thuật toán Purge/Embargo để chia tách dữ liệu thành Train, Validation và Test độc lập.
+    \item \textbf{Giai đoạn 2: Tiền xử lý chỉ học từ tập Train (Train-Only Preprocessing)}: Loại bỏ các đặc trưng hằng số và khớp (fit) bộ điền giá trị thiếu (median) duy nhất trên $\Dtrain$.
+    \item \textbf{Giai đoạn 3: Tinh chỉnh Siêu tham số (Hyperparameter Tuning)}: Tìm kiếm cấu hình tối ưu của 3 mô hình cây trên không gian $\Dtrain \times \Dval$.
+    \item \textbf{Giai đoạn 4: Đóng băng Cấu hình (Model Freeze)}: Khóa tham số và cấu hình tốt nhất vào tệp siêu dữ liệu \texttt{frozen.json}.
+    \item \textbf{Giai đoạn 5: Mở Kiểm thử một lần duy nhất (Single-Open Test Evaluation)}: Đánh giá hiệu năng tổng quát hóa trên $\Dtest$ mà không tinh chỉnh lại bất kỳ tham số nào.
+\end{enumerate}
+
+\section{Chính Sách Quản Lý Đặc Trưng (Feature Schema Policy)}
+
+Để ngăn chặn các "lối tắt học vẹt" (Shortcut Learning \cite{geirhos2020shortcut}), toàn bộ các trường thông tin định danh và siêu dữ liệu không phản ánh hành vi mạng thuần túy đều bị loại bỏ nghiêm ngặt khỏi không gian đặc trưng:
+\begin{itemize}
+    \item \textbf{Các trường cấm tuyệt đối}: \texttt{Flow ID}, \texttt{Source IP}, \texttt{Destination IP}, \texttt{Source Port}, \texttt{Timestamp}, \texttt{Timestamp\_fixed}, \texttt{Protocol}, \texttt{TimeBin10}, \texttt{\_row\_id}, \texttt{index}. Việc giữ lại địa chỉ IP hay nhãn thời gian sẽ khiến mô hình ghi nhớ máy chủ tấn công thay vì học mẫu lưu lượng.
+\end{itemize}
+
+Chi tiết chính sách quản lý đặc trưng được trình bày trong Bảng \ref{tab:feature_schema}.
+
+\input{tables/manual/tab_feature_schema.tex}
+
+\subsection{Thực nghiệm Bóc tách Cổng dịch vụ (Port Ablation Design)}
+Cổng dịch vụ đích (\texttt{Destination Port}) có giá trị bằng 21 cho giao thức FTP và 22 cho giao thức SSH. Để trả lời câu hỏi nghiên cứu RQ3 xem mô hình có bị phụ thuộc thái quá vào số cổng hay không, chúng tôi thiết kế 2 nhánh không gian đặc trưng song song:
+\begin{enumerate}
+    \item \textbf{Nhánh có cổng (\texttt{with\_port}, \FeatWithPortCount\ đặc trưng)}: Bao gồm \texttt{Destination Port} cùng toàn bộ các đặc trưng thống kê hành vi luồng mạng.
+    \item \textbf{Nhánh không có cổng (\texttt{without\_port}, \FeatWithoutPortCount\ đặc trưng)}: Loại bỏ hoàn toàn \texttt{Destination Port}, buộc mô hình phải dựa 100\% vào các đặc trưng thống kê gói tin (Packet lengths, IAT, Flags, Header lengths).
+\end{enumerate}
+
+\section{Thiết Kế Chiến Lược Phân Tách Dữ Liệu}
+
+\subsection{Cơ chế Purge và Embargo Chống Rò Rỉ Ranh Giới Thời Gian}
+Trong phân tích chuỗi thời gian mạng, một flow có thời điểm bắt đầu $s$ và thời lượng $d$ (tính bằng micro-giây) sẽ kéo dài qua một khoảng thời gian. Để tính toán thời điểm hoàn tất một cách bảo thủ, chúng tôi bổ sung thêm một sai số làm tròn lượng tử $q = 60\text{s}$:
+\begin{equation}
+    e = s + d + q
+\end{equation}
+
+Tại mỗi mốc thời gian cắt $T_{\text{cutoff}}$, nguy cơ rò rỉ thông tin xảy ra khi:
+\begin{enumerate}
+    \item \textbf{Flow vắt ngang ranh giới (Boundary Crossing)}: Flow bắt đầu trước $T_{\text{cutoff}}$ nhưng kết thúc sau $T_{\text{cutoff}}$ ($s < T_{\text{cutoff}}$ và $e \ge T_{\text{cutoff}}$). Nếu giữ lại, thông tin của tương lai đã rò rỉ vào quá khứ. Giải pháp là \textbf{Purge} (loại bỏ hoàn toàn các flow này).
+    \item \textbf{Flow diễn ra ngay sau ranh giới}: Để tránh các ảnh hưởng trễ của các kết nối TCP vừa đóng, một khoảng đệm an toàn (Embargo buffer) $g = 120\text{s}$ được áp dụng ngay sau mốc cắt. Mọi flow bắt đầu trong khoảng $[T_{\text{cutoff}}, T_{\text{cutoff}} + g)$ đều bị loại bỏ.
+\end{enumerate}
+
+Với hai mốc cắt thời gian được xác định từ trước:
+\begin{itemize}
+    \item \textbf{Mốc A}: \texttt{2017-07-04 10:00:00} (Phân cách Train và Validation)
+    \item \textbf{Mốc B}: \texttt{2017-07-04 14:30:00} (Phân cách Validation và Test)
+\end{itemize}
+
+Thuật toán Purge và Embargo đã loại bỏ tổng cộng \textbf{\DataPurgedRows\ dòng} ranh giới không an toàn (xem Bảng \ref{tab:dataset_splits}), đảm bảo tính độc lập thời gian tuyệt đối giữa các tập dữ liệu.
+
+\subsection{Chiến Lược Đối Chứng: Phân Tách Ngẫu Nhiên (Random Split)}
+Để làm cơ sở đối chứng đo lường hiện tượng Optimistic Evaluation Bias, một bản sao dữ liệu thứ hai được phân chia ngẫu nhiên theo phương pháp phân tầng (Stratified Random Split) với tỷ lệ số lượng mẫu tương ứng: Train ($20.6\%$), Validation ($46.5\%$) và Test ($32.9\%$). Phép chia này xáo trộn toàn bộ các flow mà không màng tới thứ tự thời gian xuất hiện.
+
+\section{Quy Trình Tiền Xử Lý Chỉ Học Từ Tập Train (Train-Only Preprocessing)}
+
+Một nguyên tắc cốt tử trong MLOps là \textbf{bộ tiền xử lý không được phép nhìn thấy dữ liệu tương lai}. Toàn bộ các bước học tham số tiền xử lý được thực hiện nghiêm ngặt trên tập $\Dtrain$ theo kịch bản \texttt{scripts/preprocess\_data.py}:
+\begin{enumerate}
+    \item \textbf{Loại bỏ đặc trưng hằng số}: Thuật toán kiểm tra phương sai của từng đặc trưng trên $\Dtrain$. Có \FeatConstantDropped\ đặc trưng có giá trị không đổi (phương sai bằng 0) trên $\Dtrain$ (bao gồm các cờ hiếm như \texttt{Bwd PSH Flags}, \texttt{Fwd URG Flags}, \texttt{CWE Flag Count} và các trường bulk). Danh sách \FeatConstantDropped\ cột này được lưu lại và áp dụng loại bỏ đồng bộ trên $\Dval$ và $\Dtest$.
+    \item \textbf{Điền giá trị thiếu (Missing Imputation)}: Khởi tạo \texttt{SimpleImputer(strategy='median')}. Giá trị trung vị (median) của từng đặc trưng được tính toán duy nhất trên $\Dtrain$, sau đó được dùng để điền các giá trị NaN trên cả ba tập $\Dtrain$, $\Dval$ và $\Dtest$.
+\end{enumerate}
+
+\section{Nguyên Tắc Đóng Băng Mô Hình (Single-Open Test Rule)}
+
+Để loại trừ hoàn toàn nguy cơ tinh chỉnh siêu tham số lặp đi lặp lại trên tập Test (Test Leakage qua con người), dự án áp dụng quy tắc đóng băng nghiêm ngặt:
+\begin{itemize}
+    \item Toàn bộ quá trình thử nghiệm, tuning siêu tham số và lựa chọn mô hình chiến thắng được thực hiện hoàn toàn trên tập $\Dtrain$ và $\Dval$.
+    \item Cấu hình tốt nhất sau đó được xuất ra tệp \texttt{artifacts/week3\_week4/frozen.json} và tính mã băm SHA-256 xác thực.
+    \item Kịch bản đánh giá tập Test (\texttt{scripts/run\_remaining.py}) kiểm tra cờ \texttt{TEST\_OPENED.json}. Tập Test chỉ được mở đúng một lần duy nhất để tính toán các chỉ số cuối cùng. Mọi hành động sửa đổi mã nguồn hay tham số sau mốc mở này đều bị coi là vi phạm giao thức.
+\end{itemize}

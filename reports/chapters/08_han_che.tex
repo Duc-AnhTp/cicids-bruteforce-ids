@@ -1,0 +1,43 @@
+% ==============================================================================
+% reports/chapters/08_han_che.tex
+% CHƯƠNG 8: GIỚI HẠN VÀ ĐÁNH GIÁ TÍNH HỢP LỆ
+% ==============================================================================
+
+\chapter{Giới Hạn và Đánh Giá Tính Hợp Lệ}
+\label{chap:han_che}
+
+Theo chuẩn mực nghiên cứu khoa học thực nghiệm trong công nghệ thông tin và an toàn an ninh mạng, việc tự đánh giá và phản biện các giới hạn nội tại là bắt buộc. Chương này phân tích các mối đe dọa đến tính hợp lệ của nghiên cứu (\textbf{Threats to Validity}) theo 4 khía cạnh chuẩn tắc và trình bày các biện pháp giảm thiểu tương ứng (được tổng hợp tại Bảng \ref{tab:threats_validity}).
+
+\input{tables/manual/tab_threats_validity.tex}
+
+\section{Tính Hợp Lệ Bên Trong (Internal Validity)}
+
+Tính hợp lệ bên trong xem xét liệu các kết luận thực nghiệm có bị bóp méo bởi các yếu tố gây nhiễu (confounding factors) hoặc sai sót trong quy trình xử lý dữ liệu hay không:
+\begin{enumerate}
+    \item \textbf{Độ chính xác của việc phục hồi nhãn thời gian 24 giờ}: Quy tắc phục hồi dòng thời gian (\texttt{reconstruct\_timestamp}) được xây dựng dựa trên phân tích dòng thời gian của toàn bộ lưu lượng ngày Tuesday. Mặc dù đã được kiểm chứng tính nhất quán trên 445,909 dòng dữ liệu, đây vẫn là một kỹ thuật phục hồi hậu kỳ trên tệp CSV xuất ra từ CICFlowMeter chứ không phải là nhãn thời gian tuyệt đối của từng gói tin trong tệp PCAP gốc.
+    \item \textbf{Nguy cơ rò rỉ ranh giới}: Mặc dù đã áp dụng thuật toán Purge ($q=60\text{s}$) và Embargo ($g=120\text{s}$) loại bỏ 7,632 dòng ranh giới, vẫn có thể tồn tại những kết nối TCP nền (Background benign traffic) kéo dài vượt qua ngưỡng embargo mà chưa bị triệt tiêu hoàn toàn. Tuy nhiên, lưu lượng này chỉ thuộc lớp bình thường và không chứa nhãn tấn công, do đó không làm suy yếu kết luận về sự sụp đổ của mô hình trước biến thể tấn công mới.
+\end{enumerate}
+
+\section{Tính Hợp Lệ Khái Niệm (Construct Validity)}
+
+Tính hợp lệ khái niệm đánh giá mức độ tương thích giữa bài toán đo lường thực nghiệm và mục tiêu thực tế của hệ thống an ninh mạng:
+\begin{enumerate}
+    \item \textbf{Phân loại Flow hoàn tất so với NIDS thời gian thực}: Như đã khẳng định tại Chương 2, hệ thống thực nghiệm hoạt động trên các flow đã đóng hoàn toàn sau khi kết thúc truyền thông. Do đó, các kết quả trong báo cáo này phản ánh năng lực của một hệ thống phân tích nhật ký lưu lượng mạng hậu kiểm (Post-mortem Traffic Analyzer) hơn là một hệ thống phát hiện và ngăn chặn xâm nhập thời gian thực (Inline IPS) có khả năng ngắt kết nối ngay ở những gói tin đầu tiên.
+    \item \textbf{Gộp nhãn nhị phân (\Normal\ vs \Attack)}: Việc gom chung \FTP\ và \SSH\ vào nhãn $y=1$ có thể che giấu những đặc thù riêng của từng giao thức. Tuy nhiên, việc theo dõi chỉ số phụ Subtype Recall đã giúp khắc phục triệt để hạn chế này.
+\end{enumerate}
+
+\section{Tính Hợp Lệ Bên Ngoài (External Validity)}
+
+Tính hợp lệ bên ngoài phản ánh khả năng khái quát hóa của kết quả nghiên cứu sang các môi trường mạng và ngữ cảnh khác:
+\begin{enumerate}
+    \item \textbf{Dữ liệu môi trường phòng thí nghiệm}: Tập dữ liệu CICIDS2017 được thu thập trong môi trường mạng giả lập của UNB. Mặc dù đã cố gắng mô phỏng lưu lượng người dùng tự nhiên (sử dụng hệ thống B-Profile), lưu lượng này vẫn thiếu đi sự phong phú, phức tạp và nhiễu loạn của các mạng viễn thông hoặc trung tâm dữ liệu quy mô lớn trong thực tế.
+    \item \textbf{Giới hạn trong phạm vi ngày Tuesday}: Đồ án tập trung nghiên cứu chuyên sâu vào hai biến thể tấn công brute force (FTP và SSH) trong ngày thứ Ba. Kết luận về sự sụp đổ của Zero-shot Transfer cần được tiếp tục kiểm chứng trên các dạng tấn công khác như DoS/DDoS (ngày Wednesday) hay Web Attacks (ngày Thursday).
+\end{enumerate}
+
+\section{Tính Hợp Lệ Kết Luận Thống Kê (Statistical Conclusion Validity)}
+
+Tính hợp lệ kết luận thống kê liên quan đến độ tin cậy của các phép đo lường và quy mô mẫu:
+\begin{enumerate}
+    \item \textbf{Mất cân bằng lớp cực đoan}: Số lượng mẫu tấn công trong tập Test chỉ chiếm 2.59\% (\DataTestAttack\ trên \DataTestRows\ dòng). Để đảm bảo tính tin cậy thống kê, chúng tôi đã sử dụng các chỉ số không phụ thuộc vào lớp đa số như F1-Score, Precision-Recall Curve và Average Precision (AP) thay vì dựa vào Accuracy Paradox.
+    \item \textbf{Độ nhạy của ngưỡng phân loại}: Toàn bộ các kết quả trong bảng đối chuẩn chính được đo lường tại ngưỡng xác suất mặc định $\tau = 0.5$. Mặc dù việc quét ngưỡng (Threshold Tuning) trên tập Validation có thể làm thay đổi nhẹ điểm số, sự sụp đổ cơ bản của các mô hình trước biến thể SSH vẫn giữ nguyên do khoảng cách phân phối quá lớn.
+\end{enumerate}

@@ -1,0 +1,74 @@
+% ==============================================================================
+% reports/main.tex
+% BÁO CÁO ĐỒ ÁN TỐT NGHIỆP / NGHIÊN CỨU AN TOÀN THÔNG TIN (HUCE)
+% Đề tài: Ứng dụng học máy trong phát hiện tấn công Brute Force từ dữ liệu CICIDS2017
+% ==============================================================================
+
+\documentclass[12pt,a4paper,oneside]{report}
+
+% 1. Cấu hình hệ thống, font chữ và macro số liệu
+\input{config/packages.tex}
+\input{config/typography.tex}
+\input{config/metadata.tex}
+\input{config/commands.tex}
+\input{config/generated_metrics.tex}
+
+% 2. Khai báo tệp trích dẫn học thuật
+\addbibresource{bibliography/references.bib}
+
+\begin{document}
+
+% ------------------------------------------------------------------------------
+% PHẦN ĐẦU BÁO CÁO (FRONTMATTER)
+% ------------------------------------------------------------------------------
+\input{frontmatter/titlepage.tex}
+
+\pagenumbering{roman}
+\setcounter{page}{1}
+
+\input{frontmatter/declaration.tex}
+\input{frontmatter/acknowledgement.tex}
+\input{frontmatter/abstract_vi.tex}
+\input{frontmatter/abstract_en.tex}
+
+% Mục lục tự động
+\tableofcontents
+\newpage
+\listoftables
+\newpage
+\listoffigures
+\newpage
+
+\input{frontmatter/abbreviations.tex}
+
+% ------------------------------------------------------------------------------
+% NỘI DUNG CHÍNH (MAINMATTER)
+% ------------------------------------------------------------------------------
+\cleardoublepage
+\pagenumbering{arabic}
+\setcounter{page}{1}
+
+% Chương 1 đến Chương 9
+\input{chapters/01_gioi_thieu.tex}
+\input{chapters/02_co_so_ly_thuyet.tex}
+\input{chapters/03_du_lieu_va_bai_toan.tex}
+\input{chapters/04_phuong_phap_de_xuat.tex}
+\input{chapters/05_thiet_ke_thuc_nghiem.tex}
+\input{chapters/06_ket_qua.tex}
+\input{chapters/07_thao_luan.tex}
+\input{chapters/08_han_che.tex}
+\input{chapters/09_ket_luan.tex}
+
+% ------------------------------------------------------------------------------
+% TÀI LIỆU THAM KHẢO VÀ PHỤ LỤC (BACKMATTER)
+% ------------------------------------------------------------------------------
+\cleardoublepage
+\printbibliography[heading=bibintoc,title={Tài Liệu Tham Khảo}]
+
+\appendix
+\input{appendices/appendix_a_reproducibility.tex}
+\input{appendices/appendix_b_hyperparameters.tex}
+\input{appendices/appendix_c_feature_list.tex}
+\input{appendices/appendix_d_tree_rules.tex}
+
+\end{document}

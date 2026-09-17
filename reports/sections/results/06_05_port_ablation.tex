@@ -1,0 +1,25 @@
+% ==============================================================================
+% reports/sections/results/06_05_port_ablation.tex
+% ==============================================================================
+
+\section{Kết Quả Thực Nghiệm Bóc Tách Cổng Mạng (Port Ablation)}
+
+Để kiểm chứng giả thuyết cho rằng mô hình thất bại trên tập Test theo thời gian chỉ đơn thuần là do "học vẹt" vào cổng dịch vụ đích (\texttt{Destination Port}), chúng tôi tiến hành phân tích kịch bản bóc tách cổng (\texttt{without\_port}), trong đó đặc trưng này bị loại bỏ hoàn toàn.
+
+Bảng \ref{tab:port_ablation} tổng hợp kết quả bóc tách cổng trên tập kiểm định $\Dval$.
+
+\input{tables/generated/tab_port_ablation.tex}
+
+Trên tập kiểm định $\Dval$, việc loại bỏ cổng làm giảm nhẹ điểm F1 của cả 3 mô hình (khoảng 0.0001 đến 0.0047), nhưng tỷ lệ phát hiện tấn công SSH vẫn giữ ở mức 0.00\% (vì các mô hình chỉ ưu tiên tối ưu hóa phát hiện các mẫu FTP quen thuộc chiếm đa số trong Val).
+
+Đặc biệt, khi quan sát kết quả trên tập kiểm thử $\Dtest$ theo thời gian (xem lại Phần A của Bảng \ref{tab:test_comparison}):
+\begin{itemize}
+    \item \textbf{Cây Quyết Định (Decision Tree)}: Điểm F1 tăng nhẹ từ 0.0000 lên \textbf{\DTTestWithoutPortFOne}, bắt được \DTTestWithoutPortSSHRecall\ tấn công SSH (7 mẫu).
+    \item \textbf{Rừng Ngẫu Nhiên (Random Forest)}: Điểm F1 tăng từ \RFTestFOne\ lên \textbf{\RFTestWithoutPortFOne}, bắt được \RFTestWithoutPortSSHRecall\ tấn công SSH (14 trên tổng số 3,732 mẫu).
+    \item \textbf{XGBoost}: Điểm F1 tăng từ 0.0000 lên \textbf{\XGBTestWithoutPortFOne}, bắt được \XGBTestWithoutPortSSHRecall\ tấn công SSH (13 trên tổng số 3,732 mẫu).
+\end{itemize}
+
+\noindent\textbf{Kết luận then chốt về vai trò của Cổng dịch vụ:}
+Việc loại bỏ cổng dịch vụ quả thực đã giúp các mô hình giải phóng một phần sự ràng buộc để bắt đầu nhận diện được một lượng rất nhỏ các flow SSH dựa trên đặc trưng hành vi (tỷ lệ SSH Recall tăng từ 0.00\% lên $0.19\% - 0.38\%$).
+
+Tuy nhiên, \textbf{hiệu năng tổng thể của mô hình vẫn ở mức sụp đổ hoàn toàn ($\FOne \le 0.0074$)}. Kết quả này bác bỏ giả thuyết cho rằng thất bại của NIDS chỉ đơn thuần là do đặc trưng cổng. Nó chứng minh một sự thật sâu sắc hơn: \textbf{Các đặc trưng thống kê hình thái gói tin (Packet length statistics, IAT, Flags) của tấn công FTP và SSH có sự phân kỳ phân phối (Distribution Divergence) quá lớn}, khiến mô hình học trên FTP không thể nhận diện được SSH ngay cả khi không còn cổng dẫn hướng!

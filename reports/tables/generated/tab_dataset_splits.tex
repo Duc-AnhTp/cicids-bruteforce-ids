@@ -1,0 +1,20 @@
+% ==============================================================================
+% reports/tables/generated/tab_dataset_splits.tex
+% ==============================================================================
+\begin{table}[htbp]
+\centering
+\caption{Thống kê số lượng mẫu và phân bổ nhãn theo chiến lược Temporal Split v1.}
+\label{tab:dataset_splits}
+\begin{tabular}{lrrrrrr}
+\toprule
+\textbf{Tập dữ liệu} & \textbf{Tổng số flow} & \textbf{\BENIGN} & \textbf{Tấn công} & \textbf{\FTP} & \textbf{\SSH} & \textbf{Tỷ lệ Attack (\%)} \\
+\midrule
+Train ($e < A$) & \DataTrainRows & \DataTrainBenign & \DataTrainAttack & \DataTrainFTP & \DataTrainSSH & \DataTrainAttackPercent \\
+Validation ($s \ge A+g, e < B$) & \DataValidationRows & \DataValidationBenign & \DataValidationAttack & \DataValidationFTP & \DataValidationSSH & \DataValidationAttackPercent \\
+Test ($s \ge B+g$) & \DataTestRows & \DataTestBenign & \DataTestAttack & \DataTestFTP & \DataTestSSH & \DataTestAttackPercent \\
+\midrule
+Purge / Embargo ranh giới & \DataPurgedRows & 6,967 & 665 & 386 & 279 & 8.71\% \\
+\textbf{Tổng số dòng sau làm sạch} & \textbf{\DataCleanRows} & \textbf{432,053} & \textbf{13,835} & \textbf{7,938} & \textbf{5,897} & \textbf{3.10\%} \\
+\bottomrule
+\end{tabular}
+\end{table}

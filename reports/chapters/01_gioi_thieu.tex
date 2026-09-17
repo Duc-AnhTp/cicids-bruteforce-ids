@@ -1,0 +1,75 @@
+% ==============================================================================
+% reports/chapters/01_gioi_thieu.tex
+% CHƯƠNG 1: GIỚI THIỆU VÀ ĐẶT VẤN ĐỀ
+% ==============================================================================
+
+\chapter{Giới Thiệu và Đặt Vấn Đề}
+\label{chap:gioi_thieu}
+
+\section{Bối Cảnh An Ninh Mạng và Nguy Cơ Tấn Công Brute Force}
+
+Trong kỷ nguyên chuyển đổi số và phát triển bùng nổ của hạ tầng điện toán đám mây, an toàn an ninh thông tin đã trở thành yêu cầu sống còn đối với các tổ chức và doanh nghiệp. Trong số các hình thức tấn công mạng phổ biến, tấn công dò quét và vét cạn thông tin xác thực (Brute Force / Dictionary Attacks) nhắm vào các giao thức quản trị và truyền tệp từ xa như SSH (Secure Shell - Cổng 22) và FTP (File Transfer Protocol - Cổng 21) vẫn là một trong những mối đe dọa thường trực nhất. Bằng cách tự động hóa hàng nghìn đến hàng triệu lượt thử kết hợp tên người dùng và mật khẩu, kẻ tấn công có thể chiếm đoạt quyền điều khiển máy chủ nội bộ, từ đó tạo bàn đạp để leo thang đặc quyền và phát tán mã độc tống tiền trong toàn bộ hệ thống mạng.
+
+Các hệ thống phát hiện xâm nhập mạng truyền thống (Signature-based NIDS) như Snort hay Suricata hoạt động dựa trên việc đối khớp các mẫu chuỗi nhị phân (signatures) hoặc các quy tắc ngưỡng tần suất tĩnh (threshold rules). Mặc dù có ưu điểm về tốc độ và tỷ lệ báo động giả thấp đối với các biến thể tấn công đã biết, cách tiếp cận này bộc lộ những hạn chế cố hữu:
+\begin{enumerate}
+    \item Không có khả năng phát hiện các biến thể tấn công mới hoặc các công cụ quét mật khẩu có cơ chế làm chậm nhịp gõ (low-and-slow) nhằm lách qua các ngưỡng cảnh báo cố định.
+    \item Chi phí bảo trì, cập nhật bộ luật thủ công rất lớn khi mạng lưới mở rộng.
+    \item Bất lực trước các giao thức truyền thông mã hóa tầng ứng dụng như SSH, nơi nội dung gói tin payload hoàn toàn bị xáo trộn và bảo vệ bằng mật mã.
+\end{enumerate}
+
+\section{Từ Signature-based sang Học Máy trong Flow-based NIDS}
+
+Để khắc phục các nhược điểm trên, cộng đồng nghiên cứu đã hướng sự chú ý mạnh mẽ sang các phương pháp Học máy (Machine Learning - ML). Thay vì phân tích sâu vào nội dung gói tin (Deep Packet Inspection - DPI) vốn tốn kém tài nguyên tính toán và bị cản trở bởi mã hóa, hướng tiếp cận dựa trên luồng mạng (Flow-based Inspection) chỉ trích xuất các đặc trưng thống kê tổng hợp của cả phiên truyền thông như: tổng thời lượng phiên (Flow Duration), số lượng gói tin hai chiều, kích thước gói tin trung bình và phương sai, khoảng thời gian trễ giữa các gói tin liên tiếp (Inter-Arrival Time - IAT) cũng như số lượng các cờ điều khiển TCP.
+
+Các thuật toán học máy giám sát, đặc biệt là các mô hình dựa trên cây quyết định và học kết hợp (Decision Tree, Random Forest, XGBoost), được kỳ vọng sẽ tự động trích xuất các mẫu hành vi bất thường đặc trưng của lưu lượng tấn công Brute Force mà không cần can thiệp giải mã dữ liệu người dùng.
+
+\section{Vấn Đề Khoa Học: Đánh Giá Lạc Quan và Thách Thức Thời Gian}
+
+Mặc dù có hàng nghìn công trình nghiên cứu về ML-NIDS được công bố hàng năm, việc triển khai thực tế các mô hình này trong các Trung tâm điều hành an ninh mạng (SOC) vẫn gặp phải rào cản rất lớn. Như Sommer và Paxson \cite{sommer2010outside} đã cảnh báo trong công trình kinh điển \textit{Outside the Closed World}, việc ứng dụng học máy trong an ninh mạng có sự khác biệt căn bản so với các lĩnh vực như xử lý ngôn ngữ tự nhiên hay thị giác máy tính: môi trường mạng luôn biến động, dữ liệu có tính chất chuỗi thời gian liên tục và kẻ tấn công luôn chủ động thay đổi hành vi để né tránh.
+
+Đặc biệt, công trình nghiên cứu gần đây của Arp và cộng sự \cite{arp2022dos} trên hội nghị an ninh hàng đầu USENIX Security đã chỉ ra hàng loạt "cạm bẫy" (pitfalls) nghiêm trọng đang tồn tại phổ biến trong các nghiên cứu an ninh mạng ứng dụng học máy. Trong đó, sai lầm phổ biến nhất là \textbf{Độ lệch đánh giá quá lạc quan (Optimistic Evaluation Bias)} bắt nguồn từ việc sử dụng chiến lược \textbf{Phân chia dữ liệu ngẫu nhiên (Random Split)}.
+
+Khi áp dụng phép chia ngẫu nhiên trên một tập dữ liệu lưu lượng mạng (như CICIDS2017 \cite{sharafaldin2018generating}):
+\begin{itemize}
+    \item Toàn bộ các flow thuộc cùng một chiến dịch tấn công (phát sinh từ cùng một công cụ dò quét, cùng địa chỉ IP nguồn, cùng cấu hình nhịp gõ) bị xé nhỏ và phân bổ đều vào cả tập Huấn luyện (Train), tập Kiểm định (Validation) và tập Kiểm thử (Test).
+    \item Việc này vi phạm nghiêm trọng giả thiết các quan sát độc lập và phân phối đồng nhất ($i.i.d.$) trong học máy.
+    \item Hệ quả là bài toán phân loại tổng quát hóa bị biến tướng thành bài toán "nội suy" hoặc "học thuộc lòng" đặc trưng của một chiến dịch cụ thể. Các mô hình dễ dàng đạt điểm số $\FOne > 99\%$, nhưng khi đối mặt với một chiến dịch tấn công mới diễn ra trong tương lai, hiệu năng lập tức sụp đổ.
+\end{itemize}
+
+\section{Mục Tiêu Nghiên Cứu và Câu Hỏi Nghiên Cứu (RQs)}
+
+Đồ án này không hướng tới mục tiêu "chạy đua điểm số" bằng cách sao chép các giao thức đánh giá ngẫu nhiên truyền thống. Thay vào đó, mục tiêu cốt lõi của đồ án là \textbf{xây dựng một quy trình thực nghiệm chuẩn mực, minh bạch, kiểm soát chặt chẽ rò rỉ dữ liệu theo thời gian thực (Temporal Leakage Prevention)} trên tập dữ liệu CICIDS2017 Tuesday, từ đó bóc tách bản chất thực sự của các mô hình học máy khi đối mặt với các dạng tấn công dò quét mật khẩu chưa từng thấy.
+
+Đề tài tập trung giải quyết 4 Câu hỏi nghiên cứu (Research Questions - RQ) sau:
+\begin{itemize}
+    \item[\textbf{RQ1:}] \textit{(Hiệu năng Zero-Shot Subtype Transfer theo thời gian)} Khi mô hình học máy dạng cây chỉ được huấn luyện trên dữ liệu quá khứ chứa một dạng tấn công Brute Force (\FTP), mô hình có khả năng tổng quát hóa để phát hiện dạng tấn công Brute Force mới (\SSH) xuất hiện trong tương lai trên cùng một hệ thống mạng hay không?
+    \item[\textbf{RQ2:}] \textit{(Độ lệch đánh giá của phép chia ngẫu nhiên)} Phép chia ngẫu nhiên (Random Split) tạo ra sự thổi phồng kết quả (Optimistic Bias) ở mức độ định lượng bao nhiêu so với phép chia phân tách theo thứ tự thời gian (Time-based Split)?
+    \item[\textbf{RQ3:}] \textit{(Vai trò của cổng dịch vụ và các đặc trưng hành vi)} Cổng dịch vụ đích (\texttt{Destination Port}) đóng vai trò như thế nào trong quyết định của mô hình? Khi loại bỏ cổng mạng (Port Ablation), các đặc trưng thống kê hành vi gói tin (Packet lengths, Flow IAT, Flags) có đủ để nhận diện hành vi tấn công hay không?
+    \item[\textbf{RQ4:}] \textit{(Tác động của giao thức huấn luyện lại - Refit Protocol Impact)} Việc vô tình cho phép mô hình tiếp xúc với dữ liệu của tập Validation (thông qua cơ chế refit mặc định của các thư viện tự động) làm thay đổi bản chất bài toán đánh giá NIDS từ Zero-Shot sang Supervised Learning như thế nào?
+\end{itemize}
+
+\section{Đóng Góp của Đồ Án}
+
+Các đóng góp cụ thể của đồ án bao gồm:
+\begin{enumerate}
+    \item \textbf{Xác lập bộ quy chuẩn thực nghiệm nghiêm ngặt (Canonical Protocol):} Thực hiện tiền xử lý và phục hồi dòng thời gian 24h dựa trên phân tích EDA; áp dụng kỹ thuật làm sạch bảo thủ Purge ($q=60\text{s}$) và Embargo ($g=120\text{s}$) loại bỏ \DataPurgedRows\ dòng ranh giới; thiết lập bài toán Zero-Shot Subtype Transfer tự nhiên trên CICIDS2017 Tuesday.
+    \item \textbf{Đánh giá trung thực và khách quan 3 mô hình học máy dạng cây:} Đối chuẩn Decision Tree, Random Forest và XGBoost qua 12 tổ hợp thực nghiệm (3 mô hình $\times$ 2 chiến lược chia $\times$ 2 kịch bản cổng). Ghi nhận minh bạch sự sụp đổ của mô hình trên tập Test theo thời gian ($\FOne \le \RFTestFOne$, bắt được \RFTestSSHRecall\ tấn công SSH).
+    \item \textbf{Bóc tách cơ chế ra quyết định thông qua XAI:} Sử dụng SHAP TreeExplainer và phân tích cấu trúc cây quyết định để chứng minh hiện tượng mô hình học vẹt cổng dịch vụ (\texttt{Destination Port} chiếm giá trị đóng góp áp đảo \SHAPTopOneVal).
+    \item \textbf{Phát hiện và cảnh báo case study MLOps thực tế:} Phân tích chi tiết trường hợp cờ \texttt{refit=True} của thư viện scikit-learn vô tình gây rò rỉ dữ liệu tập Validation, làm sai lệch F1 từ 0.0 lên \XGBRefitTestFOne, cung cấp bài học thực tiễn đắt giá cho cộng đồng kỹ thuật.
+    \item \textbf{Mã nguồn và báo cáo có tính tái lập tuyệt đối:} Toàn bộ số liệu trong báo cáo được truy xuất tự động từ các artifact đã đóng băng, đi kèm mã băm SHA-256 xác minh.
+\end{enumerate}
+
+\section{Cấu Trúc của Báo Cáo}
+
+Báo cáo được tổ chức thành 9 chương:
+\begin{itemize}
+    \item \textbf{Chương 1:} Giới thiệu bối cảnh, vấn đề khoa học, mục tiêu và 4 câu hỏi nghiên cứu.
+    \item \textbf{Chương 2:} Cơ sở lý thuyết về lưu lượng mạng flow, tấn công Brute Force, 3 thuật toán học máy dạng cây và hệ thống chỉ số đánh giá mất cân bằng lớp.
+    \item \textbf{Chương 3:} Chi tiết tập dữ liệu CICIDS2017 Tuesday, kiểm tra toàn vẹn băm, phục hồi đồng hồ 24h và làm sạch dữ liệu.
+    \item \textbf{Chương 4:} Phương pháp đề xuất, chính sách đặc trưng, kỹ thuật Purge/Embargo và nguyên tắc đóng băng mô hình.
+    \item \textbf{Chương 5:} Thiết kế thực nghiệm, không gian tìm kiếm siêu tham số và hàm mục tiêu lựa chọn mô hình trên tập Validation.
+    \item \textbf{Chương 6:} Báo cáo chi tiết các kết quả định lượng thu được từ 12 tổ hợp thực nghiệm, phân tích ma trận nhầm lẫn, đường cong PR và giải thích SHAP.
+    \item \textbf{Chương 7:} Thảo luận chuyên sâu về thất bại của Zero-shot Transfer, nguyên nhân của Optimistic Bias và bài học MLOps về cờ refit.
+    \item \textbf{Chương 8:} Phân tích các giới hạn của nghiên cứu theo 4 khía cạnh Threats to Validity.
+    \item \textbf{Chương 9:} Kết luận, trả lời trực tiếp RQ1–RQ4 và đề xuất hướng nghiên cứu tiếp theo.
+\end{itemize}

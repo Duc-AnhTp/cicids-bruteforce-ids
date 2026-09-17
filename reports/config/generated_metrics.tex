@@ -1,0 +1,158 @@
+% ==============================================================================
+% reports/config/generated_metrics.tex
+% SỔ ĐĂNG KÝ MACRO SỐ LIỆU THỰC NGHIỆM ĐÃ KIỂM CHỨNG
+% TỰ ĐỘNG KHÓA VÀ TRUY VẾT TỪ ARTIFACTS - KHÔNG SỬA TAY
+% ==============================================================================
+
+% Thông số tập dữ liệu gốc và làm sạch
+\newcommand{\DataRawRows}{445,909}
+\newcommand{\DataCleanRows}{445,888}
+\newcommand{\DataPurgedRows}{7,632}
+\newcommand{\DataInvalidDurationRows}{17}
+\newcommand{\DataDuplicatesRows}{4}
+\newcommand{\DataInfinityValues}{327}
+\newcommand{\DataShaSource}{ae9c88e10c41a8eb\dots}
+\newcommand{\DataShaFull}{ae9c88e10c41a8eb1ff454ae98bc513454925097d0b0b57180f94e79de445815}
+
+% Thống kê các tập phân tách theo thời gian (Time-based Split v1)
+\newcommand{\DataTrainRows}{90,273}
+\newcommand{\DataTrainBenign}{85,139}
+\newcommand{\DataTrainAttack}{5,134}
+\newcommand{\DataTrainFTP}{5,134}
+\newcommand{\DataTrainSSH}{0}
+\newcommand{\DataTrainAttackPercent}{5.69\%}
+
+\newcommand{\DataValidationRows}{203,826}
+\newcommand{\DataValidationBenign}{199,522}
+\newcommand{\DataValidationAttack}{4,304}
+\newcommand{\DataValidationFTP}{2,418}
+\newcommand{\DataValidationSSH}{1,886}
+\newcommand{\DataValidationAttackPercent}{2.11\%}
+
+\newcommand{\DataTestRows}{144,157}
+\newcommand{\DataTestBenign}{140,425}
+\newcommand{\DataTestAttack}{3,732}
+\newcommand{\DataTestFTP}{0}
+\newcommand{\DataTestSSH}{3,732}
+\newcommand{\DataTestAttackPercent}{2.59\%}
+
+% Thống kê tập phân tách ngẫu nhiên đối chứng (Random Split)
+\newcommand{\DataRandomTrainRows}{91,852}
+\newcommand{\DataRandomValidationRows}{207,465}
+\newcommand{\DataRandomTestRows}{146,571}
+\newcommand{\DataRandomTestBenign}{142,023}
+\newcommand{\DataRandomTestAttack}{4,548}
+\newcommand{\DataRandomTestFTP}{2,610}
+\newcommand{\DataRandomTestSSH}{1,938}
+
+% Số lượng đặc trưng
+\newcommand{\FeatInitialCount}{77}
+\newcommand{\FeatConstantDropped}{10}
+\newcommand{\FeatWithPortCount}{67}
+\newcommand{\FeatWithoutPortCount}{66}
+
+% Cấu hình và kết quả mô hình chiến thắng trên Validation (Random Forest time/with_port)
+\newcommand{\WinnerModel}{Random Forest}
+\newcommand{\WinnerValDepth}{16}
+\newcommand{\WinnerValMinLeaf}{5}
+\newcommand{\WinnerValTrees}{100}
+\newcommand{\WinnerValFOne}{0.7181}
+\newcommand{\WinnerValPrecision}{1.0000}
+\newcommand{\WinnerValRecall}{0.5602}
+\newcommand{\WinnerValAP}{0.7326}
+\newcommand{\WinnerValROCAUC}{0.8892}
+\newcommand{\WinnerValFPR}{0.00}
+\newcommand{\WinnerValFTPRecall}{99.71\%}
+\newcommand{\WinnerValSSHRecall}{0.00\%}
+
+% Kết quả Thực nghiệm Chính trên Test theo thời gian (Primary Benchmark: time/with_port)
+\newcommand{\DTTestAccuracy}{0.9740}
+\newcommand{\DTTestPrecision}{0.0000}
+\newcommand{\DTTestRecall}{0.0000}
+\newcommand{\DTTestFOne}{0.0000}
+\newcommand{\DTTestAP}{0.0259}
+\newcommand{\DTTestROCAUC}{0.5000}
+\newcommand{\DTTestFPR}{7.83\times 10^{-5}}
+\newcommand{\DTTestSSHRecall}{0.00\%}
+\newcommand{\DTTestTP}{0}
+\newcommand{\DTTestFP}{11}
+\newcommand{\DTTestFN}{3,725}
+\newcommand{\DTTestTN}{140,414}
+
+\newcommand{\RFTestAccuracy}{0.9742}
+\newcommand{\RFTestPrecision}{1.0000}
+\newcommand{\RFTestRecall}{0.0019}
+\newcommand{\RFTestFOne}{0.0037}
+\newcommand{\RFTestAP}{0.3591}
+\newcommand{\RFTestROCAUC}{0.7483}
+\newcommand{\RFTestFPR}{0.00}
+\newcommand{\RFTestSSHRecall}{0.19\%}
+\newcommand{\RFTestTP}{7}
+\newcommand{\RFTestFP}{0}
+\newcommand{\RFTestFN}{3,725}
+\newcommand{\RFTestTN}{140,425}
+
+\newcommand{\XGBTestAccuracy}{0.9741}
+\newcommand{\XGBTestPrecision}{0.0000}
+\newcommand{\XGBTestRecall}{0.0000}
+\newcommand{\XGBTestFOne}{0.0000}
+\newcommand{\XGBTestAP}{0.0879}
+\newcommand{\XGBTestROCAUC}{0.7503}
+\newcommand{\XGBTestFPR}{0.00}
+\newcommand{\XGBTestSSHRecall}{0.00\%}
+\newcommand{\XGBTestTP}{0}
+\newcommand{\XGBTestFP}{0}
+\newcommand{\XGBTestFN}{3,732}
+\newcommand{\XGBTestTN}{140,425}
+
+% Kết quả Test không có cổng (time/without_port)
+\newcommand{\DTTestWithoutPortFOne}{0.0037}
+\newcommand{\DTTestWithoutPortSSHRecall}{0.19\%}
+\newcommand{\RFTestWithoutPortFOne}{0.0074}
+\newcommand{\RFTestWithoutPortSSHRecall}{0.38\%}
+\newcommand{\XGBTestWithoutPortFOne}{0.0069}
+\newcommand{\XGBTestWithoutPortSSHRecall}{0.35\%}
+
+% Kết quả Thực nghiệm Đối chứng trên Random Split (Control: random/with_port)
+\newcommand{\DTRandomAccuracy}{0.9996}
+\newcommand{\DTRandomPrecision}{0.9904}
+\newcommand{\DTRandomRecall}{0.9980}
+\newcommand{\DTRandomFOne}{0.9942}
+\newcommand{\DTRandomAP}{0.9963}
+\newcommand{\DTRandomROCAUC}{0.9990}
+\newcommand{\DTRandomFTPRecall}{100.00\%}
+\newcommand{\DTRandomSSHRecall}{99.54\%}
+
+\newcommand{\RFRandomAccuracy}{1.0000}
+\newcommand{\RFRandomPrecision}{1.0000}
+\newcommand{\RFRandomRecall}{0.9993}
+\newcommand{\RFRandomFOne}{0.9997}
+\newcommand{\RFRandomAP}{1.0000}
+\newcommand{\RFRandomROCAUC}{1.0000}
+\newcommand{\RFRandomFTPRecall}{100.00\%}
+\newcommand{\RFRandomSSHRecall}{99.85\%}
+
+\newcommand{\XGBRandomAccuracy}{1.0000}
+\newcommand{\XGBRandomPrecision}{0.9993}
+\newcommand{\XGBRandomRecall}{1.0000}
+\newcommand{\XGBRandomFOne}{0.9997}
+\newcommand{\XGBRandomAP}{1.0000}
+\newcommand{\XGBRandomROCAUC}{1.0000}
+\newcommand{\XGBRandomFTPRecall}{100.00\%}
+\newcommand{\XGBRandomSSHRecall}{100.00\%}
+
+% Chênh lệch và độ lệch hiệu năng (Gaps & Bias)
+\newcommand{\DeltaFOneRFRandomTime}{0.2816}
+\newcommand{\DeltaFOneDTRandomTime}{0.2769}
+\newcommand{\DeltaFOneXGBRandomTime}{0.2814}
+
+% Tầm quan trọng đặc trưng SHAP (Validation Top features)
+\newcommand{\SHAPTopOneFeature}{Destination Port}
+\newcommand{\SHAPTopOneVal}{0.1237}
+\newcommand{\SHAPTopTwoFeature}{Fwd Packet Length Std}
+\newcommand{\SHAPTopTwoVal}{0.0339}
+\newcommand{\SHAPRatioTopOneTwo}{3.6}
+
+% Case Study: Hiệu năng XGBoost khi Refit trên Validation
+\newcommand{\XGBRefitTestFOne}{0.9912}
+\newcommand{\XGBRefitTestSSHRecall}{98.34\%}

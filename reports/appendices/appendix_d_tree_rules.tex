@@ -1,0 +1,43 @@
+% ==============================================================================
+% reports/appendices/appendix_d_tree_rules.tex
+% PHỤ LỤC D: QUY TẮC RẼ NHÁNH CỦA CÂY QUYẾT ĐỊNH
+% ==============================================================================
+
+\chapter{Quy Tắc Rẽ Nhánh Của Cây Quyết Định}
+\label{app:tree_rules}
+
+Dưới đây là cấu trúc logic và các quy tắc phân loại văn bản được trích xuất trực tiếp từ mô hình Decision Tree huấn luyện trên tập Train theo thời gian:
+
+\begin{lstlisting}[language=text, caption={Toàn văn quy tắc rẽ nhánh cấp cao của Cây Quyết Định (max\_depth=4)}]
+# Top Decision Rules for DecisionTree (max_depth=4 preview)
+# Total Depth: 9, Leaves: 17
+
+|--- Average Packet Size <= 14.12
+|   |--- Average Packet Size <= 9.29
+|   |   |--- SYN Flag Count <= 0.50
+|   |   |   |--- Total Length of Bwd Packets <= 57.00
+|   |   |   |   |--- Flow IAT Min <= 36509.50
+|   |   |   |   |   |--- class: 0 (Normal)
+|   |   |   |   |--- Flow IAT Min >  36509.50
+|   |   |   |   |   |--- truncated branch of depth 5
+|   |   |   |--- Total Length of Bwd Packets >  57.00
+|   |   |   |   |--- class: 1 (Attack)
+|   |   |--- SYN Flag Count >  0.50
+|   |   |   |--- Fwd Packet Length Mean <= 5.25
+|   |   |   |   |--- class: 0 (Normal)
+|   |   |   |--- Fwd Packet Length Mean >  5.25
+|   |   |   |   |--- class: 1 (Attack)
+|   |--- Average Packet Size >  9.29
+|   |   |--- Packet Length Std <= 14.32
+|   |   |   |--- Fwd Packet Length Std <= 14.42
+|   |   |   |   |--- Flow IAT Max <= 1.50
+|   |   |   |   |   |--- truncated branch of depth 4
+|   |   |   |   |--- Flow IAT Max >  1.50
+|   |   |   |   |   |--- class: 1 (Attack)
+|   |   |   |--- Fwd Packet Length Std >  14.42
+|   |   |   |   |--- class: 0 (Normal)
+|   |   |--- Packet Length Std >  14.32
+|   |   |   |--- class: 0 (Normal)
+|--- Average Packet Size >  14.12
+|   |--- class: 0 (Normal)
+\end{lstlisting}

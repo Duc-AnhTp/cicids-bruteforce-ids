@@ -1,85 +1,111 @@
-# Bản đồ code và hợp đồng giữa các bước
+# Bản đồ Code và Kiến trúc Dự án (Code Map)
 
-## 1. Cấu trúc repo
+Tài liệu này mô tả chi tiết cấu trúc mã nguồn, trách nhiệm của từng thành phần và luồng dữ liệu (Data Pipeline) từ dữ liệu thô ban đầu đến các sản phẩm artifacts cuối cùng.
 
-| Đường dẫn | Trách nhiệm |
-|---|---|
-| `pyproject.toml` | Python package, dependency, entry point `ids` |
-| `configs/experiment.yaml` | Nguồn dữ liệu, clock, cutoffs, feature policy, preset, ngưỡng, đường dẫn |
-| `src/ids/common.py` | Lỗi protocol, config validation, SHA-256, JSON, environment, dấu mốc Test |
-| `src/ids/schema.py` | Tên cột chuẩn hóa, allowlist, nhãn trong phạm vi |
-| `src/ids/data.py` | Đọc CSV theo chunk, parse timestamp, numeric conversion, audit timeline |
-| `src/ids/split.py` | Purge/embargo, record duplicate, support gates, checkpoint và kiểm tra hash |
-| `src/ids/preprocess.py` | sklearn transformers chỉ fit trên Train; numeric → cột hợp lệ → median |
-| `src/ids/metrics.py` | Metric nhị phân, threshold grid, recall theo subtype |
-| `src/ids/train.py` | Khởi tạo 3 model, pipeline fit, chọn trên Validation, freeze |
-| `src/ids/evaluate.py` | Kiểm tra model đã khóa, Test một lần, predictions và báo cáo |
-| `src/ids/explain.py` | SHAP cho model thắng, sample cố định, kiểm tra output/additivity |
-| `src/ids/predict.py` | Một flow JSON → schema → pipeline → score/label với ngưỡng đã khóa |
-| `src/ids/cli.py`, `__main__.py` | Điều phối lệnh, lỗi dừng rõ ràng |
-| `scripts/make_demo_data.py` | Tạo dữ liệu giả có timestamp, nhãn, missing/inf, duplicate và cột bẫy leakage |
-| `scripts/smoke_test.py` | Thực thi pipeline trên workspace giả mới |
-| `tests/test_protocol.py` | Kiểm tra các rủi ro làm sai kết quả, dùng unittest có sẵn |
-| `.github/workflows/ci.yml` | Cài dependencies, chạy unit/integration và smoke test khi đưa lên GitHub |
-| `docs/` | Protocol, phân công, phạm vi, trạng thái kiểm chứng và khung báo cáo |
+---
 
-Không cần backend/frontend, Docker, MLflow, DVC, Airflow hoặc notebook làm nguồn code chính. Các công cụ đó không giải quyết rủi ro timestamp và đánh giá trong phạm vi 3 ngày.
+## 1. Bản đồ Thư mục & Trách nhiệm
 
-## 2. Hợp đồng dữ liệu
+```text
+cicids-bruteforce-ids/
+├── configs/
+│   └── experiment.yaml                     # Cấu hình chuẩn: mốc thời gian cutoffs, allowlist features, hyperparameter grids
+│
+├── data/
+│   ├── raw/                                # Dữ liệu thô (Tuesday-WorkingHours.pcap_ISCX.csv) [Không commit Git]
+│   ├── processed/
+│   │   ├── split_v1/                       # Checkpoint dữ liệu phân tách theo thời gian (train, val, test CSV)
+│   │   └── random_split_v1/                # Checkpoint dữ liệu phân tách ngẫu nhiên
+│   └── model_ready/                        # Dữ liệu chuẩn hóa sẵn sàng huấn luyện (chia 4 thư mục):
+│       ├── time/with_port/                 # Time-based split có Destination Port (67 features) [W3-01]
+│       ├── time/without_port/              # Time-based split bỏ Destination Port (66 features)
+│       ├── random/with_port/               # Random split có Destination Port (67 features) [W3-02]
+│       └── random/without_port/            # Random split bỏ Destination Port (66 features)
+│
+├── src/ids/                                # Package mã nguồn lõi của hệ thống
+│   ├── __init__.py
+│   ├── common.py                           # Tiện ích: quản lý lỗi ProtocolError, băm SHA-256, đọc ghi JSON/YAML
+│   ├── schema.py                           # Chuẩn hóa tên cột, nhãn bài toán, danh sách đặc trưng cho phép (Allowlist)
+│   ├── data.py                             # Bộ đọc dữ liệu thô theo chunk, parse thời gian cơ bản, kiểm tra tính toàn vẹn
+│   ├── split.py                            # Thuật toán áp dụng mốc thời gian, bộ lọc Purge và Embargo
+│   ├── preprocess.py                       # Sklearn transformer pipeline: ép kiểu số, loại cột hằng, điền median từ Train
+│   ├── metrics.py                          # Tính toán Accuracy, Precision, Recall, F1, AP, ROC-AUC, Subtype Recalls
+│   ├── train.py                            # Huấn luyện baseline 3 mô hình cây, chọn threshold trên Validation
+│   ├── evaluate.py                         # Đánh giá Test đúng một lần (Single-open Test)
+│   ├── explain.py                          # Phân tích SHAP TreeExplainer cho mô hình tốt nhất
+│   ├── tune_decision_tree.py               # Script chuyên biệt: Tinh chỉnh siêu tham số Decision Tree (TV2)
+│   ├── tune_xgboost.py                     # Script chuyên biệt: Tinh chỉnh siêu tham số XGBoost (TV4)
+│   └── evaluate_tuned_model.py             # Script chuyên biệt: Đánh giá mô hình đã tune trên tập Test
+│
+├── scripts/                                # Các script tiện ích và tự động hóa
+│   ├── prepare_splits.py                   # Script phục hồi timestamp 24h và tạo các tập phân tách ban đầu
+│   ├── generate_model_ready.py             # Script chuẩn hóa và tách nhỏ thành dữ liệu data/model_ready/
+│   ├── train_tv2_all.py                    # Master script huấn luyện và xuất artifacts toàn diện cho TV2
+│   ├── generate_detailed_visualizations.py # Script sinh bộ 6 biểu đồ khoa học 300 DPI (Cây, Overfit, CM, PR/ROC, SHAP, Leakage)
+│   └── smoke_test.py                       # Kiểm thử nhanh toàn bộ pipeline trên dữ liệu giả lập
+│
+├── notebooks/                              # Sổ tay nghiên cứu & trực quan hóa tương tác
+│   ├── TV2_DecisionTree_W3-01_W3-02.ipynb  # Phân tích Cây quyết định: cấu trúc cây, quy tắc rẽ nhánh, khảo sát độ sâu quá khớp
+│   └── TV3_RandomForest_W3-03_W3-04.ipynb  # Phân tích Rừng ngẫu nhiên: thực nghiệm W3-03/W3-04, port ablation và SHAP
+│
+├── artifacts/                              # Kho lưu trữ kết quả và mô hình chính thức
+│   ├── TV2_decision_tree/                  # Artifacts chuyên biệt của TV2 (models .joblib, final_params.json, test/val CSVs, figures)
+│   ├── TV3_random_forest/                  # Artifacts chuyên biệt của TV3 (models .joblib, docx bản nháp báo cáo)
+│   └── week3_week4/                        # Benchmark hợp nhất cả 3 mô hình (RESULTS.md, test_comparison.csv, frozen.json)
+│
+├── experiments/                            # Kết quả chi tiết từ các phiên chạy thực nghiệm
+│   ├── figures/                            # 6 biểu đồ PNG chất lượng cao phục vụ chèn vào báo cáo
+│   ├── w3_01_dt_time/                      # Chi tiết tuning Decision Tree kịch bản thời gian
+│   ├── w3_02_dt_random/                    # Chi tiết tuning Decision Tree kịch bản ngẫu nhiên
+│   ├── w3_05_time_tuning/                  # Chi tiết tuning XGBoost kịch bản thời gian
+│   └── w3_06_random_tuning/                # Chi tiết tuning XGBoost kịch bản ngẫu nhiên
+│
+└── docs/                                   # Toàn bộ tài liệu học thuật và báo cáo
+    ├── BAO_CAO_THUC_NGHIEM_W3_W4.md        # Báo cáo thực nghiệm học thuật toàn diện
+    ├── DATA_AND_PROTOCOL.md                # Quy chuẩn dữ liệu và protocol thực nghiệm
+    ├── CODE_MAP.md                         # Bản đồ kiến trúc mã nguồn (tài liệu này)
+    └── quy_trinh_thu_thap_tien_xu_ly_CICIDS2017.md # Phân tích EDA timeline và quy trình xử lý dữ liệu
+```
 
-`read_flows(cfg) -> (frame, feature_names, audit_summary)`.
+---
 
-Trong `frame`, cột thống kê hợp lệ là dữ liệu số. Metadata dùng tiền tố `_`:
+## 2. Luồng Dữ liệu Toàn hệ thống (End-to-End Pipeline)
 
-| Cột | Ý nghĩa | Vào model? |
+```mermaid
+flowchart LR
+    A["Raw Tuesday CSV"] -->|scripts/prepare_splits.py| B["data/processed/split_v1/"]
+    B -->|scripts/generate_model_ready.py| C["data/model_ready/"]
+    
+    C -->|scripts/train_tv2_all.py| D1["artifacts/TV2_decision_tree/"]
+    C -->|notebooks/TV2_DecisionTree...| D1
+    C -->|notebooks/TV3_RandomForest...| D2["artifacts/TV3_random_forest/"]
+    C -->|src/ids/tune_xgboost.py| D3["experiments/w3_05 & w3_06/"]
+    
+    D1 -->|scripts/generate_detailed_visualizations.py| E["experiments/figures/ (6 biểu đồ)"]
+    D1 & D2 & D3 --> F["artifacts/week3_week4/ (Benchmark chung)"]
+```
+
+---
+
+## 3. Mô tả Các Tệp Đầu vào & Đầu ra Quan trọng
+
+| Tệp / Thư mục | Mục đích sử dụng | Nguồn gốc / Công cụ sinh |
 |---|---|---|
-| `_row_id` | Mã băm nguồn rút gọn + số thứ tự dòng khi đọc | Không |
-| `_start` | Timestamp đã parse | Không |
-| `_end` | Cận trên thời điểm hoàn tất: start + duration + độ chính xác timestamp | Không |
-| `_label` | Nhãn gốc đã uppercase | Không |
-| `_target` | 0 = BENIGN, 1 = FTP/SSH | Chỉ y |
-| `_record_hash` | Fingerprint bản ghi, không chứa nhãn | Không |
-| `_feature_hash` | Fingerprint vector feature trước fit | Không |
-| `_seen_feature_in_earlier_split` | Vector này từng có ở tập thời gian sớm hơn | Không |
+| `data/model_ready/time/with_port/` | Bộ dữ liệu chuẩn cho kịch bản thời gian W3-01. Gồm `X_train.csv`, `X_validation.csv`, `X_test.csv` và các nhãn nhị phân / subtype tương ứng. | Sinh bởi `scripts/generate_model_ready.py` |
+| `artifacts/TV2_decision_tree/dt_final_params.json` | Tóm tắt cấu hình tối ưu và chỉ số đánh giá của TV2 cho cả W3-01 và W3-02. | Sinh bởi `scripts/train_tv2_all.py` |
+| `artifacts/week3_week4/test_comparison.csv` | Bảng tổng hợp đối chuẩn 3 mô hình (DT, RF, XGB) trên 2 split (time, random) và 2 không gian đặc trưng (with_port, without_port). | Sinh từ benchmark hợp nhất W3–W4 |
+| `experiments/figures/*.png` | 6 biểu đồ khoa học có độ phân giải 300 DPI phục vụ bài báo cáo và slide thuyết trình. | Sinh bởi `scripts/generate_detailed_visualizations.py` |
 
-Train gọi `pipeline.fit(train[feature_names], train['_target'])`. Model không nhận cả DataFrame metadata. `NumericGuard` kiểm tra allowlist thêm một lần để tránh vô tình truyền cột nhãn.
+---
 
-## 3. Vì sao lưu CSV gzip?
+## 4. Hợp đồng Ranh giới Dữ liệu (Data Boundary Contract)
 
-Dữ liệu một ngày vừa đủ cho định dạng này; không cần thêm Arrow chỉ để chạy đồ án. Split lưu `.csv.gz`, đọc timestamp rõ ràng, giữ fingerprint `uint64` và dùng `float_precision="round_trip"`. Mỗi file được băm byte thực tế và kiểm tra trước khi dùng. Không khẳng định bitwise output giống nhau trên mọi phiên bản/thư viện hay hệ điều hành; cùng seed không thay thế việc pin môi trường.
-
-`chunksize` giảm chi phí đọc dữ liệu thô nhưng sau lọc các dòng vẫn được ghép vào RAM để sort và train; repo **không** là pipeline streaming/out-of-core. Không `df.sample()` trên toàn bộ Tuesday trước split. Nếu thiếu RAM, giảm số cột theo protocol trước khi khóa hoặc dùng máy đủ RAM, không giảm bớt Test để có điểm thuận lợi.
-
-## 4. Luồng thực thi
-
-| Lệnh | Đọc | Ghi | Có fit? | Có đọc Test để dự đoán? |
-|---|---|---|---|---|
-| `audit` | CSV toàn ngày | Audit, timeline | Không | Không; có xem nhãn/thời gian để thiết kế split |
-| `prepare` | CSV toàn ngày | Ba split và manifest | Không | Không; tạo Test và kiểm tra support |
-| `train` | Train, Validation, manifest | Model, Val tables, frozen | Chỉ Train | Không |
-| `evaluate` | Model đã khóa và Test | Final metrics, predictions, marker | Không | Một phiên đã khai báo |
-| `report` | Predictions/metrics đã lưu | Markdown và PNG | Không | Không đọc lại partition Test |
-| `explain` | Validation và model thắng | CSV SHAP, PNG, metadata | Không fit classifier | Không |
-| `predict` | JSON một flow và artifacts đã khóa | JSON stdout | Không | Không |
-
-Một số lệnh đọc metadata chung để kiểm tra hash và nguồn. “Không đọc Test” ở train nghĩa là không đọc file partition Test hoặc score Test; không có nghĩa manifest phải che luôn số mẫu đã audit.
-
-## 5. Các quyết định cố ý đơn giản hóa
-
-- Ba preset, không tuning rộng, không XGBoost early stopping để tránh thêm đường truyền eval_set qua preprocessing.
-- Không scaling cho các model cây; không SMOTE.
-- Loại feature hằng/toàn thiếu thay vì thêm hàng loạt missing indicators; median được fit đúng Train.
-- Threshold grid nhỏ trên Validation; không thêm calibration trong 3 ngày.
-- Không refit model sau khi ngưỡng đã chọn; model file bao gồm preprocessing.
-- SHAP dựa trên Validation, không chọn ví dụ Test đẹp; một biểu đồ global và một waterfall của mẫu đầu trong sample cố định.
-- Random split và port ablation không có công tắc “tự chạy khi lỗi” để tránh thay đổi ý nghĩa thí nghiệm âm thầm.
-- Mọi output giả đều được đánh dấu `synthetic`; thí nghiệm thật yêu cầu đủ ba model.
-
-## 6. Phối hợp Git tối thiểu
-
-Một branch cho thay đổi dữ liệu/protocol; một branch cho thay đổi model/report khi thật sự cần. Trước `prepare` chính thức: review, gộp code, chốt config, ghi commit. Sau đó dùng cùng commit và cùng manifest. Không để mỗi người tự chuẩn hóa, chia tập và train bằng một notebook riêng.
-
-Tệp raw, model lớn và dữ liệu đã chia đã nằm trong `.gitignore`. Cả nhóm có thể chia sẻ chúng qua thư mục chung do nhóm quản lý; luôn đối chiếu SHA-256 trong manifest. Giữ mã, config, tài liệu và kết quả báo cáo đã chọn trong Git bằng cách chủ động đưa các tệp kết quả cần nộp vào thư mục riêng, không commit toàn bộ dataset.
-
-`code_sha256` khóa các module `src/ids/*.py`. Nếu sửa mã sau prepare, repo dừng. Trước Test có thể tạo phiên bản run mới có ghi lý do; sau Test không sửa phương pháp dựa trên điểm rồi nhận đó là kiểm định độc lập. Hash và marker không phải hệ thống kiểm soát truy cập chống người cố ý sửa artifact.
-
+1. **Huấn luyện (Train Phase)**:
+   - Mô hình chỉ nhận các cột đặc trưng trong Allowlist (`features`).
+   - Mọi transformer tiền xử lý (loại cột hằng số, tính toán median để điền khuyết thiếu, tính toán trọng số lớp `class_weight`) **chỉ được `fit` trên tập Train**.
+2. **Kiểm định (Validation Phase)**:
+   - Dữ liệu Validation chỉ đi qua `transform()` và `predict_proba()` để tìm siêu tham số tối ưu và ngưỡng quyết định (threshold).
+   - Tuyệt đối không tính toán lại phương sai hay trọng số từ tập Validation.
+3. **Đánh giá (Test Phase)**:
+   - Mở duy nhất một lần sau khi mọi quyết định mô hình và siêu tham số đã được cố định hoàn toàn.
+   - Không thực hiện bất kỳ thao tác refit hoặc điều chỉnh ngưỡng nào sau khi có kết quả Test.

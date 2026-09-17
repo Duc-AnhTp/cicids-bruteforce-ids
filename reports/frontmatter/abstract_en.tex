@@ -1,0 +1,20 @@
+% ==============================================================================
+% reports/frontmatter/abstract_en.tex
+% Abstract (English)
+% ==============================================================================
+
+\begin{otherlanguage}{english}
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+
+In recent years, the application of Machine Learning (ML) to Network Intrusion Detection Systems (NIDS) has garnered widespread interest. However, most existing academic studies employing random data partitioning report near-perfect F1-scores ($> 99\%$), introducing substantial optimistic evaluation bias and concealing the risk of catastrophic failure in real-world deployments.
+
+This study conducts a rigorous, transparent empirical evaluation of brute force attack detection (\FTP\ and \SSH) using the benchmark CICIDS2017 Tuesday dataset. By implementing a strict time-based split combined with conservative boundary purge ($q=60\text{s}$) and embargo ($g=120\text{s}$) mechanisms, we formulate a realistic \textbf{Zero-Shot Subtype Transfer} benchmark: models are trained strictly on morning \FTP\ attacks and subsequently evaluated on afternoon \SSH\ attacks, which are completely unobserved during training.
+
+Empirical evaluation across three prominent tree-based algorithms (Decision Tree, Random Forest, and XGBoost) demonstrates a severe performance collapse: the top-performing model (Random Forest) achieves an F1-score of only \RFTestFOne\ on the canonical temporal test set, capturing merely 7 out of 3,732 SSH flows (\RFTestSSHRecall). Interpretability analyses via SHAP TreeExplainer and decision tree topology reveal that models heavily overfit to service ports (\texttt{Destination Port} exhibits the highest mean $|$SHAP$|$ attribution, 3.6 times higher than the second feature). When service ports are eliminated via port ablation, packet length and inter-arrival time statistics remain insufficient for cross-protocol generalization due to fundamental differences between FTP and SSH traffic signatures.
+
+Conversely, under conventional random splitting controls, models attain artificially inflated F1-scores of $0.9823 - 0.9997$ caused by campaign-level autocorrelation and identical traffic footprints spanning both training and test partitions. Furthermore, we investigate an instructive MLOps case study wherein default scikit-learn \texttt{refit=True} behavior re-trains models on concatenated Train and Validation sets, exposing the classifier to 1,886 validation SSH flows and causing the test F1-score to surge from 0.0 to 0.9912. This research underscores essential methodological principles for temporal leakage prevention, data boundary governance, and authentic NIDS evaluation.
+
+\vspace{0.8cm}
+\noindent\textbf{Keywords:} Network Intrusion Detection Systems (NIDS), CICIDS2017, Brute Force Attacks, Temporal Split, Data Leakage, Zero-Shot Transfer, Explainable AI (SHAP).
+\end{otherlanguage}

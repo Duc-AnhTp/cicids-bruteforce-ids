@@ -1,0 +1,40 @@
+% ==============================================================================
+% reports/frontmatter/titlepage.tex
+% Trang bìa chuẩn đồ án tốt nghiệp / đề tài nghiên cứu HUCE
+% ==============================================================================
+
+\begin{titlepage}
+\begin{center}
+    % Tên trường và khoa
+    {\bfseries\Large \ReportUniversity}\\[0.3cm]
+    {\bfseries\large \ReportFaculty}\\[0.2cm]
+    {\bfseries\normalsize \ReportDepartment}\\[0.8cm]
+
+    % Logo trường
+    \includegraphics[width=3.2cm]{LogoHUCE.jpg}\\[1.0cm]
+
+    % Cấp đề tài / loại đồ án
+    {\bfseries\large \MakeUppercase{\ReportSubject}}\\[0.2cm]
+    {\itshape\normalsize \ReportMajor}\\[1.5cm]
+
+    % Tên đề tài
+    {\bfseries\LARGE \ReportTitle}\\[0.5cm]
+    {\bfseries\large (\ReportTitleEn)}\\[2.0cm]
+
+    % Thông tin sinh viên và người hướng dẫn
+    \begin{minipage}{0.85\textwidth}
+        \begin{flushleft}
+            \large
+            \textbf{Sinh viên thực hiện:} \ReportAuthor\\[0.2cm]
+            \textbf{Mã số sinh viên:} \ReportStudentID\\[0.2cm]
+            \textbf{Lớp:} \ReportClass\\[0.5cm]
+            \textbf{\ReportSupervisorTitle} \ReportSupervisor
+        \end{flushleft}
+    \end{minipage}
+
+    \vfill
+
+    % Địa điểm và năm hoàn thành
+    {\bfseries\large \ReportLocation, \ReportYear}
+\end{center}
+\end{titlepage}

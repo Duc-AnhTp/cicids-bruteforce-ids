@@ -1,0 +1,18 @@
+% ==============================================================================
+% reports/frontmatter/abstract_vi.tex
+% Tóm tắt báo cáo (Tiếng Việt)
+% ==============================================================================
+
+\chapter*{Tóm Tắt Báo Cáo}
+\addcontentsline{toc}{chapter}{Tóm Tắt Báo Cáo}
+
+Trong những năm gần đây, ứng dụng học máy (Machine Learning - ML) trong các hệ thống phát hiện xâm nhập mạng (Network Intrusion Detection Systems - NIDS) là một trong những hướng tiếp cận nhận được sự quan tâm lớn. Tuy nhiên, phần lớn các công bố học thuật sử dụng chiến lược phân chia dữ liệu ngẫu nhiên (Random Split) thường báo cáo điểm số F1-Score vượt trội ($> 99\%$), tạo ra một bức tranh hiệu năng quá mức lạc quan (Optimistic Evaluation Bias) và tiềm ẩn nguy cơ thất bại nghiêm trọng khi triển khai trong môi trường mạng thực tế.
+
+Nghiên cứu này tiến hành một cuộc đánh giá thực nghiệm toàn diện và nghiêm ngặt đối với bài toán phát hiện tấn công dò quét mật khẩu (Brute Force: \FTP\ và \SSH) trên tập dữ liệu chuẩn CICIDS2017 (phần dữ liệu ngày thứ Ba - Tuesday Working Hours). Bằng việc áp dụng chiến lược phân tách theo thời gian (Time-based Split) kết hợp với kỹ thuật làm sạch ranh giới bảo thủ (Purge $q=60$s và Embargo $g=120$s), bài toán được thiết lập thành một kịch bản \textbf{Zero-Shot Subtype Transfer} thực tế: Mô hình chỉ được học trên tấn công \FTP\ diễn ra vào buổi sáng và phải nhận diện dạng tấn công \SSH\ hoàn toàn mới xuất hiện vào buổi chiều.
+
+Kết quả thực nghiệm trên 3 mô hình học máy dạng cây (Decision Tree, Random Forest, XGBoost) đã chỉ ra một sự sụp đổ hiệu năng nghiêm trọng: Điểm F1-Score trên tập Test theo thời gian chỉ đạt tối đa \RFTestFOne\ đối với mô hình chiến thắng (Random Forest) với tỷ lệ bắt giữ tấn công SSH chỉ đạt \RFTestSSHRecall\ (chỉ nhận diện được 7 trên tổng số 3,732 flow SSH). Phân tích khả năng giải thích bằng SHAP TreeExplainer và cấu trúc cây quyết định chứng minh rằng các mô hình đã phụ thuộc tuyệt đối vào cổng dịch vụ (\texttt{Destination Port} chiếm giá trị SHAP cao nhất, gấp 3.6 lần đặc trưng thứ hai). Khi loại bỏ thông tin cổng (Port Ablation), các đặc trưng thống kê kích thước gói tin và thời gian vẫn không đủ để mô hình tổng quát hóa do sự khác biệt cơ bản về cấu trúc giao thức giữa FTP và SSH.
+
+Ngược lại, trên tập đối chứng phân tách ngẫu nhiên, các mô hình dễ dàng đạt $\FOne \approx 0.9823 - 0.9997$ do hiện tượng rò rỉ phân phối và lặp lại chiến dịch tấn công. Đồ án cũng làm rõ một case study điển hình trong MLOps: việc công cụ tự động kích hoạt cơ chế huấn luyện lại (\texttt{refit=True}) trên tập gộp Train + Validation đã vô tình làm rò rỉ 1,886 mẫu SSH từ Validation vào mô hình, đẩy F1 từ 0.0 lên 0.9912. Nghiên cứu đúc kết những bài học thực tiễn then chốt trong việc quản trị ranh giới dữ liệu và đề xuất quy trình đánh giá chuẩn mực cho các hệ thống NIDS dựa trên học máy.
+
+\vspace{0.8cm}
+\noindent\textbf{Từ khóa:} Hệ thống phát hiện xâm nhập mạng (NIDS), CICIDS2017, Tấn công Brute Force, Phân tách theo thời gian (Time-based Split), Data Leakage, Zero-Shot Transfer, Khả năng giải thích mô hình (SHAP).

@@ -78,15 +78,18 @@ def load_split_data(split_dir: Path):
     return X_train, y_train, X_val, y_val, feature_cols
 
 
-def tune_xgboost(split_dir: Path, output_dir: Path, n_iter: int = 50, random_state: int = 42):
+def tune_xgboost(split_dir: Path, output_dir: Path, n_iter: int = 50, random_state: int = 42, strict_train_only: bool = False):
     """
     Tune XGBoost hyperparameters using RandomizedSearchCV.
-    
+
     Args:
         split_dir: Path to data split (e.g., data/processed/split_v1)
         output_dir: Where to save tuning results
         n_iter: Number of parameter settings sampled
         random_state: Random seed
+        strict_train_only: If True, best parameters are refit strictly on X_train only
+                           (Canonical Zero-Shot). If False, refit occurs on X_combined
+                           (Train + Validation, Subtype-Aware / Refit Regime).
     """
     output_dir.mkdir(parents=True, exist_ok=True)
     
@@ -140,42 +143,63 @@ def tune_xgboost(split_dir: Path, output_dir: Path, n_iter: int = 50, random_sta
     val_indices = np.arange(len(X_train), len(X_train) + len(X_val))
     cv_split = [(train_indices, val_indices)]
     
+    # NOTE ON PROTOCOL / BEHAVIOR:
+    # If strict_train_only is False:
+    #   RandomizedSearchCV defaults to refit=True.
+    #   After selecting the best hyperparameters using cv_split (train_indices vs val_indices),
+    #   search.best_estimator_ is automatically refit on the entire X_combined (Train + Validation).
+    #   In a time-based split where Train only has FTP-Patator and Validation contains SSH-Patator,
+    #   this refit step gives the model exposure to SSH-Patator samples before testing (Seen-Subtype regime).
+    # If strict_train_only is True:
+    #   RandomizedSearchCV runs with refit=False.
+    #   The best estimator is then explicitly fitted strictly on X_train only (Canonical Zero-Shot regime).
     search = RandomizedSearchCV(
         estimator=base_model,
         param_distributions=param_distributions,
         n_iter=n_iter,
         scoring=f1_scorer,
         cv=cv_split,
+        refit=not strict_train_only,
         verbose=2,
         random_state=random_state,
         n_jobs=1,  # XGBoost already uses n_jobs=-1
         return_train_score=True
     )
-    
+
     # Combine train + val for CV split
     X_combined = pd.concat([X_train, X_val], axis=0).reset_index(drop=True)
     y_combined = pd.concat([y_train, y_val], axis=0).reset_index(drop=True)
-    
+
     # Fit
     search.fit(X_combined, y_combined)
-    
+
     print(f"\n[{datetime.now().strftime('%H:%M:%S')}] Tuning complete!")
     print(f"  Best F1 on Validation: {search.best_score_:.4f}")
     print(f"  Best params:")
     for param, value in search.best_params_.items():
         print(f"    {param}: {value}")
-    
+
+    if strict_train_only:
+        print(f"\n[{datetime.now().strftime('%H:%M:%S')}] [Strict Train-Only Mode] Fitting best estimator strictly on X_train only...")
+        from sklearn.base import clone
+        best_model = clone(base_model).set_params(**search.best_params_)
+        best_model.fit(X_train, y_train)
+    else:
+        print(f"\n[{datetime.now().strftime('%H:%M:%S')}] [Subtype-Aware / Refit Mode] Best estimator refit on X_combined (Train + Val).")
+        best_model = search.best_estimator_
+
     # Save best model
     best_model_path = output_dir / "best_xgboost_model.pkl"
-    joblib.dump(search.best_estimator_, best_model_path)
-    print(f"\n  Saved best model to {best_model_path}")
-    
+    joblib.dump(best_model, best_model_path)
+    print(f"  Saved best model to {best_model_path}")
+
     # Save tuning results
     results = {
         'timestamp': datetime.now().isoformat(),
         'split_dir': str(split_dir),
         'n_iter': n_iter,
         'random_state': random_state,
+        'refit_regime': 'strict_train_only' if strict_train_only else 'train_val_combined',
         'scale_pos_weight': float(scale_pos_weight),
         'train_size': len(y_train),
         'train_attack': int(n_attack),
@@ -210,27 +234,33 @@ def tune_xgboost(split_dir: Path, output_dir: Path, n_iter: int = 50, random_sta
     print(f"  Saved top 10 configs to {top_10_path}")
     
     print(f"\n[{datetime.now().strftime('%H:%M:%S')}] Done!")
-    
-    return search.best_estimator_, results
+
+    return best_model, results
 
 
 if __name__ == "__main__":
     import argparse
-    
+
     parser = argparse.ArgumentParser(description="Tune XGBoost hyperparameters using RandomizedSearchCV")
     parser.add_argument("--split", required=True, help="Split directory (e.g., data/processed/split_v1)")
     parser.add_argument("--output", required=True, help="Output directory for tuning results")
     parser.add_argument("--n-iter", type=int, default=50, help="Number of parameter settings to sample (default: 50)")
     parser.add_argument("--seed", type=int, default=42, help="Random seed (default: 42)")
-    
+    parser.add_argument(
+        "--strict-train-only",
+        action="store_true",
+        default=False,
+        help="If set, best estimator is refit strictly on Train only (Canonical Zero-Shot). Default: refit on Train+Val (Subtype-Aware)."
+    )
+
     args = parser.parse_args()
-    
+
     split_dir = Path(args.split)
     output_dir = Path(args.output)
-    
+
     if not split_dir.exists():
         raise ValueError(f"Split directory does not exist: {split_dir}")
-    
+
     print("=" * 80)
     print("XGBoost Hyperparameter Tuning")
     print("=" * 80)
@@ -238,6 +268,7 @@ if __name__ == "__main__":
     print(f"Output directory: {output_dir}")
     print(f"n_iter: {args.n_iter}")
     print(f"Random seed: {args.seed}")
+    print(f"Strict Train-Only: {args.strict_train_only}")
     print("=" * 80)
-    
-    tune_xgboost(split_dir, output_dir, n_iter=args.n_iter, random_state=args.seed)
+
+    tune_xgboost(split_dir, output_dir, n_iter=args.n_iter, random_state=args.seed, strict_train_only=args.strict_train_only)

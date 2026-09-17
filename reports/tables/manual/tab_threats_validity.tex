@@ -1,0 +1,22 @@
+% ==============================================================================
+% reports/tables/manual/tab_threats_validity.tex
+% ==============================================================================
+\begin{table}[htbp]
+\centering
+\small
+\caption{Tổng hợp các mối đe dọa đến tính hợp lệ của nghiên cứu và giải pháp kiểm soát.}
+\label{tab:threats_validity}
+\begin{tabular}{lp{5.5cm}p{6.5cm}}
+\toprule
+\textbf{Khía cạnh hợp lệ} & \textbf{Nguy cơ tiềm ẩn} & \textbf{Biện pháp kiểm soát trong nghiên cứu} \\
+\midrule
+\textbf{Internal Validity} & Sai lệch do phục hồi thời gian hoặc rò rỉ thông tin ranh giới. & Áp dụng Purge ($q=60$s) và Embargo ($g=120$s); loại bỏ 7,632 dòng ranh giới; kiểm tra toàn vẹn băm SHA-256. \\
+\midrule
+\textbf{Construct Validity} & Nhầm lẫn giữa phân loại flow đã đóng và NIDS thời gian thực. & Tuyên bố minh bạch phạm vi Post-Flow Classification; không đo lường độ trễ phát hiện gói tin; không tuyên bố triển khai online. \\
+\midrule
+\textbf{External Validity} & Dữ liệu mô phỏng trong môi trường phòng thí nghiệm (CICIDS2017). & Phân tích cơ chế suy giảm tổng quát hóa; nhấn mạnh yêu cầu đánh giá trên traffic đa dạng và hạ tầng thực tế. \\
+\midrule
+\textbf{Statistical Validity} & Tỷ lệ tấn công thấp ($\sim 2-5\%$) gây nhiễu chỉ số Accuracy. & Sử dụng F1-Score, Precision-Recall Curve, AP và FPR làm hệ quy chiếu cốt lõi; loại bỏ sự phụ thuộc vào Accuracy Paradox. \\
+\bottomrule
+\end{tabular}
+\end{table}

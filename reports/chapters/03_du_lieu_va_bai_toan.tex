@@ -1,0 +1,99 @@
+% ==============================================================================
+% reports/chapters/03_du_lieu_va_bai_toan.tex
+% CHƯƠNG 3: TẬP DỮ LIỆU VÀ ĐỊNH NGHĨA BÀI TOÁN
+% ==============================================================================
+
+\chapter{Tập Dữ Liệu và Định Nghĩa Bài Toán}
+\label{chap:du_lieu}
+
+\section{Tổng Quan Tập Dữ Liệu CICIDS2017 Tuesday}
+
+Tập dữ liệu CICIDS2017 \cite{sharafaldin2018generating} được xây dựng bởi Viện An ninh mạng Canada (Canadian Institute for Cybersecurity - CIC), Đại học New Brunswick (UNB). Đây là một trong những bộ dữ liệu chuẩn mực và được sử dụng rộng rãi nhất để nghiên cứu và đánh giá các hệ thống phát hiện xâm nhập mạng thế hệ mới.
+
+Tập dữ liệu ghi lại toàn bộ lưu lượng mạng trong 5 ngày làm việc liên tiếp (từ thứ Hai ngày 03/07/2017 đến thứ Sáu ngày 07/07/2017) trên một hạ tầng mạng mô phỏng gồm mạng nạn nhân (Victim Network) và mạng tấn công bên ngoài (Attacker Network). Trong đó, ngày thứ Ba (Tuesday, 04/07/2017) được dành riêng để thực hiện các kịch bản tấn công vét cạn mật khẩu (Brute Force):
+\begin{itemize}
+    \item \textbf{Tấn công buổi sáng}: \FTP\ thực hiện dò quét mật khẩu dịch vụ FTP (Cổng 21) từ 09:20 đến 10:20.
+    \item \textbf{Tấn công buổi chiều}: \SSH\ thực hiện dò quét mật khẩu dịch vụ SSH (Cổng 22) từ 14:00 đến 15:00.
+\end{itemize}
+
+\section{Nguồn Gốc Dữ Liệu và Xác Minh Tính Toàn Vẹn SHA-256}
+
+Dữ liệu thô được sử dụng trong nghiên cứu này là tệp CSV trích xuất chính thức từ gói \texttt{GeneratedLabelledFlows.zip} của UNB:
+\begin{itemize}
+    \item \textbf{Đường dẫn}: \texttt{data/raw/Tuesday-WorkingHours.pcap\_ISCX.csv}
+    \item \textbf{Mã băm SHA-256 đã xác minh}:
+    \begin{center}
+        \texttt{\DataShaFull}
+    \end{center}
+    \item \textbf{Tổng số dòng thô ban đầu}: \DataRawRows\ dòng (bao gồm 1 dòng tiêu đề và 445,908 bản ghi flow).
+\end{itemize}
+
+Việc lưu trữ và kiểm tra mã băm SHA-256 đảm bảo tính toàn vẹn tuyệt đối của dữ liệu đầu vào, cho phép bất kỳ nhà nghiên cứu nào trên thế giới cũng có thể kiểm chứng độc lập trên cùng một tệp dữ liệu nguồn.
+
+\section{Phục Hồi Dòng Thời Gian 24 Giờ (Timestamp Reconstruction Policy)}
+
+Trong quá trình Khám phá Dữ liệu (Exploratory Data Analysis - EDA), chúng tôi phát hiện một lỗi định dạng nghiêm trọng trong tệp CSV gốc do công cụ CICFlowMeter xuất ra:
+\begin{itemize}
+    \item Định dạng chuỗi thời gian thô được lưu dưới dạng \texttt{dd/MM/yyyy h:mm} hoặc \texttt{dd/MM/yyyy hh:mm}.
+    \item Các giá trị giờ thô quan sát được trong dữ liệu chỉ gồm hai nhóm:
+    \begin{equation}
+        \mathcal{H}_{\text{raw}} = \{ 1, 2, 3, 4, 5, 8, 9, 10, 11, 12 \}
+    \end{equation}
+    \item Các bản ghi diễn ra vào buổi chiều (từ 13:00 đến 17:00) đã bị công cụ xuất nhầm theo định dạng đồng hồ 12 giờ thành 1:00 đến 5:00 mà không hề có hậu tố chỉ định \texttt{PM}.
+\end{itemize}
+
+Nếu phân tích trực tiếp chuỗi thời gian này mà không phục hồi, các flow buổi chiều sẽ bị sắp xếp nhầm thành buổi đêm/sáng sớm (1h - 5h sáng), làm đảo lộn hoàn toàn thứ tự thời gian của các chiến dịch tấn công.
+
+\subsection{Quy tắc phục hồi 24 giờ chuẩn mực}
+Quy tắc phục hồi được hiện thực hóa trong hàm \texttt{reconstruct\_timestamp()} tại \texttt{scripts/prepare\_splits.py}:
+\begin{equation}
+    H_{\text{24h}} = \begin{cases}
+        H_{\text{raw}} + 12 & \text{nếu } H_{\text{raw}} \in \{1, 2, 3, 4, 5\} \\
+        H_{\text{raw}} & \text{nếu } H_{\text{raw}} \in \{8, 9, 10, 11, 12\}
+    \end{cases}
+\end{equation}
+
+\noindent\textbf{Nguyên tắc kiểm soát rò rỉ dữ liệu (No-Leakage Policy):} Quy tắc phục hồi này được thiết lập độc lập hoàn toàn với nhãn tấn công (\texttt{Label}) và cổng đích (\texttt{Destination Port}), chỉ dựa trên phân tích dòng thời gian của toàn bộ traffic trong ngày Tuesday (thời gian làm việc từ 8:30 sáng đến 17:00 chiều).
+
+\section{Định Nghĩa Bài Toán và Không Gian Nhãn}
+
+Đồ án định nghĩa bài toán phân loại là \textbf{Phân loại nhị phân (Binary Classification)} nhằm nhận diện lưu lượng bất thường:
+\begin{equation}
+    y = \begin{cases}
+        0 & \text{nếu flow là lưu lượng bình thường (\BENIGN)} \\
+        1 & \text{nếu flow là lưu lượng tấn công Brute Force (\FTP\ hoặc \SSH)}
+    \end{cases}
+\end{equation}
+
+Chi tiết ánh xạ nhãn được trình bày trong Bảng \ref{tab:label_mapping}.
+
+\input{tables/manual/tab_label_mapping.tex}
+
+Mặc dù bài toán phân loại chính là nhị phân, thông tin chi tiết về dạng tấn công (\texttt{Subtype}) vẫn được bảo toàn nguyên vẹn trong một cột siêu dữ liệu riêng biệt để phục vụ việc đánh giá khả năng phát hiện chi tiết từng dạng tấn công (Subtype Recall).
+
+\section{Quy Trình Làm Sạch Dữ Liệu Thô}
+
+Tệp dữ liệu thô trải qua các bước làm sạch kỹ thuật nghiêm ngặt:
+\begin{enumerate}
+    \item \textbf{Loại bỏ flow có thời lượng không hợp lệ}: Loại bỏ \DataInvalidDurationRows\ bản ghi có $\text{Flow Duration} \le 0$ hoặc bị thiếu (NaN).
+    \item \textbf{Loại bỏ bản ghi trùng lặp tuyệt đối}: Loại bỏ \DataDuplicatesRows\ dòng bản ghi trùng lặp hoàn toàn trên tất cả các cột dữ liệu.
+    \item \textbf{Loại bỏ cột đặc trưng trùng lặp}: Cột \texttt{Fwd Header Length.1} có giá trị trùng lặp 100\% với cột \texttt{Fwd Header Length} được loại bỏ vĩnh viễn khỏi không gian đặc trưng.
+    \item \textbf{Xử lý giá trị vô cùng}: Có \DataInfinityValues\ giá trị vô cùng ($\pm\infty$, chủ yếu phát sinh do phép chia cho thời lượng bằng 0 trong các cột \texttt{Flow Bytes/s} và \texttt{Flow Packets/s}) được chuyển đổi thành giá trị \texttt{NaN} để xử lý qua bộ điền giá trị thiếu (Imputer).
+\end{enumerate}
+
+Sau khi làm sạch kỹ thuật, tổng số bản ghi hợp lệ đưa vào quy trình phân tách là \textbf{\DataCleanRows\ dòng}.
+
+\section{Dòng Thời Gian Tấn Công Thực Tế và Phân Bổ Mẫu}
+
+Bảng \ref{tab:dataset_splits} tổng hợp chi tiết số lượng mẫu và phân bổ nhãn qua các tập sau khi áp dụng chiến lược phân tách theo thời gian (sẽ được trình bày chi tiết ở Chương 4).
+
+\input{tables/generated/tab_dataset_splits.tex}
+
+Phân tích dòng thời gian chỉ ra một đặc tính tự nhiên vô cùng thú vị của dữ liệu CICIDS2017 Tuesday:
+\begin{itemize}
+    \item \textbf{Tập Train} ($e < 10:00$): Chứa \DataTrainBenign\ mẫu bình thường và \DataTrainFTP\ mẫu \FTP. Hoàn toàn \textbf{không có \SSH\ (0 mẫu)}.
+    \item \textbf{Tập Validation} ($10:02 \le s$ và $e < 14:30$): Chứa đoạn kết của chiến dịch FTP (\DataValidationFTP\ mẫu) và giai đoạn đầu của chiến dịch SSH (\DataValidationSSH\ mẫu).
+    \item \textbf{Tập Test} ($s \ge 14:32$): Chứa \DataTestBenign\ mẫu bình thường và \DataTestSSH\ mẫu \SSH. Hoàn toàn \textbf{không có \FTP\ (0 mẫu)}.
+\end{itemize}
+
+Đặc tính phân bố này biến việc đánh giá trên tập Test theo thời gian thành một bài toán \textbf{Zero-Shot Subtype Transfer} khắt khe và thực tế: mô hình được học duy nhất trên FTP vào buổi sáng, liệu có phát hiện được SSH vào buổi chiều hay không?

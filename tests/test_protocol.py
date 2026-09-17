@@ -58,6 +58,16 @@ class ProtocolTests(unittest.TestCase):
         with self.assertRaises(ProtocolError):
             parse_timestamps(pd.Series(["not a timestamp"]), ["%d/%m/%Y %H:%M"])
 
+    def test_reconstruct_12h_afternoon(self):
+        parsed = parse_timestamps(
+            pd.Series(["04/07/2017 01:30", "04/07/2017 09:15", "04/07/2017 14:00"]),
+            ["%d/%m/%Y %H:%M"],
+            reconstruct_12h=True
+        )
+        self.assertEqual(parsed[0], pd.Timestamp("2017-07-04 13:30"))
+        self.assertEqual(parsed[1], pd.Timestamp("2017-07-04 09:15"))
+        self.assertEqual(parsed[2], pd.Timestamp("2017-07-04 14:00"))
+
     def test_training_only_median_and_constant_selection(self):
         train = pd.DataFrame({"flow_duration": [1.0, 3.0, np.nan], "total_fwd_packets": [4, 4, 4]})
         val = pd.DataFrame({"flow_duration": [10000.0, np.nan], "total_fwd_packets": [1, 999]})

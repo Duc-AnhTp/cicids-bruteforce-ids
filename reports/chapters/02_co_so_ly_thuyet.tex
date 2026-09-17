@@ -1,0 +1,148 @@
+% ==============================================================================
+% reports/chapters/02_co_so_ly_thuyet.tex
+% CHƯƠNG 2: CƠ SỞ LÝ THUYẾT
+% ==============================================================================
+
+\chapter{Cơ Sở Lý Thuyết}
+\label{chap:co_so_ly_thuyet}
+
+\section{Bản Chất Lưu Lượng Mạng và Cơ Chế Flow-Based Inspection}
+
+\subsection{Khái niệm Luồng Mạng (IP Network Flow)}
+Trong kiến trúc mạng TCP/IP, một luồng mạng (Network Flow) được định nghĩa theo chuẩn RFC 7011 (IPFIX) là một chuỗi các gói tin (packets) truyền qua một điểm quan sát trên mạng trong một khoảng thời gian nhất định và chia sẻ chung một bộ thuộc tính nhận dạng đặc trưng, thường được gọi là \textbf{5-Tuple}:
+\begin{equation}
+    \text{Flow 5-Tuple} = \langle \text{Source IP}, \text{Destination IP}, \text{Source Port}, \text{Destination Port}, \text{Protocol} \rangle
+\end{equation}
+
+\subsection{Cơ chế sinh đặc trưng của CICFlowMeter}
+Công cụ CICFlowMeter \cite{sharafaldin2018generating} thực hiện tổng hợp các gói tin thuộc cùng một 5-Tuple theo cả hai hướng truyền thông (Forward - từ client đến server, và Backward - từ server về client) để tạo thành một \textbf{Bi-directional Flow}. Một flow được coi là kết thúc khi xảy ra một trong các điều kiện sau:
+\begin{enumerate}
+    \item Xuất hiện cờ điều khiển đóng kết nối TCP (\texttt{FIN} hoặc \texttt{RST}).
+    \item Khoảng thời gian không có gói tin nào mới vượt quá ngưỡng thời gian chờ không hoạt động (Inactivity Timeout, mặc định thường là 15 đến 60 giây).
+    \item Tổng thời lượng của flow vượt quá thời gian tối đa cho phép (Flow Timeout).
+\end{enumerate}
+
+Sau khi flow đóng, CICFlowMeter tính toán hơn 80 chỉ số thống kê tổng hợp mô tả toàn bộ vòng đời của flow, bao gồm thời lượng phiên truyền, thống kê kích thước gói tin (min, max, mean, std), khoảng thời gian trễ giữa các gói tin (Flow IAT, Fwd IAT, Bwd IAT), số lượng các cờ TCP (SYN, ACK, PSH, URG, FIN) và kích thước cửa sổ nhận ban đầu (\texttt{Init\_Win\_bytes}).
+
+\subsection{Phân biệt Flow đã hoàn tất và NIDS thời gian thực}
+Một điểm cốt lõi cần khẳng định về mặt lý thuyết: vì toàn bộ các đặc trưng thống kê nói trên chỉ được tính toán đầy đủ \textbf{sau khi flow đã kết thúc hoàn toàn}, các mô hình học máy được xây dựng trên dữ liệu này hoạt động ở cơ chế \textbf{Phân loại Flow đã hoàn tất (Completed-Flow Classification / Post-mortem Analysis)}.
+
+Hệ thống này \textbf{không phải} là hệ thống phát hiện xâm nhập thời gian thực ở mức gói tin (Real-time Packet-level IDS). Mô hình không thể can thiệp ngăn chặn tấn công ngay ở những gói tin bắt tay đầu tiên và không đo lường độ trễ phát hiện (Detection Latency) theo mili-giây.
+
+\section{Cơ Chế Tấn Công Brute Force trên Giao Thức FTP và SSH}
+
+\subsection{Tấn công Brute Force đối với FTP (Port 21)}
+FTP (File Transfer Protocol) là giao thức truyền tệp hoạt động trên kênh văn bản rõ (plain-text) ở tầng ứng dụng:
+\begin{itemize}
+    \item Quá trình xác thực diễn ra thông qua các lệnh \texttt{USER <username>} và \texttt{PASS <password>}.
+    \item Máy chủ phản hồi bằng mã trạng thái \texttt{230 User logged in} (thành công) hoặc \texttt{530 Login incorrect} (thất bại).
+    \item Khi công cụ Patator (\texttt{ftp\_patator}) thực hiện tấn công brute force, nó thiết lập liên tục các kết nối TCP mới, gửi lệnh thử mật khẩu và đóng kết nối ngay khi nhận mã 530.
+    \item \textbf{Đặc trưng thống kê}: Vì là văn bản rõ, các gói tin yêu cầu và phản hồi có kích thước rất ngắn và cố định. Lưu lượng hướng đi (Fwd) thường có độ lệch chuẩn kích thước gói tin rất nhỏ.
+\end{itemize}
+
+\subsection{Tấn công Brute Force đối với SSH (Port 22)}
+SSH (Secure Shell) là giao thức truyền thông an toàn cung cấp kênh xác thực và điều khiển được mã hóa:
+\begin{itemize}
+    \item Trước khi quá trình gửi thông tin xác thực diễn ra, client và server bắt buộc phải trải qua pha bắt tay mật mã phức tạp: trao đổi phiên bản giao thức (\texttt{SSH-2.0-OpenSSH}), thương lượng thuật toán mã hóa đối xứng, trao đổi khóa Diffie-Hellman và xác thực khóa công khai của host.
+    \item Quá trình xác thực mật khẩu diễn ra hoàn toàn bên trong kênh đã được mã hóa bằng thuật toán đối xứng (như AES-GCM hoặc ChaCha20-Poly1305).
+    \item \textbf{Đặc trưng thống kê}: Pha trao đổi khóa mã hóa làm phát sinh các gói tin có kích thước lớn hơn đáng kể so với FTP. Cấu trúc bắt tay phức tạp làm cho các chỉ số về kích thước gói tin trung bình (\texttt{Packet Length Mean}) và thời gian trễ giữa các gói tin (\texttt{Flow IAT}) của SSH có phân phối thống kê khác biệt căn bản so với FTP.
+\end{itemize}
+
+\section{Các Thuật Toán Học Máy Dạng Cây}
+
+\subsection{Cây Quyết Định (Decision Tree)}
+Cây quyết định phân loại (Classification Decision Tree \cite{quinlan1986induction}) phân chia không gian đặc trưng thành các vùng siêu hình hộp rời rạc thông qua một tập hợp các quy tắc rẽ nhánh dạng bậc thang ($x_j \le \theta$).
+
+Tại mỗi nút phân chia, thuật toán tìm kiếm đặc trưng $j$ và ngưỡng $\theta$ tối ưu nhằm tối đa hóa mức giảm độ vẩn đục (Impurity Reduction). Chỉ số vẩn đục phổ biến là \textbf{Gini Impurity}:
+\begin{equation}
+    I_G(p) = 1 - \sum_{k=0}^{1} p_k^2
+\end{equation}
+hoặc \textbf{Entropy (Information Gain)}:
+\begin{equation}
+    H(p) = - \sum_{k=0}^{1} p_k \log_2(p_k)
+\end{equation}
+trong đó $p_k$ là tỷ lệ mẫu thuộc lớp $k$ tại nút đang xét. Mức giảm độ vẩn đục khi phân chia tập $S$ thành $S_L$ và $S_R$ được tính bằng:
+\begin{equation}
+    \Delta I(S, j, \theta) = I(S) - \left( \frac{|S_L|}{|S|} I(S_L) + \frac{|S_R|}{|S|} I(S_R) \right)
+\end{equation}
+
+Ưu điểm nổi bật của Decision Tree là tính minh bạch và khả năng trực quan hóa cấu trúc rẽ nhánh, giúp giải thích trực tiếp logic phân loại. Tuy nhiên, Decision Tree đơn lẻ có phương sai rất cao và dễ bị quá khớp (overfitting) với các đặc trưng cục bộ.
+
+\subsection{Rừng Ngẫu Nhiên (Random Forest)}
+Random Forest \cite{breiman2001random} là một phương pháp học kết hợp (Ensemble Learning) dựa trên kỹ thuật đóng bao (Bootstrap Aggregating - Bagging). Mô hình xây dựng một tập hợp gồm $B$ cây quyết định độc lập:
+\begin{equation}
+    \hat{y} = \text{mode} \left\{ T_1(\mathbf{x}), T_2(\mathbf{x}), \dots, T_B(\mathbf{x}) \right\}
+\end{equation}
+hoặc tính xác suất trung bình:
+\begin{equation}
+    P(y=1|\mathbf{x}) = \frac{1}{B} \sum_{b=1}^{B} P_b(y=1|\mathbf{x})
+\end{equation}
+
+Hai cơ chế ngẫu nhiên hóa cốt lõi của Random Forest giúp giảm thiểu phương sai mà không làm tăng độ chệch (bias):
+\begin{enumerate}
+    \item \textbf{Bootstrap Sampling}: Mỗi cây được huấn luyện trên một tập dữ liệu con được rút mẫu có hoàn lại từ tập huấn luyện gốc với kích thước bằng $N$.
+    \item \textbf{Random Feature Subspace}: Tại mỗi nút rẽ nhánh, thay vì tìm kiếm trên toàn bộ $D$ đặc trưng, thuật toán chỉ chọn ngẫu nhiên một tập con gồm $m \approx \sqrt{D}$ đặc trưng để chọn ra điểm phân chia tốt nhất. Cơ chế này giúp giải tương quan (decorrelate) giữa các cây trong rừng.
+\end{enumerate}
+
+\subsection{XGBoost (eXtreme Gradient Boosting)}
+XGBoost \cite{chen2016xgboost} là một thuật toán nâng cao thuộc họ Gradient Boosting. Khác với Bagging xây dựng các cây độc lập song song, Boosting xây dựng các cây quyết định tuần tự, trong đó mỗi cây mới $f_t(\mathbf{x})$ được tối ưu để bù đắp sai số (residuals) của tổ hợp các cây trước đó:
+\begin{equation}
+    \hat{y}_i^{(t)} = \hat{y}_i^{(t-1)} + f_t(\mathbf{x}_i)
+\end{equation}
+
+Hàm mục tiêu được tối thiểu hóa tại bước $t$ bao gồm hàm mất mát khả vi (differentiable loss function) và số hạng chính quy hóa (regularization term) để kiểm soát độ phức tạp của cây:
+\begin{equation}
+    \mathcal{L}^{(t)} = \sum_{i=1}^{n} l\left(y_i, \hat{y}_i^{(t-1)} + f_t(\mathbf{x}_i)\right) + \Omega(f_t)
+\end{equation}
+với số hạng phạt phức tạp:
+\begin{equation}
+    \Omega(f) = \gamma T + \frac{1}{2} \lambda \sum_{j=1}^{T} w_j^2
+\end{equation}
+trong đó $T$ là số lượng lá, $w_j$ là trọng số tại lá $j$, $\gamma$ là ngưỡng phạt tối thiểu để tạo lá mới và $\lambda$ là hệ số chính quy hóa L2.
+
+XGBoost áp dụng xấp xỉ Taylor bậc hai (Second-order Taylor Expansion) cho hàm mục tiêu:
+\begin{equation}
+    \mathcal{L}^{(t)} \approx \sum_{i=1}^{n} \left[ l(y_i, \hat{y}_i^{(t-1)}) + g_i f_t(\mathbf{x}_i) + \frac{1}{2} h_i f_t^2(\mathbf{x}_i) \right] + \Omega(f_t)
+\end{equation}
+trong đó $g_i = \partial_{\hat{y}^{(t-1)}} l(y_i, \hat{y}^{(t-1)})$ là gradient bậc một và $h_i = \partial^2_{\hat{y}^{(t-1)}} l(y_i, \hat{y}^{(t-1)})$ là Hessian bậc hai. Ngoài ra, việc sử dụng thuật toán xấp xỉ Histogram (\texttt{tree\_method='hist'}) giúp tăng tốc độ huấn luyện trên dữ liệu lớn mà vẫn duy trì độ chính xác cao.
+
+\section{Đánh Giá Mô Hình Trên Dữ Liệu Mất Cân Bằng Nghiêm Trọng}
+
+\subsection{Hệ Thống Chỉ Số Từ Ma Trận Nhầm Lẫn}
+Trong bài toán phát hiện xâm nhập mạng, lớp tấn công (\Attack, gán nhãn 1) thường chỉ chiếm tỷ lệ nhỏ ($< 5\%$) so với lưu lượng bình thường (\Normal, gán nhãn 0). Ma trận nhầm lẫn (Confusion Matrix) gồm 4 đại lượng:
+\begin{itemize}
+    \item \textbf{True Positive (TP)}: Số flow tấn công được phát hiện chính xác.
+    \item \textbf{False Positive (FP)}: Số flow bình thường bị cảnh báo nhầm là tấn công (Báo động giả).
+    \item \textbf{False Negative (FN)}: Số flow tấn công bị bỏ lọt (Nguy hiểm nhất trong an ninh).
+    \item \textbf{True Negative (TN)}: Số flow bình thường được phân loại đúng.
+\end{itemize}
+
+Các chỉ số phái sinh chuẩn:
+\begin{equation}
+    \text{Precision} = \frac{TP}{TP + FP}
+\end{equation}
+\begin{equation}
+    \text{Recall (TPR)} = \frac{TP}{TP + FN}
+\end{equation}
+\begin{equation}
+    \text{False Positive Rate (FPR)} = \frac{FP}{FP + TN}
+\end{equation}
+\begin{equation}
+    \text{F1-Score} = 2 \cdot \frac{\text{Precision} \cdot \text{Recall}}{\text{Precision} + \text{Recall}} = \frac{2TP}{2TP + FP + FN}
+\end{equation}
+
+\subsection{Nghịch Lý Độ Chính Xác (Accuracy Paradox) Trong NIDS}
+Chỉ số Accuracy tổng thể:
+\begin{equation}
+    \text{Accuracy} = \frac{TP + TN}{TP + TN + FP + FN}
+\end{equation}
+rất nguy hiểm và hoàn toàn gây hiểu lầm trong an ninh mạng. Giả sử tập kiểm thử có $97.4\%$ mẫu bình thường và $2.6\%$ mẫu tấn công (như tập Test CICIDS2017 Tuesday). Một bộ phân loại tầm thường (trivial classifier) luôn dự đoán mọi flow là bình thường ($TP=0, FP=0$) sẽ đạt ngay \textbf{Accuracy = 97.4\%} mặc dù hoàn toàn bất lực trong việc bảo vệ hệ thống (\textbf{Recall = 0.0\%}). Do đó, F1-Score và Precision-Recall Curve là tiêu chuẩn đánh giá bắt buộc.
+
+\subsection{Đường Cong Precision-Recall (PR) và Average Precision (AP)}
+Như Davis và Goadrich \cite{davis2006relationship} đã chứng minh, trên các tập dữ liệu mất cân bằng lớp cực đoan, đường cong ROC (Receiver Operating Characteristic) có thể phản ánh một cái nhìn sai lệch quá mức lạc quan vì đại lượng $TN$ trong mẫu số của $FPR$ quá lớn làm $FPR$ luôn giữ ở mức rất thấp.
+
+Đường cong Precision-Recall biểu diễn mối quan hệ đánh đổi giữa Precision và Recall khi thay đổi ngưỡng phân loại $\tau \in [0, 1]$. Đại lượng \textbf{Average Precision (AP)} tích phân diện tích dưới đường cong PR không suy biến:
+\begin{equation}
+    \text{AP} = \sum_{n} (R_n - R_{n-1}) P_n
+\end{equation}
+trong đó $P_n$ và $R_n$ là Precision và Recall tại ngưỡng thứ $n$. AP là chỉ số phản ánh trung thực nhất năng lực phân tách của mô hình trên lớp thiểu số.

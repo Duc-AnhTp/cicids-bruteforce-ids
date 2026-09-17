@@ -1,0 +1,43 @@
+% ==============================================================================
+% reports/chapters/09_ket_luan.tex
+% CHƯƠNG 9: KẾT LUẬN VÀ HƯỚNG PHÁT TRIỂN
+% ==============================================================================
+
+\chapter{Kết Luận và Hướng Phát Triển}
+\label{chap:ket_luan}
+
+\section{Tổng Kết Nghiên Cứu và Câu Trả Lời Cho Các Câu Hỏi Nghiên Cứu}
+
+Đồ án này đã hoàn thành một cuộc đánh giá thực nghiệm toàn diện, nghiêm ngặt và minh bạch về khả năng phát hiện tấn công dò quét mật khẩu (Brute Force) của các mô hình học máy dạng cây trên tập dữ liệu chuẩn CICIDS2017 Tuesday. Thông qua việc thiết lập một quy trình thực nghiệm chuẩn mực (Canonical Protocol) kiểm soát chặt chẽ rò rỉ thời gian và lưu vết bất biến các artifact, nghiên cứu đã đưa ra câu trả lời tường minh cho 4 câu hỏi nghiên cứu cốt lõi:
+
+\begin{enumerate}
+    \item \textbf{Trả lời RQ1 (Hiệu năng Zero-Shot Subtype Transfer theo thời gian):}
+    Khi mô hình học máy dạng cây chỉ được huấn luyện trên dữ liệu quá khứ chứa một dạng tấn công Brute Force (\FTP), mô hình \textbf{hoàn toàn không có khả năng tự động khái quát hóa để nhận diện dạng tấn công Brute Force mới (\SSH) xuất hiện trong tương lai}. Trên tập Test theo thời gian chính thức, cả 3 mô hình đều sụp đổ: Decision Tree và XGBoost đạt $\FOne = \mathbf{0.0000}$ (không bắt được mẫu SSH nào), trong khi Random Forest chiến thắng chỉ đạt $\FOne = \mathbf{\RFTestFOne}$ với tỷ lệ phát hiện SSH vỏn vẹn $\mathbf{\RFTestSSHRecall}$ (7/3,732 flow).
+
+    \item \textbf{Trả lời RQ2 (Độ lệch đánh giá của phép chia ngẫu nhiên - Optimistic Bias):}
+    Phép chia ngẫu nhiên (Random Split) tạo ra \textbf{sự thổi phồng kết quả cực kỳ nghiêm trọng}, làm sai lệch hoàn toàn nhận thức về năng lực thực tế của mô hình. Trong khi trên phân tách theo thời gian F1 chỉ đạt $\le 0.0037$, thì trên Random Split, cả 3 mô hình đều đạt $\FOne \ge \mathbf{0.9942 - 0.9997}$. Khoảng cách sai lệch hiệu năng ($\Delta\FOne$) trên tập kiểm định lên tới \textbf{\DeltaFOneRFRandomTime}. Hiện tượng này xảy ra do phép chia ngẫu nhiên đã xé lẻ các flow thuộc cùng một chiến dịch tấn công vào cả hai tập, vi phạm giả thiết $i.i.d.$ và biến bài toán tổng quát hóa thành bài toán nhận dạng lại một chiến dịch đã học.
+
+    \item \textbf{Trả lời RQ3 (Vai trò của cổng dịch vụ và các đặc trưng hành vi):}
+    Cổng dịch vụ đích (\texttt{Destination Port}) đóng vai trò là một \textbf{lối tắt học vẹt (Shortcut Feature) áp đảo}. Phân tích SHAP chứng minh \texttt{Destination Port} có mức độ đóng góp trung bình lớn nhất (\SHAPTopOneVal, gấp \SHAPRatioTopOneTwo\ lần đặc trưng xếp thứ hai), và Cây Quyết Định phân chia ngay ở nút gốc tại ngưỡng $\le 21.5$.
+    Khi loại bỏ cổng dịch vụ (Port Ablation), tỷ lệ nhận diện SSH có tăng nhẹ từ 0.00\% lên $0.19\% - 0.38\%$, nhưng \textbf{hiệu năng tổng thể vẫn sụp đổ hoàn toàn ($\FOne \le 0.0074$)}. Điều này chứng minh sự thất bại của NIDS không chỉ do số cổng, mà do sự phân kỳ sâu sắc về phân phối kích thước gói tin và thời gian trễ giữa các giao thức.
+
+    \item \textbf{Trả lời RQ4 (Tác động của giao thức huấn luyện lại - Refit Impact):}
+    Hành vi mặc định \texttt{refit=True} của thư viện \texttt{scikit-learn} khi sử dụng kiểm định chéo trên tập gộp Train + Validation đã \textbf{vô tình phá vỡ ranh giới dữ liệu}. Mô hình bị huấn luyện lại trên 1,886 mẫu SSH từ tập Validation, biến một bài toán Zero-Shot thành bài toán Supervised Learning thông thường và đẩy điểm số Test F1 từ \textbf{0.0000 lên \XGBRefitTestFOne}. Đây là bài học thực tiễn đắt giá về việc kiểm soát ranh giới dữ liệu trong MLOps an ninh mạng.
+\end{enumerate}
+
+\section{Đóng Góp Khoa Học và Ý Nghĩa Thực Tiễn}
+
+\begin{itemize}
+    \item \textbf{Về mặt học thuật}: Đồ án là một trong những công trình đầu tiên tại Việt Nam dũng cảm công bố và phân tích chi tiết sự suy giảm hiệu năng của mô hình học máy trên NIDS chuỗi thời gian, cung cấp bằng chứng thực nghiệm rõ ràng phản bác lại trào lưu "chạy đua F1 > 99\%" thiếu thực tế.
+    \item \textbf{Về mặt phương pháp luận}: Đề xuất và hoàn thiện quy chuẩn đánh giá NIDS 5 bước với kỹ thuật Purge và Embargo, kiểm soát ranh giới dữ liệu và theo dõi tỷ lệ phát hiện chi tiết theo từng biến thể tấn công (Subtype Recall).
+    \item \textbf{Về mặt kỹ thuật MLOps}: Cảnh báo nguy cơ tiềm ẩn từ các cờ tự động của thư viện học máy và chứng minh sự cần thiết của các cơ chế đánh dấu mốc kiểm thử bất biến (\texttt{TEST\_OPENED.json}).
+\end{itemize}
+
+\section{Hướng Nghiên Cứu Tiếp Theo}
+
+Từ các kết quả và hạn chế đã chỉ ra, các hướng nghiên cứu mở rộng đầy triển vọng bao gồm:
+\begin{enumerate}
+    \item \textbf{Áp dụng Học Thích Ứng Miền (Domain Adaptation) và Học Vài Mẫu (Few-Shot Learning)}: Xây dựng các mạng nơ-ron học biểu diễn (Representation Learning) nhằm trích xuất các đặc trưng phi tuyến bất biến qua các giao thức (Protocol-invariant Features), giúp mô hình có thể phát hiện tấn công mới chỉ với một lượng rất nhỏ mẫu mồi.
+    \item \textbf{Học Liên Tục (Continual / Lifelong Learning) trong NIDS}: Thiết kế các cơ chế cập nhật trọng số mô hình trực tuyến theo thời gian thực (Online Continual Updating) mà không gặp phải hiện tượng quên thảm họa (Catastrophic Forgetting) đối với các dạng tấn công cũ.
+    \item \textbf{Đánh giá Đa Ngày trên CICIDS2017}: Mở rộng quy chuẩn phân tách theo thời gian sang các ngày còn lại trong tuần (như DoS/DDoS ngày Wednesday và Web Attacks ngày Thursday) để xây dựng một bức tranh toàn cảnh về độ bền vững của ML-NIDS.
+\end{enumerate}

@@ -1,0 +1,47 @@
+% ==============================================================================
+% reports/sections/results/06_06_explainability.tex
+% ==============================================================================
+
+\section{Phân Tích Khả Năng Giải Thích (Explainability Analysis)}
+
+Để làm rõ cơ chế suy luận bên trong của mô hình và lý giải nguyên nhân dẫn đến sự sụp đổ hiệu năng, chúng tôi áp dụng phương pháp giải thích gia tăng Shapley (\textbf{SHAP TreeExplainer} \cite{lundberg2017unified}) kết hợp với việc trích xuất cấu trúc logic của Cây Quyết Định.
+
+\subsection{Phân Tích Tầm Quan Trọng Đặc Trưng Bằng SHAP}
+Phân tích SHAP được thực hiện trên 500 mẫu đại diện từ tập kiểm định $\Dval$ đối với mô hình Random Forest chiến thắng (\texttt{time/with\_port}). Bảng \ref{tab:shap_top10} liệt kê 10 đặc trưng có giá trị đóng góp trung bình tuyệt đối ($\text{Mean } |\text{SHAP}|$) lớn nhất.
+
+\input{tables/generated/tab_shap_top10.tex}
+
+Kết quả định lượng cho thấy:
+\begin{itemize}
+    \item Đặc trưng \textbf{\texttt{Destination Port}} chiếm vị trí số 1 tuyệt đối với giá trị $\text{Mean } |\text{SHAP}| = \textbf{\SHAPTopOneVal}$.
+    \item Đặc trưng xếp thứ hai là \texttt{Fwd Packet Length Std} chỉ đạt giá trị \textbf{\SHAPTopTwoVal}.
+    \item Tỷ số đóng góp giữa đặc trưng số 1 và số 2 lên tới \textbf{\SHAPRatioTopOneTwo\ lần}.
+\end{itemize}
+
+Điều này khẳng định rằng trong kịch bản có cổng, mô hình đã dựa dẫm áp đảo vào cổng dịch vụ đích như một "lối tắt phân loại" (Shortcut Feature) để phân biệt giữa lưu lượng bình thường (web 80/443, DNS 53) và lưu lượng tấn công FTP (Port 21), như được minh họa trực quan trên biểu đồ SHAP Summary Plot (Hình \ref{fig:shap_summary}).
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.85\textwidth]{artifacts/week3_week4/shap/summary.png}
+\caption{Biểu đồ phân bố giá trị SHAP (SHAP Summary Plot) của Top các đặc trưng quan trọng trên 500 mẫu kiểm định.}
+\label{fig:shap_summary}
+\end{figure}
+
+\subsection{Trích Xuất Cấu Trúc Cây Quyết Định}
+Quan sát cấu trúc logic của Cây Quyết Định (trích xuất từ \texttt{tree\_structure.png} và \texttt{tree\_rules\_top.txt}, thể hiện trên Hình \ref{fig:tree_structure}) càng làm sáng tỏ cơ chế này:
+\begin{itemize}
+    \item \textbf{Nút gốc (Root Node)} của cây quyết định phân chia trực tiếp dựa trên điều kiện:
+    \begin{center}
+        \texttt{Destination Port <= 21.5}
+    \end{center}
+    \item Các nhánh tiếp theo tiếp tục cô lập các flow có \texttt{Destination Port <= 20.5} (loại bỏ traffic cổng thấp) để định vị chính xác \textbf{Cổng 21 (FTP)}.
+\end{itemize}
+
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.95\textwidth]{experiments/figures/01_tree_structure_detailed.png}
+\caption{Cấu trúc 3 tầng đầu tiên của Cây Quyết Định minh họa ngưỡng rẽ nhánh ưu tiên tại \texttt{Destination Port $\le$ 21.5}.}
+\label{fig:tree_structure}
+\end{figure}
+
+Khi chuyển sang tập kiểm thử $\Dtest$, toàn bộ các cuộc tấn công đều diễn ra trên \textbf{Cổng 22 (SSH)}, tức là rơi vào nhánh \texttt{Destination Port > 21.5}. Tại nhánh này, vì trong tập Train mô hình chưa từng thấy bất kỳ cuộc tấn công nào diễn ra trên cổng $> 21$, toàn bộ các nút lá tương ứng đều được gán nhãn là lưu lượng bình thường (\Normal, 0). Đây chính là nguyên nhân trực tiếp khiến mô hình có độ chuẩn xác $\Recall = 0.00\%$ đối với SSH!

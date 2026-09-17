@@ -151,9 +151,17 @@ Trong Test chính, Random Forest báo đúng 7 attack (`TP = 7`), bỏ sót 3725
 
 Các số gần 1.0 trong random split là kết quả đối chứng trong một phân phối trộn ngẫu nhiên. Chúng không thay thế cho kết quả time-based và không được trình bày như bằng chứng tổng quát hóa sang dữ liệu tương lai.
 
+### 8.3. Bản chất học thuật của Random Split: Optimistic Evaluation Bias
+
+Không nên quy chụp đơn giản rằng Random split "chứng minh một cơ chế data leakage cụ thể". Trong an ninh mạng và NIDS:
+- Một chiến dịch brute force diễn ra liên tục hàng nghìn flow thường có cùng đặc điểm công cụ dò quét (cùng client SSH/FTP, cùng nhịp gõ thời gian giữa các gói IAT, cùng kích thước gói tin bắt tay).
+- Khi xáo trộn ngẫu nhiên toàn bộ ngày Tuesday, các flow thuộc cùng một chiến dịch bị chia đều sang cả Train và Test. Điều này vi phạm giả định quan trọng nhất của học máy: **tính độc lập và phân bố đồng nhất (I.I.D) giữa các flow mạng**.
+- Do đó, thuật ngữ học thuật chuẩn xác là **Hiện tượng ước lượng hiệu năng quá lạc quan (Optimistic Evaluation Bias)**: Random split tạo ra một bài toán nội suy dễ hơn rất nhiều, che giấu hoàn toàn điểm mù khi đối mặt với các biến thể tấn công mới trong tương lai.
+
 ## 9. Phân tích lỗi
 
 ### 9.1. Lỗi trên kết quả chính
+
 
 Ở Test time/with_port, winner có `FP = 0` và `FPR = 0.0`, nên không tạo báo động giả trong số 140425 flow BENIGN. Tuy nhiên có `FN = 3725` trên `n_attack = 3732`, nên bỏ sót gần như toàn bộ attack của Test; recall attack chỉ là `0.0018756698821007502`, F1 là `0.003744316662209147`.
 
@@ -168,6 +176,21 @@ Validation có cả FTP và SSH nhưng winner vẫn có `SSH recall = 0.0` tại
 SHAP cho thấy `Destination Port` có attribution lớn nhất. Vì Train time-based chứa FTP-Patator và Test chỉ có SSH-Patator, port có thể là tín hiệu gắn với dịch vụ/campaign của dữ liệu Train thay vì tín hiệu đủ ổn định cho subtype chưa thấy. Đây là diễn giải phù hợp với pattern quan sát được, nhưng SHAP không chứng minh quan hệ nhân quả.
 
 Kết quả `without_port` trên Test cũng rất thấp: Decision Tree có SSH recall `0.0018756698821007502`, Random Forest `0.0037513397642015005`, và XGBoost `0.0034833869239013935`. Vì vậy việc bỏ port không giải quyết được sự khác biệt subtype; đồng thời không thể quy toàn bộ lỗi cho một feature duy nhất.
+
+### 9.3. Case Study Chuyên sâu: Tác động của Refit Protocol trên Validation đối với XGBoost
+
+Trong quá trình thực nghiệm, xuất hiện sự chênh lệch đáng kể giữa hai kết quả của XGBoost trên kịch bản thời gian:
+1. **Benchmark gốc (`artifacts/week3_week4/test_comparison.csv`)**: XGBoost đạt `Test F1 = 0.0000`, `SSH Recall = 0.0%`.
+2. **Thực nghiệm Tuning mới (`experiments/w3_05_time_tuning/`)**: XGBoost sau khi chạy script `src/ids/tune_xgboost.py` đạt `Test F1 ≈ 0.9910`.
+
+**Nguyên nhân kỹ thuật & Bản chất thực nghiệm:**
+- Kiểm tra mã nguồn `src/ids/tune_xgboost.py` cho thấy script sử dụng `RandomizedSearchCV` với custom CV trên tập dữ liệu gộp `X_combined = pd.concat([X_train, X_val])`.
+- Do không thiết lập `refit=False`, cơ chế mặc định của `RandomizedSearchCV` sẽ tự động lấy toàn bộ `X_combined` (Train + Validation) để huấn luyện lại mô hình `best_estimator_` sau khi chọn xong tham số tối ưu.
+- Trong Time-based split: Tập Train chỉ có `FTP-Patator`, nhưng tập Validation chứa **1,886 flows `SSH-Patator`**.
+- Do đó, việc refit trên `Train + Val` đã vô tình biến bài toán từ **Zero-Shot Transfer (chưa từng thấy SSH)** thành **Seen-Subtype Evaluation (mô hình đã được học mồi 1,886 mẫu SSH từ trước)**.
+- Khi bước vào tập Test, mô hình đã nắm được chữ ký đặc trưng của `SSH-Patator` nên đạt F1 cao (~0.991).
+
+👉 **Ý nghĩa nghiên cứu**: Đây là một bài học thực tế đắt giá trong MLOps và NIDS. Nó chứng minh rằng chỉ cần một sai sót nhỏ trong việc kiểm soát cờ `refit` của thư viện tự động, tính chất của toàn bộ bài toán đánh giá an toàn thông tin sẽ bị thay đổi từ zero-shot sang supervised learning thông thường. Trong báo cáo, nhóm ghi nhận minh bạch cả hai số liệu để làm rõ hiện tượng này.
 
 ## 10. SHAP top 10 feature
 
@@ -190,10 +213,18 @@ SHAP được chạy sau khi model đã khóa, trên `validation`, với `n = 50
 
 ## 11. Hình và artifact kết quả
 
-Thư mục `artifacts/week3_week4/figures/` có:
-
+### 11.1. Hình ảnh từ benchmark hợp nhất W3–W4 (`artifacts/week3_week4/figures/`)
 - `precision_recall_test_time_with_port.png` — đường precision–recall của kết quả Test time/with_port.
 - `confusion_test_time_with_port.png` — confusion matrix của kết quả Test time/with_port.
+
+### 11.2. Bộ 6 biểu đồ khoa học chi tiết phục vụ báo cáo & bảo vệ (`experiments/figures/`)
+Được tạo tự động bởi `scripts/generate_detailed_visualizations.py` (chuẩn công bố 300 DPI):
+1. `01_tree_structure_detailed.png`: Cấu trúc 3 tầng đầu Cây Quyết định, thể hiện ranh giới tách cổng `Destination Port <= 21.5` phân lập FTP (Port 21) và SSH (Port 22).
+2. `02_overfitting_analysis_depth.png`: Đồ thị quá khớp (Overfitting Curve) so sánh F1 Train vs Validation qua các độ sâu từ 2 đến 20, chỉ rõ vùng tối ưu (`max_depth = 4–8`) và vùng quá khớp nặng (`max_depth > 12`).
+3. `03_confusion_matrices_detailed.png`: Ma trận nhầm lẫn đối chiếu song song Time-based vs Random split, làm nổi bật 3,725 cuộc tấn công SSH bị bỏ lọt (FN) trên kịch bản thời gian.
+4. `04_roc_and_pr_curves_comparative.png`: So sánh trực tiếp đường cong PR (kèm AP) và ROC (kèm AUC) giữa 2 kịch bản phân tách trên cùng hệ quy chiếu.
+5. `05_feature_importance_top20.png`: Biểu đồ Top 20 đặc trưng quan trọng nhất phân nhóm theo 4 màu sắc chuyên môn mạng: Cổng mạng, Kích thước gói tin, Thời gian IAT, và Cờ TCP/Tiêu đề.
+6. `06_data_leakage_benchmark.png`: Đối chứng tỷ lệ phát hiện theo subtype (FTP vs SSH) và bảng benchmark hiệu năng tổng hợp giữa Decision Tree, Random Forest và XGBoost.
 
 Các hình này là sản phẩm minh họa của run; các con số chính trong báo cáo được lấy từ CSV/JSON, đặc biệt là `test_comparison.csv` và `test_metrics.json`.
 

@@ -1,0 +1,18 @@
+% ==============================================================================
+% reports/tables/generated/tab_port_ablation.tex
+% ==============================================================================
+\begin{table}[htbp]
+\centering
+\small
+\caption{Thực nghiệm Bóc tách Cổng mạng (Port Ablation) trên tập Validation phân tách theo thời gian.}
+\label{tab:port_ablation}
+\begin{tabular}{lrrrrr}
+\toprule
+\textbf{Mô hình} & \textbf{\FOne\ (Có Cổng)} & \textbf{\FOne\ (Không Cổng)} & \textbf{$\Delta$\FOne} & \textbf{SSH Recall (Có)} & \textbf{SSH Recall (Không)} \\
+\midrule
+Decision Tree & 0.7170 & 0.7169 & 0.0001 & 0.00\% & 0.00\% \\
+Random Forest & 0.7181 & 0.7134 & 0.0047 & 0.00\% & 0.00\% \\
+XGBoost & 0.7181 & 0.7136 & 0.0045 & 0.00\% & 0.00\% \\
+\bottomrule
+\end{tabular}
+\end{table}
