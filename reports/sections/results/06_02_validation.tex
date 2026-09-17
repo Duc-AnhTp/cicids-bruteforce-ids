@@ -10,9 +10,12 @@ Quá trình tìm kiếm siêu tham số trên tập kiểm định $\Dval$ mang 
 
 Trong kịch bản đánh giá chính theo thời gian có cổng (\texttt{time/with\_port}):
 \begin{enumerate}
-    \item \textbf{Cây Quyết Định (Decision Tree)}: Đạt $\FOne = 0.7170$, $\Precision = 0.9971$, $\Recall = 0.5597$, $\AP = 0.5690$ và $\FPR = 3.51\times 10^{-5}$ tại cấu hình \texttt{max\_depth=6}, \texttt{min\_samples\_leaf=5}.
-    \item \textbf{Rừng Ngẫu Nhiên (Random Forest)}: Đạt $\FOne = \textbf{\WinnerValFOne}$, $\Precision = \textbf{\WinnerValPrecision}$, $\Recall = \textbf{\WinnerValRecall}$, $\AP = \textbf{\WinnerValAP}$ và $\FPR = \textbf{\WinnerValFPR}$ tại cấu hình \texttt{n\_estimators=100}, \texttt{max\_depth=16}, \texttt{min\_samples\_leaf=5}. Mô hình phát hiện được \WinnerValFTPRecall\ mẫu \FTP\ nhưng bắt được 0.00\% mẫu \SSH.
-    \item \textbf{XGBoost}: Đạt $\FOne = 0.7181$, $\Precision = 1.0000$, $\Recall = 0.5602$, $\AP = 0.6045$ và $\FPR = 0.00$ tại cấu hình \texttt{n\_estimators=200}, \texttt{max\_depth=4}, \texttt{learning\_rate=0.08}.
+    \item \textbf{Cây Quyết Định (Decision Tree)}:
+    Đạt $\FOne = 0.7170$, $\Precision = 0.9971$, $\Recall = 0.5597$, $\AP = 0.5690$ và $\FPR = 3.51\times 10^{-5}$ với cấu hình gồm \texttt{max\_depth=6} và \texttt{min\_samples\_leaf=5}.
+    \item \textbf{Rừng Ngẫu Nhiên (Random Forest)}:
+    Đạt $\FOne = \textbf{\WinnerValFOne}$, $\Precision = \textbf{\WinnerValPrecision}$, $\Recall = \textbf{\WinnerValRecall}$, $\AP = \textbf{\WinnerValAP}$ và $\FPR = \textbf{\WinnerValFPR}$ với cấu hình \texttt{n\_estimators=100}, \texttt{max\_depth=16}, \texttt{min\_samples\_leaf=5}. Mô hình bắt được \WinnerValFTPRecall\ mẫu \FTP\ nhưng không phát hiện được mẫu \SSH\ nào ($0.00\%$).
+    \item \textbf{XGBoost}:
+    Đạt $\FOne = 0.7181$, $\Precision = 1.0000$, $\Recall = 0.5602$, $\AP = 0.6045$ và $\FPR = 0.00$ với cấu hình \texttt{n\_estimators=200}, \texttt{max\_depth=4}, \texttt{learning\_rate=0.08}.
 \end{enumerate}
 
 \noindent\textbf{Quyết định lựa chọn mô hình chiến thắng (Winner Selection):}

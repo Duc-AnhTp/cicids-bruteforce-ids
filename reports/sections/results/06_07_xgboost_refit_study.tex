@@ -6,8 +6,8 @@
 
 Trong quá trình đối soát thực nghiệm giữa các đường ống trong mã nguồn, chúng tôi phát hiện một sự phân kỳ số liệu đặc biệt lớn đối với thuật toán XGBoost:
 \begin{itemize}
-    \item Trong benchmark chuẩn mực (\path{artifacts/week3_week4/test_comparison.csv}), XGBoost đạt $\FOne = \textbf{0.0000}$ ($\text{SSH Recall} = 0.00\%$).
-    \item Trong kết quả tuning độc lập (\path{experiments/w3_05_time_tuning/test_eval/test_metrics.json}), XGBoost lại đạt $\FOne = \textbf{\XGBRefitTestFOne}$ ($\text{SSH Recall} = \textbf{\XGBRefitTestSSHRecall}$).
+    \item Trong benchmark chuẩn mực tại \path{artifacts/week3_week4/test_comparison.csv}, XGBoost đạt $\FOne = \textbf{0.0000}$ ($\text{SSH Recall} = 0.00\%$).
+    \item Trong kết quả tuning độc lập tại \path{experiments/w3_05_time_tuning/test_eval/test_metrics.json}, XGBoost lại đạt $\FOne = \textbf{\XGBRefitTestFOne}$ ($\text{SSH Recall} = \textbf{\XGBRefitTestSSHRecall}$).
 \end{itemize}
 
 \subsection{Truy Vết Nguyên Nhân Kỹ Thuật Trong Mã Nguồn}
@@ -57,4 +57,4 @@ Chế độ 2: Subtype-Aware Refit & Train + Val ($\Dtrain \cup \Dval$) & 1,886 
 }
 \end{table}
 
-Phát hiện này cung cấp một bài học thực tiễn vô cùng giá trị trong kỹ nghệ MLOps cho an ninh mạng: một cấu hình mặc định tưởng chừng vô hại của thư viện học máy (\texttt{refit=True}) có thể âm thầm xóa bỏ ranh giới dữ liệu và làm sai lệch hoàn toàn kết luận khoa học của một nghiên cứu nếu không được kiểm soát chặt chẽ.
+Phát hiện này mang lại một bài học thực tiễn giá trị trong kỹ nghệ MLOps cho an ninh mạng: một cấu hình mặc định tưởng chừng vô hại của thư viện học máy (\texttt{refit=True}) có thể âm thầm xóa bỏ ranh giới dữ liệu và làm sai lệch hoàn toàn kết luận khoa học nếu không được kiểm soát chặt chẽ.

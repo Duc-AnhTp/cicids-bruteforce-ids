@@ -23,18 +23,18 @@ Dữ liệu thô được sử dụng trong nghiên cứu này là tệp CSV tr�
     \item \textbf{Đường dẫn}: \texttt{data/raw/Tuesday-WorkingHours.pcap\_ISCX.csv}
     \item \textbf{Mã băm SHA-256 đã xác minh}:
     \begin{center}
-        \texttt{\DataShaFull}
+        \small\texttt{\DataShaFull}
     \end{center}
     \item \textbf{Tổng số dòng thô ban đầu}: \DataRawRows\ bản ghi flow (tương ứng 445,910 dòng trên đĩa tính cả 1 dòng tiêu đề).
 \end{itemize}
 
 Việc lưu trữ và kiểm tra mã băm SHA-256 đảm bảo tính toàn vẹn tuyệt đối của dữ liệu đầu vào, cho phép bất kỳ nhà nghiên cứu nào trên thế giới cũng có thể kiểm chứng độc lập trên cùng một tệp dữ liệu nguồn.
 
-\section{Phục Hồi Dòng Thời Gian 24 Giờ (Timestamp Reconstruction Policy)}
+\section{Phục Hồi Dòng Thời Gian 24 Giờ (Timestamp Reconstruction)}
 
 Trong quá trình Khám phá Dữ liệu (Exploratory Data Analysis - EDA), chúng tôi phát hiện một lỗi định dạng nghiêm trọng trong tệp CSV gốc do công cụ CICFlowMeter xuất ra:
 \begin{itemize}
-    \item Định dạng chuỗi thời gian thô được lưu dưới dạng \texttt{dd/MM/yyyy h:mm} hoặc \texttt{dd/MM/yyyy hh:mm}.
+    \item Định dạng chuỗi thời gian thô được lưu dưới dạng \texttt{dd/MM/yyyy} kết hợp với \texttt{h:mm} hoặc \texttt{hh:mm}.
     \item Các giá trị giờ thô quan sát được trong dữ liệu chỉ gồm hai nhóm:
     \begin{equation}
         \mathcal{H}_{\text{raw}} = \{ 1, 2, 3, 4, 5, 8, 9, 10, 11, 12 \}
@@ -61,7 +61,7 @@ Bài tập lớn định nghĩa bài toán phân loại là \textbf{Phân loại
 \begin{equation}
     y = \begin{cases}
         0 & \text{nếu flow là lưu lượng bình thường (\BENIGN)} \\
-        1 & \text{nếu flow là lưu lượng tấn công Brute Force (\FTP\ hoặc \SSH)}
+        1 & \text{nếu flow là tấn công Brute Force (\FTP\ hoặc \SSH)}
     \end{cases}
 \end{equation}
 

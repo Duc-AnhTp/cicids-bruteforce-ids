@@ -29,7 +29,7 @@ Mặc dù có hàng nghìn công trình nghiên cứu về ML-NIDS được côn
 
 Đặc biệt, công trình nghiên cứu gần đây của Arp và cộng sự \cite{arp2022dos} trên hội nghị an ninh hàng đầu USENIX Security đã chỉ ra hàng loạt "cạm bẫy" (pitfalls) nghiêm trọng đang tồn tại phổ biến trong các nghiên cứu an ninh mạng ứng dụng học máy. Trong đó, sai lầm phổ biến nhất là \textbf{Độ lệch đánh giá quá lạc quan (Optimistic Evaluation Bias)} bắt nguồn từ việc sử dụng chiến lược \textbf{Phân chia dữ liệu ngẫu nhiên (Random Split)}.
 
-Khi áp dụng phép chia ngẫu nhiên trên một tập dữ liệu lưu lượng mạng (như CICIDS2017 \cite{sharafaldin2018generating}):
+Khi áp dụng phương pháp phân chia ngẫu nhiên trên tập dữ liệu lưu lượng mạng như CICIDS2017~\cite{sharafaldin2018generating}:
 \begin{itemize}
     \item Toàn bộ các flow thuộc cùng một chiến dịch tấn công (phát sinh từ cùng một công cụ dò quét, cùng địa chỉ IP nguồn, cùng cấu hình nhịp gõ) bị xé nhỏ và phân bổ đều vào cả tập Huấn luyện (Train), tập Kiểm định (Validation) và tập Kiểm thử (Test).
     \item Việc này vi phạm nghiêm trọng giả thiết các quan sát độc lập và phân phối đồng nhất ($i.i.d.$) trong học máy.

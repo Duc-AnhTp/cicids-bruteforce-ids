@@ -12,7 +12,7 @@ Toàn bộ các thực nghiệm trong nghiên cứu này được triển khai t
 \begin{itemize}
     \item \textbf{Phần cứng}: Vi xử lý đa nhân x86\_64, bộ nhớ RAM 32 GB, hỗ trợ tập lệnh SIMD AVX2.
     \item \textbf{Hệ điều hành}: Windows 11 / Linux POSIX tương thích.
-    \item \textbf{Nền tảng phần mềm}: Python 3.12, \texttt{numpy==1.26.4}, \texttt{pandas==2.2.2}, \texttt{scikit-learn==1.6.1}, \texttt{xgboost==3.0.5}, \texttt{shap==0.48.0}, \texttt{matplotlib==3.9.2}.
+    \item \textbf{Nền tảng phần mềm}: Python 3.12 cùng hệ thống thư viện khoa học dữ liệu gồm \texttt{numpy==1.26.4}, \texttt{pandas==2.2.2}, \texttt{scikit-learn==1.6.1}, \texttt{xgboost==3.0.5}, \texttt{shap==0.48.0} và \texttt{matplotlib==3.9.2}.
 \end{itemize}
 
 \section{Kiểm Soát Tính Ngẫu Nhiên}
@@ -28,7 +28,8 @@ Như đã phân tích tại Bảng \ref{tab:dataset_splits}, trong tập $\Dtrai
 
 Để khắc phục hiện tượng mô hình bị thiên lệch về lớp đa số mà không làm biến dạng phân phối không gian mẫu (như các phương pháp tổng hợp dữ liệu SMOTE thường gây nhiễu ranh giới mạng), dự án áp dụng kỹ thuật gán trọng số lớp (Cost-sensitive Weighting) tính toán duy nhất từ $\Dtrain$:
 \begin{itemize}
-    \item \textbf{Đối với Decision Tree và Random Forest}: Sử dụng tham số \texttt{class\_weight='balanced'}:
+    \item \textbf{Decision Tree và Random Forest}:\\
+    Sử dụng tham số trọng số \texttt{class\_weight='balanced'}:
     \begin{equation}
         w_c = \frac{N_{\text{train}}}{2 \cdot N_{\text{train}, c}} \implies w_0 = \frac{90,273}{2 \times 85,139} \approx 0.53, \quad w_1 = \frac{90,273}{2 \times 5,134} \approx 8.79
     \end{equation}
@@ -82,7 +83,7 @@ Mô hình đạt điểm số tối ưu trên $\Dval$ sẽ được lựa chọn
 Nhằm đảm bảo tính minh bạch khoa học và tránh việc diễn giải sai lệch kết quả, nghiên cứu phân định rõ ràng \textbf{hai chế độ thực nghiệm} độc lập đã được thực hiện:
 
 \subsection{Chế độ 1: Canonical Strict Zero-Shot Regime (Chuẩn Mực Chính)}
-Đây là giao thức đánh giá trung tâm của bài tập lớn được triển khai trong \texttt{scripts/run\_remaining.py} và lưu trữ tại \texttt{artifacts/week3\_week4/test\_comparison.csv}:
+Đây là giao thức đánh giá trung tâm của bài tập lớn được triển khai trong \path{scripts/run_remaining.py} và lưu trữ tại \path{artifacts/week3_week4/test_comparison.csv}:
 \begin{itemize}
     \item Mô hình được \textbf{fit duy nhất trên tập $\Dtrain$} (chỉ chứa \FTP).
     \item Tập $\Dval$ chỉ được đưa vào phương thức \texttt{predict\_proba} để lựa chọn cấu hình tham số tốt nhất.

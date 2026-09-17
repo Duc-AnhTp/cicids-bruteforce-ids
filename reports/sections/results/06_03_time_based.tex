@@ -2,9 +2,9 @@
 % reports/sections/results/06_03_time_based.tex
 % ==============================================================================
 
-\section{Kết Quả Đánh Giá Trên Tập Test Theo Thời Gian (Primary Benchmark)}
+\section{Kết Quả Đánh Giá Tập Test Theo Thời Gian (Primary Benchmark)}
 
-Sau khi đóng băng toàn bộ cấu hình siêu tham số và lưu vết mã băm trong \texttt{frozen.json}, kịch bản \texttt{scripts/run\_remaining.py} tiến hành mở tập kiểm thử $\Dtest$ đúng một lần duy nhất. Kết quả đánh giá của 3 mô hình trên tập Test theo thời gian (kịch bản \texttt{time/with\_port}) được thể hiện tại Phần A của Bảng \ref{tab:test_comparison}.
+Sau khi đóng băng toàn bộ cấu hình siêu tham số và lưu vết mã băm trong \texttt{frozen.json}, kịch bản \path{scripts/run_remaining.py} tiến hành mở tập kiểm thử $\Dtest$ đúng một lần duy nhất. Kết quả đánh giá của 3 mô hình trên tập Test theo thời gian (kịch bản \texttt{time/with\_port}) được thể hiện tại Phần A của Bảng \ref{tab:test_comparison}.
 
 \input{tables/generated/tab_test_comparison.tex}
 
@@ -12,7 +12,8 @@ Kết quả thực nghiệm ghi nhận một \textbf{sự sụp đổ hiệu nă
 \begin{itemize}
     \item \textbf{Cây Quyết Định (Decision Tree)}: Đạt $\FOne = \textbf{\DTTestFOne}$, $\Precision = \DTTestPrecision$, $\Recall = \DTTestRecall$, $\AP = \DTTestAP$, $\ROCAUC = \DTTestROCAUC$. Ma trận nhầm lẫn: $TP = \DTTestTP$, $FP = \DTTestFP$, $FN = \DTTestFN$, $TN = \DTTestTN$. Mô hình bỏ lọt 100\% các cuộc tấn công SSH ($\text{SSH Recall} = \DTTestSSHRecall$).
     \item \textbf{Rừng Ngẫu Nhiên (Random Forest - Mô hình Thắng cuộc)}: Đạt $\FOne = \textbf{\RFTestFOne}$, $\Precision = \RFTestPrecision$, $\Recall = \RFTestRecall$, $\AP = \RFTestAP$, $\ROCAUC = \RFTestROCAUC$. Ma trận nhầm lẫn: $TP = \RFTestTP$, $FP = \RFTestFP$, $FN = \RFTestFN$, $TN = \RFTestTN$. Mô hình chỉ nhận diện chính xác vỏn vẹn \textbf{7 trên tổng số 3,732 flow tấn công SSH}, tương ứng với tỷ lệ phát hiện chỉ đạt $\text{SSH Recall} = \textbf{\RFTestSSHRecall}$.
-    \item \textbf{XGBoost}: Đạt $\FOne = \textbf{\XGBTestFOne}$, $\Precision = \XGBTestPrecision$, $\Recall = \XGBTestRecall$, $\AP = \XGBTestAP$, $\ROCAUC = \XGBTestROCAUC$. Ma trận nhầm lẫn: $TP = \XGBTestTP$, $FP = \XGBTestFP$, $FN = \XGBTestFN$, $TN = \XGBTestTN$. Tương tự Decision Tree, XGBoost không nhận diện được bất kỳ cuộc tấn công SSH nào ($\text{SSH Recall} = \XGBTestSSHRecall$).
+    \item \textbf{XGBoost}:
+    Đạt $\FOne = \textbf{\XGBTestFOne}$, $\Precision = \XGBTestPrecision$, $\Recall = \XGBTestRecall$, $\AP = \XGBTestAP$, $\ROCAUC = \XGBTestROCAUC$. Ma trận nhầm lẫn gồm $TP = \XGBTestTP$, $FP = \XGBTestFP$, $FN = \XGBTestFN$, $TN = \XGBTestTN$. Tương tự Decision Tree, XGBoost không nhận diện được bất kỳ cuộc tấn công SSH nào ($\text{SSH Recall} = \XGBTestSSHRecall$).
 \end{itemize}
 
 \begin{figure}[htbp]
@@ -23,7 +24,7 @@ Kết quả thực nghiệm ghi nhận một \textbf{sự sụp đổ hiệu nă
 \end{figure}
 
 \noindent\textbf{Ghi nhận về Support và FTP Recall trên tập Test:}
-Do tập $\Dtest$ theo thời gian diễn ra từ 14:32 đến 17:00 chiều (chỉ có chiến dịch \SSH), số lượng mẫu hỗ trợ của \FTP\ là $0$ ($\text{FTP Support} = 0$). Theo đúng nguyên tắc trung thực học thuật đã đề ra, chỉ số \textbf{FTP Recall trên tập Test bắt buộc phải ghi nhận là N/A (Not Applicable)}, tuyệt đối không được gán giá trị 0\% hay 100\%.
+Do tập $\Dtest$ theo thời gian diễn ra từ 14:32 đến 17:00 chiều (chỉ xuất hiện chiến dịch \SSH), số lượng mẫu hỗ trợ của \FTP\ là $0$ ($\text{FTP Support} = 0$). Theo đúng nguyên tắc trung thực học thuật đã đề ra, chỉ số \textbf{FTP Recall trên tập Test bắt buộc phải ghi nhận là N/A (Not Applicable)}, tuyệt đối không được gán giá trị 0\% hay 100\%.
 
 \noindent\textbf{Ý nghĩa khoa học của kết quả:}
 Con số $\FOne \le \RFTestFOne$ là minh chứng đanh thép và không thể chối cãi cho thấy: khi chỉ được huấn luyện trên dữ liệu quá khứ chứa một dạng tấn công brute force (\FTP), các mô hình học máy dạng cây hoàn toàn không có khả năng tự động suy luận để nhận diện một dạng tấn công brute force mới (\SSH) xuất hiện trong tương lai trên cùng một hệ thống mạng!

@@ -31,8 +31,8 @@ Chi tiết chính sách quản lý đặc trưng được trình bày trong Bả
 \subsection{Thực nghiệm Bóc tách Cổng dịch vụ (Port Ablation Design)}
 Cổng dịch vụ đích (\texttt{Destination Port}) có giá trị bằng 21 cho giao thức FTP và 22 cho giao thức SSH. Để trả lời câu hỏi nghiên cứu RQ3 xem mô hình có bị phụ thuộc thái quá vào số cổng hay không, chúng tôi thiết kế 2 nhánh không gian đặc trưng song song:
 \begin{enumerate}
-    \item \textbf{Nhánh có cổng (\texttt{with\_port}, \FeatWithPortCount\ đặc trưng)}: Bao gồm \texttt{Destination Port} cùng toàn bộ các đặc trưng thống kê hành vi luồng mạng.
-    \item \textbf{Nhánh không có cổng (\texttt{without\_port}, \FeatWithoutPortCount\ đặc trưng)}: Loại bỏ hoàn toàn \texttt{Destination Port}, buộc mô hình phải dựa 100\% vào các đặc trưng thống kê gói tin (Packet lengths, IAT, Flags, Header lengths).
+    \item \textbf{Nhánh có cổng} (\texttt{with\_port}, \FeatWithPortCount\ đặc trưng): Bao gồm \texttt{Destination Port} cùng toàn bộ các đặc trưng thống kê hành vi luồng mạng.
+    \item \textbf{Nhánh không có cổng} (\texttt{without\_port}, \FeatWithoutPortCount\ đặc trưng): Loại bỏ hoàn toàn \texttt{Destination Port}, buộc mô hình phải dựa 100\% vào các đặc trưng thống kê gói tin (Packet lengths, IAT, Flags, Header lengths).
 \end{enumerate}
 
 Danh mục định nghĩa chi tiết của toàn bộ \FeatWithPortCount\ đặc trưng mạng được cung cấp tại Phụ lục \ref{app:feature_list}.
@@ -62,12 +62,12 @@ Thuật toán Purge và Embargo đã loại bỏ tổng cộng \textbf{\DataPurg
 \subsection{Chiến Lược Đối Chứng: Phân Tách Ngẫu Nhiên (Random Split)}
 Để làm cơ sở đối chứng đo lường hiện tượng Optimistic Evaluation Bias, một bản sao dữ liệu thứ hai được phân chia ngẫu nhiên theo phương pháp phân tầng (Stratified Random Split) với tỷ lệ số lượng mẫu tương ứng: Train ($20.6\%$), Validation ($46.5\%$) và Test ($32.9\%$). Phép chia này xáo trộn toàn bộ các flow mà không màng tới thứ tự thời gian xuất hiện.
 
-\section{Quy Trình Tiền Xử Lý Chỉ Học Từ Tập Train (Train-Only Preprocessing)}
+\section{Quy Trình Tiền Xử Lý Độc Lập Trên Tập Train (Train-Only Preprocessing)}
 
-Một nguyên tắc cốt tử trong MLOps là \textbf{bộ tiền xử lý không được phép nhìn thấy dữ liệu tương lai}. Toàn bộ các bước học tham số tiền xử lý được thực hiện nghiêm ngặt trên tập $\Dtrain$ theo kịch bản \texttt{scripts/preprocess\_data.py}:
+Một nguyên tắc cốt tử trong MLOps là \textbf{bộ tiền xử lý không được phép nhìn thấy dữ liệu tương lai}. Toàn bộ các bước học tham số tiền xử lý được thực hiện nghiêm ngặt trên tập $\Dtrain$ theo kịch bản \path{scripts/preprocess_data.py}:
 \begin{enumerate}
     \item \textbf{Loại bỏ đặc trưng hằng số}: Thuật toán kiểm tra phương sai của từng đặc trưng trên $\Dtrain$. Có \FeatConstantDropped\ đặc trưng có giá trị không đổi (phương sai bằng 0) trên $\Dtrain$ (bao gồm các cờ hiếm như \texttt{Bwd PSH Flags}, \texttt{Fwd URG Flags}, \texttt{CWE Flag Count} và các trường bulk). Danh sách \FeatConstantDropped\ cột này được lưu lại và áp dụng loại bỏ đồng bộ trên $\Dval$ và $\Dtest$.
-    \item \textbf{Điền giá trị thiếu (Missing Imputation)}: Khởi tạo \texttt{SimpleImputer(strategy='median')}. Giá trị trung vị (median) của từng đặc trưng được tính toán duy nhất trên $\Dtrain$, sau đó được dùng để điền các giá trị NaN trên cả ba tập $\Dtrain$, $\Dval$ và $\Dtest$.
+    \item \textbf{Điền giá trị thiếu (Missing Imputation)}: Khởi tạo \texttt{SimpleImputer} với chiến lược trung vị (\texttt{strategy='median'}). Giá trị trung vị của từng đặc trưng được tính toán duy nhất trên $\Dtrain$, sau đó được dùng để điền các giá trị NaN trên cả ba tập $\Dtrain$, $\Dval$ và $\Dtest$.
 \end{enumerate}
 
 \section{Nguyên Tắc Đóng Băng Mô Hình (Single-Open Test Rule)}
@@ -75,6 +75,6 @@ Một nguyên tắc cốt tử trong MLOps là \textbf{bộ tiền xử lý khô
 Để loại trừ hoàn toàn nguy cơ tinh chỉnh siêu tham số lặp đi lặp lại trên tập Test (Test Leakage qua con người), dự án áp dụng quy tắc đóng băng nghiêm ngặt:
 \begin{itemize}
     \item Toàn bộ quá trình thử nghiệm, tuning siêu tham số và lựa chọn mô hình chiến thắng được thực hiện hoàn toàn trên tập $\Dtrain$ và $\Dval$.
-    \item Cấu hình tốt nhất sau đó được xuất ra tệp \texttt{artifacts/week3\_week4/frozen.json} và tính mã băm SHA-256 xác thực.
-    \item Kịch bản đánh giá tập Test (\texttt{scripts/run\_remaining.py}) kiểm tra cờ \texttt{TEST\_OPENED.json}. Tập Test chỉ được mở đúng một lần duy nhất để tính toán các chỉ số cuối cùng. Mọi hành động sửa đổi mã nguồn hay tham số sau mốc mở này đều bị coi là vi phạm giao thức.
+    \item Cấu hình tốt nhất sau đó được xuất ra tệp \path{artifacts/week3_week4/frozen.json} và tính mã băm SHA-256 xác thực.
+    \item Kịch bản đánh giá tập Test (\path{scripts/run_remaining.py}) kiểm tra cờ \texttt{TEST\_OPENED.json}. Tập Test chỉ được mở đúng một lần duy nhất để tính toán các chỉ số cuối cùng. Mọi hành động sửa đổi mã nguồn hay tham số sau mốc mở này đều bị coi là vi phạm giao thức.
 \end{itemize}

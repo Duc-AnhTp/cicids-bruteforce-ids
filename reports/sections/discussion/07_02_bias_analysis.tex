@@ -16,7 +16,7 @@ Tuy nhiên, trong an ninh mạng, lưu lượng phát sinh từ một chiến d�
 \begin{itemize}
     \item Một chiến dịch tấn công brute force kéo dài liên tục hàng giờ sử dụng một công cụ duy nhất (\texttt{patator}) chạy trên một máy trạm duy nhất.
     \item Công cụ này có cấu hình cố định về: kích thước buffer socket, thuật toán tạo luồng song song (threading model), thời gian trễ giữa các yêu cầu (delay interval) và chuỗi lệnh thử mật khẩu.
-    \item Máy chủ phản hồi cũng có cấu hình cố định về kích thước TCP window (\texttt{Init\_Win\_bytes}) và các cờ giao thức.
+    \item Máy chủ phản hồi cũng có cấu hình cố định về các cờ giao thức và kích thước cửa sổ TCP (\texttt{Init\_Win\_bytes}).
 \end{itemize}
 
 Hệ quả là hàng nghìn flow được sinh ra trong chiến dịch đó có sự tự tương quan nội tại (Intra-campaign Autocorrelation) cực kỳ mạnh mẽ. Chúng chia sẻ chung một "dấu vân tay thống kê" (Statistical Footprint) gần như đồng nhất.

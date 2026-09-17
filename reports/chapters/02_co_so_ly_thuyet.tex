@@ -34,7 +34,7 @@ Hệ thống này \textbf{không phải} là hệ thống phát hiện xâm nh�
 \subsection{Tấn công Brute Force đối với FTP (Port 21)}
 FTP (File Transfer Protocol) là giao thức truyền tệp hoạt động trên kênh văn bản rõ (plain-text) ở tầng ứng dụng:
 \begin{itemize}
-    \item Quá trình xác thực diễn ra thông qua các lệnh \texttt{USER <username>} và \texttt{PASS <password>}.
+    \item Quá trình xác thực diễn ra thông qua các cặp lệnh \texttt{USER} và \texttt{PASS}.
     \item Máy chủ phản hồi bằng mã trạng thái \texttt{230 User logged in} (thành công) hoặc \texttt{530 Login incorrect} (thất bại).
     \item Khi công cụ Patator (\texttt{ftp\_patator}) thực hiện tấn công brute force, nó thiết lập liên tục các kết nối TCP mới, gửi lệnh thử mật khẩu và đóng kết nối ngay khi nhận mã 530.
     \item \textbf{Đặc trưng thống kê}: Vì là văn bản rõ, các gói tin yêu cầu và phản hồi có kích thước rất ngắn và cố định. Lưu lượng hướng đi (Fwd) thường có độ lệch chuẩn kích thước gói tin rất nhỏ.

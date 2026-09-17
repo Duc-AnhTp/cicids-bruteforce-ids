@@ -26,8 +26,12 @@
 \setlength{\parindent}{1.27cm}
 \setlength{\parskip}{6pt}
 
-% Đảm bảo longtable không bị lỗi glue shrinkage do parskip
-\AtBeginEnvironment{longtable}{\setlength{\parskip}{0pt}\singlespacing}
+% Đảm bảo độ dãn linh hoạt và tránh overfull hbox ở các dòng có mã nguồn
+\raggedbottom
+\setlength{\emergencystretch}{3em}
+
+% Đảm bảo longtable không bị lỗi glue shrinkage do parskip và setspace
+\AtBeginEnvironment{longtable}{\setlength{\parskip}{0pt}\linespread{1.0}\selectfont}
 
 % Định dạng tiêu đề chương và các mục con
 \titleformat{\chapter}[display]

@@ -23,7 +23,7 @@ Tính hợp lệ bên trong xem xét liệu các kết luận thực nghiệm c�
 Tính hợp lệ khái niệm đánh giá mức độ tương thích giữa bài toán đo lường thực nghiệm và mục tiêu thực tế của hệ thống an ninh mạng:
 \begin{enumerate}
     \item \textbf{Phân loại Flow hoàn tất so với NIDS thời gian thực}: Như đã khẳng định tại Chương 2, hệ thống thực nghiệm hoạt động trên các flow đã đóng hoàn toàn sau khi kết thúc truyền thông. Do đó, các kết quả trong báo cáo này phản ánh năng lực của một hệ thống phân tích nhật ký lưu lượng mạng hậu kiểm (Post-mortem Traffic Analyzer) hơn là một hệ thống phát hiện và ngăn chặn xâm nhập thời gian thực (Inline IPS) có khả năng ngắt kết nối ngay ở những gói tin đầu tiên.
-    \item \textbf{Gộp nhãn nhị phân (\Normal\ vs \Attack)}: Việc gom chung \FTP\ và \SSH\ vào nhãn $y=1$ có thể che giấu những đặc thù riêng của từng giao thức. Tuy nhiên, việc theo dõi chỉ số phụ Subtype Recall đã giúp khắc phục triệt để hạn chế này.
+    \item \textbf{Gộp nhãn nhị phân} (\Normal\ so với \Attack): Việc gom chung \FTP\ và \SSH\ vào nhãn $y=1$ có thể che giấu những đặc thù riêng của từng giao thức. Tuy nhiên, việc theo dõi chỉ số phụ Subtype Recall đã giúp khắc phục triệt để hạn chế này.
 \end{enumerate}
 
 \section{Tính Hợp Lệ Bên Ngoài (External Validity)}
@@ -31,7 +31,7 @@ Tính hợp lệ khái niệm đánh giá mức độ tương thích giữa bài
 Tính hợp lệ bên ngoài phản ánh khả năng khái quát hóa của kết quả nghiên cứu sang các môi trường mạng và ngữ cảnh khác:
 \begin{enumerate}
     \item \textbf{Dữ liệu môi trường phòng thí nghiệm}: Tập dữ liệu CICIDS2017 được thu thập trong môi trường mạng giả lập của UNB. Mặc dù đã cố gắng mô phỏng lưu lượng người dùng tự nhiên (sử dụng hệ thống B-Profile), lưu lượng này vẫn thiếu đi sự phong phú, phức tạp và nhiễu loạn của các mạng viễn thông hoặc trung tâm dữ liệu quy mô lớn trong thực tế.
-    \item \textbf{Giới hạn trong phạm vi ngày Tuesday}: Đồ án tập trung nghiên cứu chuyên sâu vào hai biến thể tấn công brute force (FTP và SSH) trong ngày thứ Ba. Kết luận về sự sụp đổ của Zero-shot Transfer cần được tiếp tục kiểm chứng trên các dạng tấn công khác như DoS/DDoS (ngày Wednesday) hay Web Attacks (ngày Thursday).
+    \item \textbf{Giới hạn trong phạm vi ngày Tuesday}: Bài tập lớn tập trung nghiên cứu chuyên sâu vào hai biến thể tấn công brute force (FTP và SSH) trong ngày thứ Ba. Kết luận về sự sụp đổ của Zero-shot Transfer cần được tiếp tục kiểm chứng trên các dạng tấn công khác như DoS/DDoS (ngày Wednesday) hay Web Attacks (ngày Thursday).
 \end{enumerate}
 
 \section{Tính Hợp Lệ Kết Luận Thống Kê (Statistical Conclusion Validity)}
