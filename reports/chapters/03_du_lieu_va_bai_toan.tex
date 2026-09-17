@@ -25,7 +25,7 @@ Dữ liệu thô được sử dụng trong nghiên cứu này là tệp CSV tr�
     \begin{center}
         \texttt{\DataShaFull}
     \end{center}
-    \item \textbf{Tổng số dòng thô ban đầu}: \DataRawRows\ dòng (bao gồm 1 dòng tiêu đề và 445,908 bản ghi flow).
+    \item \textbf{Tổng số dòng thô ban đầu}: \DataRawRows\ bản ghi flow (tương ứng 445,910 dòng trên đĩa tính cả 1 dòng tiêu đề).
 \end{itemize}
 
 Việc lưu trữ và kiểm tra mã băm SHA-256 đảm bảo tính toàn vẹn tuyệt đối của dữ liệu đầu vào, cho phép bất kỳ nhà nghiên cứu nào trên thế giới cũng có thể kiểm chứng độc lập trên cùng một tệp dữ liệu nguồn.
@@ -45,7 +45,7 @@ Trong quá trình Khám phá Dữ liệu (Exploratory Data Analysis - EDA), chú
 Nếu phân tích trực tiếp chuỗi thời gian này mà không phục hồi, các flow buổi chiều sẽ bị sắp xếp nhầm thành buổi đêm/sáng sớm (1h - 5h sáng), làm đảo lộn hoàn toàn thứ tự thời gian của các chiến dịch tấn công.
 
 \subsection{Quy tắc phục hồi 24 giờ chuẩn mực}
-Quy tắc phục hồi được hiện thực hóa trong hàm \texttt{reconstruct\_timestamp()} tại \texttt{scripts/prepare\_splits.py}:
+Quy tắc phục hồi được hiện thực hóa thông qua hàm \texttt{reconstruct\_timestamp()} tại tệp mã nguồn \path{scripts/prepare_splits.py}:
 \begin{equation}
     H_{\text{24h}} = \begin{cases}
         H_{\text{raw}} + 12 & \text{nếu } H_{\text{raw}} \in \{1, 2, 3, 4, 5\} \\
@@ -57,7 +57,7 @@ Quy tắc phục hồi được hiện thực hóa trong hàm \texttt{reconstruc
 
 \section{Định Nghĩa Bài Toán và Không Gian Nhãn}
 
-Đồ án định nghĩa bài toán phân loại là \textbf{Phân loại nhị phân (Binary Classification)} nhằm nhận diện lưu lượng bất thường:
+Bài tập lớn định nghĩa bài toán phân loại là \textbf{Phân loại nhị phân (Binary Classification)} nhằm nhận diện lưu lượng bất thường:
 \begin{equation}
     y = \begin{cases}
         0 & \text{nếu flow là lưu lượng bình thường (\BENIGN)} \\

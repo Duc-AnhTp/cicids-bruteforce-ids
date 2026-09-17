@@ -4,7 +4,6 @@
 # ==============================================================================
 
 PROJECT = main
-BUILD_DIR = build
 COMPILER = xelatex
 BIB_COMPILER = biber
 

@@ -6,12 +6,12 @@
 
 Trong quá trình đối soát thực nghiệm giữa các đường ống trong mã nguồn, chúng tôi phát hiện một sự phân kỳ số liệu đặc biệt lớn đối với thuật toán XGBoost:
 \begin{itemize}
-    \item Trong benchmark chuẩn mực (\texttt{artifacts/week3\_week4/test\_comparison.csv}), XGBoost đạt $\FOne = \textbf{0.0000}$ ($\text{SSH Recall} = 0.00\%$).
-    \item Trong kết quả tuning độc lập (\texttt{experiments/w3\_05\_time\_tuning/test\_eval/test\_metrics.json}), XGBoost lại đạt $\FOne = \textbf{\XGBRefitTestFOne}$ ($\text{SSH Recall} = \textbf{\XGBRefitTestSSHRecall}$).
+    \item Trong benchmark chuẩn mực (\path{artifacts/week3_week4/test_comparison.csv}), XGBoost đạt $\FOne = \textbf{0.0000}$ ($\text{SSH Recall} = 0.00\%$).
+    \item Trong kết quả tuning độc lập (\path{experiments/w3_05_time_tuning/test_eval/test_metrics.json}), XGBoost lại đạt $\FOne = \textbf{\XGBRefitTestFOne}$ ($\text{SSH Recall} = \textbf{\XGBRefitTestSSHRecall}$).
 \end{itemize}
 
 \subsection{Truy Vết Nguyên Nhân Kỹ Thuật Trong Mã Nguồn}
-Tiến hành phân tích chuyên sâu mã nguồn \texttt{src/ids/tune\_xgboost.py}, nguyên nhân gốc rễ (Root Cause) đã được xác định một cách tường minh tại dòng 151--168:
+Tiến hành phân tích chuyên sâu mã nguồn \path{src/ids/tune_xgboost.py}, nguyên nhân gốc rễ (Root Cause) đã được xác định một cách tường minh tại dòng 151--168:
 \begin{lstlisting}[language=Python]
 search = RandomizedSearchCV(
     estimator=base_model,
@@ -27,7 +27,7 @@ search.fit(X_combined, y_combined)
 joblib.dump(search.best_estimator_, best_model_path)
 \end{lstlisting}
 
-Theo tài liệu đặc tả của thư viện \texttt{scikit-learn}, tham số \texttt{refit} có giá trị mặc định là \texttt{True}. Sau khi hoàn tất việc đánh giá các tổ hợp siêu tham số trên \texttt{cv\_split} (sử dụng tập con Train làm fold huấn luyện và Val làm fold kiểm định), đối tượng \texttt{RandomizedSearchCV} sẽ \textbf{tự động gọi hàm \texttt{fit()} của mô hình tốt nhất trên toàn bộ tập dữ liệu được truyền vào hàm \texttt{fit()}}, tức là toàn bộ tập gộp $\mathbf{X}_{\text{combined}} = \mathbf{X}_{\text{train}} \cup \mathbf{X}_{\text{val}}$.
+Theo tài liệu đặc tả của thư viện \texttt{scikit-learn}, tham số \texttt{refit} có giá trị mặc định là \texttt{True}. Sau khi hoàn tất việc đánh giá các tổ hợp siêu tham số trên \texttt{cv\_split} (sử dụng tập con Train làm fold huấn luyện và Val làm fold kiểm định), đối tượng \texttt{RandomizedSearchCV} sẽ \textbf{tự động gọi hàm \texttt{fit()} của mô hình tốt nhất trên toàn bộ tập dữ liệu được truyền vào hàm \texttt{fit()}}, tức là toàn bộ tập gộp $\mathbf{X}_{\text{combined}} = \Xtrain \cup \Xval$.
 
 \subsection{Hậu Quả Đối Với Bản Chất Bài Toán Đánh Giá}
 Trong khi tập $\Dtrain$ hoàn toàn không có bất kỳ mẫu \SSH\ nào (0 flow), thì tập kiểm định $\Dval$ lại chứa tới \textbf{1,886 flow tấn công \SSH}.
@@ -45,7 +45,7 @@ Bảng \ref{tab:refit_comparison} tổng hợp sự đối lập sâu sắc gi�
 \centering
 \caption{Đối chiếu hiệu năng của XGBoost giữa Chế độ Zero-Shot Chuẩn mực và Chế độ Tiếp xúc Validation (Refit).}
 \label{tab:refit_comparison}
-\resizebox{\textwidth}{!}{%
+\adjustbox{max width=\textwidth}{%
 \begin{tabular}{lllrr}
 \toprule
 \textbf{Chế độ thực nghiệm} & \textbf{Dữ liệu thực tế fit mô hình} & \textbf{Số mẫu SSH đã học} & \textbf{Test F1-Score} & \textbf{Test SSH Recall} \\

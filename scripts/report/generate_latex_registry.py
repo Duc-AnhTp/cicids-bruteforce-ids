@@ -172,6 +172,7 @@ def main():
         r"\centering",
         r"\caption{Thống kê phân bổ dữ liệu các tập Train, Validation và Test theo chiến lược Temporal Split v1.}",
         r"\label{tab:dataset_splits}",
+        r"\adjustbox{max width=\textwidth}{%",
         r"\begin{tabular}{lrrrrrr}",
         r"\toprule",
         r"\textbf{Tập dữ liệu} & \textbf{Tổng số flow} & \textbf{BENIGN} & \textbf{Tấn công} & \textbf{FTP-Patator} & \textbf{SSH-Patator} & \textbf{Tỷ lệ Attack (\%)} \\",
@@ -185,7 +186,8 @@ def main():
         f"Purge/Embargo & {purged_rows:,} & 6,967 & 665 & 386 & 279 & 8.71\\% \\\\",
         f"\\textbf{{Tổng số hợp lệ}} & \\textbf{{{cleaned_rows:,}}} & \\textbf{{432,053}} & \\textbf{{13,835}} & \\textbf{{7,938}} & \\textbf{{5,897}} & \\textbf{{3.10\\%}} \\\\",
         r"\bottomrule",
-        r"\end{tabular}",
+        r"\end{tabular}%",
+        r"}",
         r"\end{table}",
     ])
     with open(out_tbl / "tab_dataset_splits.tex", "w", encoding="utf-8") as f:
@@ -195,9 +197,9 @@ def main():
     t2 = [
         r"\begin{table}[htbp]",
         r"\centering",
-        r"\small",
         r"\caption{Kết quả đánh giá và lựa chọn cấu hình siêu tham số tối ưu trên tập Validation (Mốc 10:02 -- 14:28).}",
         r"\label{tab:validation_winners}",
+        r"\adjustbox{max width=\textwidth}{%",
         r"\begin{tabular}{lllrrrrrr}",
         r"\toprule",
         r"\textbf{Mô hình} & \textbf{Phân tách} & \textbf{Cổng} & \textbf{F1-Score} & \textbf{Precision} & \textbf{Recall} & \textbf{AP} & \textbf{ROC-AUC} & \textbf{FPR} \\",
@@ -211,7 +213,8 @@ def main():
         t2.append(f"{mname} & {sp} & {scen} & {r['f1_attack']:.4f} & {r['precision_attack']:.4f} & {r['recall_attack']:.4f} & {r['average_precision']:.4f} & {r['roc_auc']:.4f} & {format_num(r['fpr'])} \\\\")
     t2.extend([
         r"\bottomrule",
-        r"\end{tabular}",
+        r"\end{tabular}%",
+        r"}",
         r"\end{table}",
     ])
     with open(out_tbl / "tab_validation_winners.tex", "w", encoding="utf-8") as f:
@@ -221,9 +224,9 @@ def main():
     t3 = [
         r"\begin{table}[htbp]",
         r"\centering",
-        r"\scriptsize",
         r"\caption{Hiệu năng tổng thể trên tập Test đối chuẩn giữa 12 tổ hợp thực nghiệm (Đánh giá sau khi khóa cấu hình).}",
         r"\label{tab:test_comparison}",
+        r"\adjustbox{max width=\textwidth}{%",
         r"\begin{tabular}{lllrrrrrrrr}",
         r"\toprule",
         r"\textbf{Mô hình} & \textbf{Phân tách} & \textbf{Kịch bản} & \textbf{Accuracy} & \textbf{Precision} & \textbf{Recall} & \textbf{F1} & \textbf{AP} & \textbf{ROC-AUC} & \textbf{FTP Rec.} & \textbf{SSH Rec.} \\",
@@ -248,7 +251,8 @@ def main():
         t3.append(f"{mname} & Random & {scen} & {r['accuracy']:.4f} & {r['precision_attack']:.4f} & {r['recall_attack']:.4f} & \\textbf{{{r['f1_attack']:.4f}}} & {r['average_precision']:.4f} & {r['roc_auc']:.4f} & {ftp_rec} & {ssh_rec} \\\\")
     t3.extend([
         r"\bottomrule",
-        r"\end{tabular}",
+        r"\end{tabular}%",
+        r"}",
         r"\end{table}",
     ])
     with open(out_tbl / "tab_test_comparison.tex", "w", encoding="utf-8") as f:
@@ -258,9 +262,9 @@ def main():
     t4 = [
         r"\begin{table}[htbp]",
         r"\centering",
-        r"\small",
         r"\caption{Thực nghiệm Bóc tách Cổng mạng (Port Ablation) trên tập Validation phân tách theo thời gian.}",
         r"\label{tab:port_ablation}",
+        r"\adjustbox{max width=\textwidth}{%",
         r"\begin{tabular}{lrrrrr}",
         r"\toprule",
         r"\textbf{Mô hình} & \textbf{F1 (Có Cổng)} & \textbf{F1 (Không Cổng)} & \textbf{$\Delta$F1} & \textbf{SSH Recall (Có)} & \textbf{SSH Recall (Không)} \\",
@@ -271,7 +275,8 @@ def main():
         t4.append(f"{mname} & {r['f1_with_port']:.4f} & {r['f1_without_port']:.4f} & {r['delta_f1']:.4f} & {r['ssh_recall_with_port']*100:.2f}\\% & {r['ssh_recall_without_port']*100:.2f}\\% \\\\")
     t4.extend([
         r"\bottomrule",
-        r"\end{tabular}",
+        r"\end{tabular}%",
+        r"}",
         r"\end{table}",
     ])
     with open(out_tbl / "tab_port_ablation.tex", "w", encoding="utf-8") as f:
@@ -281,9 +286,9 @@ def main():
     t5 = [
         r"\begin{table}[htbp]",
         r"\centering",
-        r"\small",
         r"\caption{Độ lệch hiệu năng ($\Delta\text{F1}$) giữa Phân tách Ngẫu nhiên và Phân tách Thời gian trên tập Validation.}",
         r"\label{tab:split_diff}",
+        r"\adjustbox{max width=\textwidth}{%",
         r"\begin{tabular}{llrrrr}",
         r"\toprule",
         r"\textbf{Mô hình} & \textbf{Kịch bản cổng} & \textbf{F1 (Thời gian)} & \textbf{F1 (Ngẫu nhiên)} & \textbf{$\Delta\text{F1 (Random - Time)}$} & \textbf{SSH Recall (Random)} \\",
@@ -295,7 +300,8 @@ def main():
         t5.append(f"{mname} & {scen} & {r['f1_time']:.4f} & {r['f1_random']:.4f} & \\textbf{{{r['delta_f1_random_minus_time']:.4f}}} & {r['ssh_recall_random']*100:.2f}\\% \\\\")
     t5.extend([
         r"\bottomrule",
-        r"\end{tabular}",
+        r"\end{tabular}%",
+        r"}",
         r"\end{table}",
     ])
     with open(out_tbl / "tab_split_diff.tex", "w", encoding="utf-8") as f:
@@ -305,9 +311,9 @@ def main():
     t6 = [
         r"\begin{table}[htbp]",
         r"\centering",
-        r"\small",
         r"\caption{Top 10 đặc trưng mạng có đóng góp lớn nhất vào quyết định phân loại theo giá trị SHAP trung bình.}",
         r"\label{tab:shap_top10}",
+        r"\adjustbox{max width=\textwidth}{%",
         r"\begin{tabular}{rlrl}",
         r"\toprule",
         r"\textbf{Hạng} & \textbf{Tên đặc trưng mạng} & \textbf{Mean $|$SHAP$|$} & \textbf{Ý nghĩa giao thức / thống kê mạng} \\",
@@ -333,7 +339,8 @@ def main():
         t6.append(f"{i+1} & \\texttt{{{fname}}} & {fval:.4f} & {fdesc} \\\\")
     t6.extend([
         r"\bottomrule",
-        r"\end{tabular}",
+        r"\end{tabular}%",
+        r"}",
         r"\end{table}",
     ])
     with open(out_tbl / "tab_shap_top10.tex", "w", encoding="utf-8") as f:
