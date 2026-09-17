@@ -1,18 +1,15 @@
-% ==============================================================================
-% reports/tables/generated/tab_split_diff.tex
-% ==============================================================================
 \begin{table}[htbp]
 \centering
-\caption{Độ lệch hiệu năng ($\Delta$\FOne) giữa Phân tách Ngẫu nhiên và Phân tách Thời gian trên tập Validation.}
+\caption{Độ lệch hiệu năng ($\Delta\text{F1}$) giữa Phân tách Ngẫu nhiên và Phân tách Thời gian trên tập Validation.}
 \label{tab:split_diff}
-\resizebox{\textwidth}{!}{%
+\adjustbox{max width=\textwidth}{%
 \begin{tabular}{llrrrr}
 \toprule
-\textbf{Mô hình} & \textbf{Kịch bản cổng} & \textbf{\FOne\ (Thời gian)} & \textbf{\FOne\ (Ngẫu nhiên)} & \textbf{$\Delta$\FOne\ (Random - Time)} & \textbf{SSH Recall (Random)} \\
+\textbf{Mô hình} & \textbf{Kịch bản cổng} & \textbf{F1 (Thời gian)} & \textbf{F1 (Ngẫu nhiên)} & \textbf{$\Delta\text{F1 (Random - Time)}$} & \textbf{SSH Recall (Random)} \\
 \midrule
 Decision Tree & Có cổng & 0.7170 & 0.9939 & \textbf{0.2769} & 99.53\% \\
 Decision Tree & Không cổng & 0.7169 & 0.9799 & \textbf{0.2631} & 98.87\% \\
-Random Forest & Có cổng & 0.7181 & 0.9997 & \textbf{\DeltaFOneRFRandomTime} & 99.89\% \\
+Random Forest & Có cổng & 0.7181 & 0.9997 & \textbf{0.2816} & 99.89\% \\
 Random Forest & Không cổng & 0.7134 & 0.9942 & \textbf{0.2808} & 99.05\% \\
 XGBoost & Có cổng & 0.7181 & 0.9995 & \textbf{0.2814} & 100.00\% \\
 XGBoost & Không cổng & 0.7136 & 0.9984 & \textbf{0.2848} & 99.67\% \\

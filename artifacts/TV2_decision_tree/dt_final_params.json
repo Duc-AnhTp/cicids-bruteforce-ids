@@ -1,0 +1,41 @@
+{
+  "author": "TV2 (Decision Tree Lead)",
+  "timestamp": "2026-09-17T01:04:17.643085",
+  "models": {
+    "W3-01": {
+      "job": "W3-01",
+      "split": "time",
+      "scenario": "with_port",
+      "criterion": "gini",
+      "max_depth": 4,
+      "min_samples_leaf": 5,
+      "accuracy": 0.974,
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1_score": 0.0,
+      "fpr": 7.8e-05,
+      "roc_auc": 0.5,
+      "avg_precision": 0.0259,
+      "ftp_recall": null,
+      "ssh_recall": 0.0
+    },
+    "W3-02": {
+      "job": "W3-02",
+      "split": "random",
+      "scenario": "with_port",
+      "criterion": "entropy",
+      "max_depth": 12,
+      "min_samples_leaf": 5,
+      "accuracy": 0.9997,
+      "precision": 0.9921,
+      "recall": 0.9998,
+      "f1_score": 0.9959,
+      "fpr": 0.000253,
+      "roc_auc": 0.9999,
+      "avg_precision": 0.9993,
+      "ftp_recall": 1.0,
+      "ssh_recall": 0.999484004127967
+    }
+  },
+  "note": "W3-01 Time-based: zero-shot transfer challenge (Train=FTP only, Test=SSH only). W3-02 Random: control demonstrating data leakage inflates F1."
+}

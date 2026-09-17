@@ -5,7 +5,7 @@ Không điền số từ `demo_workspace`; tất cả số phải trích từ ru
 ## 1. Bài toán và phạm vi
 
 Mục tiêu: phân loại flow hoàn tất thành BENIGN hoặc FTP/SSH-Patator trong Tuesday.
-Nêu phạm vi rút gọn 3 ngày; liệt kê Random split và port ablation không thực hiện.
+Phạm vi thực nghiệm: Đánh giá trên bộ dữ liệu CICIDS2017 Tuesday với 12 tổ hợp thực nghiệm đối chuẩn hoàn chỉnh (3 thuật toán Decision Tree, Random Forest, XGBoost × 2 chiến lược phân tách Time-based/Random split × 2 không gian đặc trưng Có cổng/Bỏ cổng Port Ablation).
 
 ## 2. Nguồn dữ liệu
 

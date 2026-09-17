@@ -41,31 +41,33 @@ Như đã phân tích tại Bảng \ref{tab:dataset_splits}, trong tập $\Dtrai
 
 \section{Thiết Lập Không Gian Tìm Kiếm Siêu Tham Số}
 
-Quá trình tinh chỉnh siêu tham số được thực hiện thông qua tìm kiếm lưới (Grid Search) hoặc tìm kiếm ngẫu nhiên có kiểm soát (Randomized Search) trên không gian các tham số quan trọng nhất của từng thuật toán:
+Để đảm bảo tính khách quan và khả năng tái lập tuyệt đối, không gian siêu tham số được chuẩn hóa thành lưới tìm kiếm chính thức (\textit{Canonical Benchmark Grid}) và được khóa cấu hình trong tệp lưu vết \texttt{artifacts/week3\_week4/frozen.json}. Các tham số quan trọng nhất của từng thuật toán được xác định như sau:
 
 \begin{enumerate}
     \item \textbf{Cây Quyết Định (Decision Tree)}:
     \begin{itemize}
-        \item Tiêu chuẩn phân tách (\texttt{criterion}): \texttt{['gini', 'entropy']}
-        \item Độ sâu tối đa (\texttt{max\_depth}): \texttt{[4, 6, 8, 12, None]}
-        \item Số mẫu tối thiểu tại nút lá (\texttt{min\_samples\_leaf}): \texttt{[5, 10, 20]}
+        \item Tiêu chuẩn phân tách (\texttt{criterion}): Mặc định \texttt{'gini'} (đã khảo sát bổ sung \texttt{'entropy'} trong các thử nghiệm thăm dò của TV2).
+        \item Độ sâu tối đa (\texttt{max\_depth}): \texttt{[6, 8, 12, None]} (với \texttt{None} là cây phát triển hoàn toàn đến khi lá thuần nhất).
+        \item Số mẫu tối thiểu tại nút lá (\texttt{min\_samples\_leaf}): \texttt{[5, 10]}.
     \end{itemize}
     \item \textbf{Rừng Ngẫu Nhiên (Random Forest)}:
     \begin{itemize}
-        \item Số lượng cây (\texttt{n\_estimators}): \texttt{[100, 150, 300]}
-        \item Độ sâu tối đa (\texttt{max\_depth}): \texttt{[10, 16, None]}
-        \item Số mẫu tối thiểu tại nút lá (\texttt{min\_samples\_leaf}): \texttt{[5, 10]}
-        \item Số đặc trưng tại mỗi nút (\texttt{max\_features}): \texttt{'sqrt'}
+        \item Số lượng cây (\texttt{n\_estimators}): \texttt{[100, 150, 300]}.
+        \item Độ sâu tối đa (\texttt{max\_depth}): \texttt{[10, 16, None]}.
+        \item Số mẫu tối thiểu tại nút lá (\texttt{min\_samples\_leaf}): \texttt{[5]}.
+        \item Số đặc trưng tại mỗi nút (\texttt{max\_features}): \texttt{'sqrt'}.
     \end{itemize}
     \item \textbf{XGBoost}:
     \begin{itemize}
-        \item Số lượng cây (\texttt{n\_estimators}): \texttt{[100, 200]}
-        \item Độ sâu cây (\texttt{max\_depth}): \texttt{[3, 4, 6]}
-        \item Tốc độ học (\texttt{learning\_rate}): \texttt{[0.05, 0.08, 0.1]}
-        \item Tỷ lệ lấy mẫu đặc trưng (\texttt{colsample\_bytree}): \texttt{0.8}
-        \item Tỷ lệ lấy mẫu dòng (\texttt{subsample}): \texttt{0.8}
+        \item Số lượng cây (\texttt{n\_estimators}): \texttt{[100, 200]}.
+        \item Độ sâu cây (\texttt{max\_depth}): \texttt{[3, 4, 6]}.
+        \item Tốc độ học (\texttt{learning\_rate}): \texttt{0.08}.
+        \item Tỷ lệ lấy mẫu đặc trưng (\texttt{colsample\_bytree}): \texttt{0.8}.
+        \item Tỷ lệ lấy mẫu dòng (\texttt{subsample}): \texttt{0.8}.
     \end{itemize}
 \end{enumerate}
+
+Bên cạnh lưới chính thức trên, các thực nghiệm mở rộng sử dụng \texttt{RandomizedSearchCV} (như tinh chỉnh 50 lượt lặp cho Decision Tree hoặc khảo sát tốc độ học $[0.05, 0.08, 0.1]$ cho XGBoost) được ghi nhận độc lập tại các thư mục thực nghiệm riêng lẻ để phục vụ phân tích độ nhạy. Chi tiết các cấu hình tối ưu được lựa chọn cho 12 mô hình được tổng hợp tại Phụ lục \ref{app:hyperparameters}.
 
 \section{Tiêu Chí Lựa Chọn Mô Hình Chiến Thắng (Validation Selection)}
 

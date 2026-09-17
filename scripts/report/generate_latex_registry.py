@@ -35,6 +35,21 @@ def format_percent(val, decimals=2):
     return f"{float(val)*100:.{decimals}f}\\%"
 
 
+def format_fpr(val):
+    """Format FPR for LaTeX: 0.00 or scientific notation with \\times 10^{...}."""
+    if pd.isna(val) or val is None or val == "":
+        return "0.00"
+    val = float(val)
+    if val == 0.0:
+        return "0.00"
+    if val < 1e-3:
+        s = f"{val:.2e}"
+        base, exp = s.split("e")
+        exp_int = int(exp)
+        return f"{base}\\times 10^{{{exp_int}}}"
+    return f"{val:.4f}"
+
+
 def main():
     root_dir = Path(__file__).resolve().parents[2]
     art_dir = root_dir / "artifacts" / "week3_week4"
@@ -52,8 +67,19 @@ def main():
     with open(proc_dir / "split_metadata.json", "r", encoding="utf-8") as f:
         split_meta = json.load(f)
 
+    rnd_meta_file = root_dir / "data" / "processed" / "random_split_v1" / "split_metadata.json"
+    with open(rnd_meta_file, "r", encoding="utf-8") as f:
+        random_split_meta = json.load(f)
+
     with open(mr_dir / "preprocessing_metadata.json", "r", encoding="utf-8") as f:
         prep_meta = json.load(f)
+
+    with open(art_dir / "frozen.json", "r", encoding="utf-8") as f:
+        frozen_meta = json.load(f)
+
+    xgb_metrics_file = root_dir / "experiments" / "w3_05_time_tuning" / "test_eval" / "test_metrics.json"
+    with open(xgb_metrics_file, "r", encoding="utf-8") as f:
+        xgb_refit_metrics = json.load(f)
 
     # 2. Load CSV artifacts
     test_comp = pd.read_csv(art_dir / "test_comparison.csv")
@@ -67,8 +93,9 @@ def main():
     # ==========================================
     macros = []
     macros.append("% " + "="*70)
-    macros.append("% TỰ ĐỘNG SINH BỞI scripts/report/generate_latex_registry.py")
-    macros.append("% KHÔNG ĐƯỢC SỬA TAY FILE NÀY - MỌI SỐ LIỆU ĐỀU TRUY XUẤT TỪ ARTIFACT")
+    macros.append("% reports/config/generated_metrics.tex")
+    macros.append("% SỔ ĐĂNG KÝ MACRO SỐ LIỆU THỰC NGHIỆM ĐÃ KIỂM CHỨNG")
+    macros.append("% TỰ ĐỘNG KHÓA VÀ TRUY VẾT TỪ ARTIFACTS - KHÔNG SỬA TAY")
     macros.append("% " + "="*70 + "\n")
 
     # Dataset stats
@@ -78,10 +105,14 @@ def main():
     macros.append(f"\\newcommand{{\\DataRawRows}}{{{raw_rows:,}}}")
     macros.append(f"\\newcommand{{\\DataCleanRows}}{{{cleaned_rows:,}}}")
     macros.append(f"\\newcommand{{\\DataPurgedRows}}{{{purged_rows:,}}}")
+    macros.append(f"\\newcommand{{\\DataInvalidDurationRows}}{{{split_meta['cleaning']['negative_or_invalid_duration_removed']}}}")
+    macros.append(f"\\newcommand{{\\DataDuplicatesRows}}{{{split_meta['cleaning']['raw_duplicates_removed']}}}")
+    macros.append(f"\\newcommand{{\\DataInfinityValues}}{{{split_meta['cleaning']['infinity_converted_to_nan']}}}")
     macros.append(f"\\newcommand{{\\DataShaSource}}{{{split_meta['source']['sha256'][:16]}\\dots}}")
     macros.append(f"\\newcommand{{\\DataShaFull}}{{{split_meta['source']['sha256']}}}")
 
-    # Splits rows
+    # Splits rows (Time-based Split v1)
+    macros.append(f"\n% Thống kê các tập phân tách theo thời gian (Time-based Split v1)")
     for s in split_meta["splits"]:
         sname = s["split"]
         macros.append(f"\\newcommand{{\\Data{sname}Rows}}{{{s['rows']:,}}}")
@@ -91,30 +122,58 @@ def main():
         macros.append(f"\\newcommand{{\\Data{sname}SSH}}{{{s['SSH_Patator']:,}}}")
         macros.append(f"\\newcommand{{\\Data{sname}AttackPercent}}{{{s['Attack_percent']:.2f}\\%}}")
 
+    # Splits rows (Random Split control)
+    macros.append(f"\n% Thống kê tập phân tách ngẫu nhiên đối chứng (Random Split)")
+    rnd_splits = {s["split"]: s for s in random_split_meta["splits"]}
+    macros.append(f"\\newcommand{{\\DataRandomTrainRows}}{{{rnd_splits['Train']['rows']:,}}}")
+    macros.append(f"\\newcommand{{\\DataRandomValidationRows}}{{{rnd_splits['Validation']['rows']:,}}}")
+    macros.append(f"\\newcommand{{\\DataRandomTestRows}}{{{rnd_splits['Test']['rows']:,}}}")
+    macros.append(f"\\newcommand{{\\DataRandomTestBenign}}{{{rnd_splits['Test']['BENIGN']:,}}}")
+    macros.append(f"\\newcommand{{\\DataRandomTestAttack}}{{{rnd_splits['Test']['Attack']:,}}}")
+    macros.append(f"\\newcommand{{\\DataRandomTestFTP}}{{{rnd_splits['Test']['FTP_Patator']:,}}}")
+    macros.append(f"\\newcommand{{\\DataRandomTestSSH}}{{{rnd_splits['Test']['SSH_Patator']:,}}}")
+
+    # Feature counts
+    macros.append(f"\n% Số lượng đặc trưng")
+    init_feat = prep_meta.get("initial_feature_count", 77)
+    const_dropped = len(prep_meta.get("constant_features", []))
+    with_port_cnt = prep_meta.get("final_feature_count", 67)
+    without_port_cnt = with_port_cnt - 1
+    macros.append(f"\\newcommand{{\\FeatInitialCount}}{{{init_feat}}}")
+    macros.append(f"\\newcommand{{\\FeatConstantDropped}}{{{const_dropped}}}")
+    macros.append(f"\\newcommand{{\\FeatWithPortCount}}{{{with_port_cnt}}}")
+    macros.append(f"\\newcommand{{\\FeatWithoutPortCount}}{{{without_port_cnt}}}")
+
     # Validation Winner
     val_rf = val_winners[(val_winners["model"] == "random_forest") & (val_winners["scenario"] == "with_port") & (val_winners["split"] == "time")].iloc[0]
-    macros.append(f"\n% Validation Winner (time/with_port/random_forest)")
+    winner_name = "Random Forest" if frozen_meta.get("winner_model") == "random_forest" else str(frozen_meta.get("winner_model"))
+    rf_params = frozen_meta.get("models", {}).get("time/with_port/random_forest", {}).get("params", {})
+    macros.append(f"\n% Cấu hình và kết quả mô hình chiến thắng trên Validation (Random Forest time/with_port)")
+    macros.append(f"\\newcommand{{\\WinnerModel}}{{{winner_name}}}")
+    macros.append(f"\\newcommand{{\\WinnerValDepth}}{{{rf_params.get('max_depth', 16)}}}")
+    macros.append(f"\\newcommand{{\\WinnerValMinLeaf}}{{{rf_params.get('min_samples_leaf', 5)}}}")
+    macros.append(f"\\newcommand{{\\WinnerValTrees}}{{{rf_params.get('n_estimators', 100)}}}")
     macros.append(f"\\newcommand{{\\WinnerValFOne}}{{{val_rf['f1_attack']:.4f}}}")
     macros.append(f"\\newcommand{{\\WinnerValPrecision}}{{{val_rf['precision_attack']:.4f}}}")
     macros.append(f"\\newcommand{{\\WinnerValRecall}}{{{val_rf['recall_attack']:.4f}}}")
     macros.append(f"\\newcommand{{\\WinnerValAP}}{{{val_rf['average_precision']:.4f}}}")
     macros.append(f"\\newcommand{{\\WinnerValROCAUC}}{{{val_rf['roc_auc']:.4f}}}")
-    macros.append(f"\\newcommand{{\\WinnerValFPR}}{{{val_rf['fpr']:.2e}}}")
+    macros.append(f"\\newcommand{{\\WinnerValFPR}}{{{format_fpr(val_rf['fpr'])}}}")
     macros.append(f"\\newcommand{{\\WinnerValFTPRecall}}{{{val_rf['ftp_recall']*100:.2f}\\%}}")
     macros.append(f"\\newcommand{{\\WinnerValSSHRecall}}{{{val_rf['ssh_recall']*100:.2f}\\%}}")
 
     # Primary Test Results (time/with_port)
-    macros.append(f"\n% Primary Test Results (time/with_port)")
+    macros.append(f"\n% Kết quả Thực nghiệm Chính trên Test theo thời gian (Primary Benchmark: time/with_port)")
     for model in ["decision_tree", "random_forest", "xgboost"]:
         row = test_comp[(test_comp["model"] == model) & (test_comp["scenario"] == "with_port") & (test_comp["split"] == "time")].iloc[0]
         prefix = {"decision_tree": "DT", "random_forest": "RF", "xgboost": "XGB"}[model]
-        macros.append(f"\\newcommand{{\\{prefix}TestFOne}}{{{row['f1_attack']:.4f}}}")
+        macros.append(f"\\newcommand{{\\{prefix}TestAccuracy}}{{{row['accuracy']:.4f}}}")
         macros.append(f"\\newcommand{{\\{prefix}TestPrecision}}{{{row['precision_attack']:.4f}}}")
         macros.append(f"\\newcommand{{\\{prefix}TestRecall}}{{{row['recall_attack']:.4f}}}")
-        macros.append(f"\\newcommand{{\\{prefix}TestAccuracy}}{{{row['accuracy']:.4f}}}")
+        macros.append(f"\\newcommand{{\\{prefix}TestFOne}}{{{row['f1_attack']:.4f}}}")
         macros.append(f"\\newcommand{{\\{prefix}TestAP}}{{{row['average_precision']:.4f}}}")
         macros.append(f"\\newcommand{{\\{prefix}TestROCAUC}}{{{row['roc_auc']:.4f}}}")
-        macros.append(f"\\newcommand{{\\{prefix}TestFPR}}{{{row['fpr']:.2e}}}")
+        macros.append(f"\\newcommand{{\\{prefix}TestFPR}}{{{format_fpr(row['fpr'])}}}")
         macros.append(f"\\newcommand{{\\{prefix}TestSSHRecall}}{{{row['ssh_recall']*100:.2f}\\%}}")
         macros.append(f"\\newcommand{{\\{prefix}TestTP}}{{{int(row['tp']):,}}}")
         macros.append(f"\\newcommand{{\\{prefix}TestFP}}{{{int(row['fp']):,}}}")
@@ -122,7 +181,7 @@ def main():
         macros.append(f"\\newcommand{{\\{prefix}TestTN}}{{{int(row['tn']):,}}}")
 
     # Primary Test Results without port
-    macros.append(f"\n% Test Results without port (time/without_port)")
+    macros.append(f"\n% Kết quả Test không có cổng (time/without_port)")
     for model in ["decision_tree", "random_forest", "xgboost"]:
         row = test_comp[(test_comp["model"] == model) & (test_comp["scenario"] == "without_port") & (test_comp["split"] == "time")].iloc[0]
         prefix = {"decision_tree": "DT", "random_forest": "RF", "xgboost": "XGB"}[model]
@@ -130,14 +189,14 @@ def main():
         macros.append(f"\\newcommand{{\\{prefix}TestWithoutPortSSHRecall}}{{{row['ssh_recall']*100:.2f}\\%}}")
 
     # Control Test Results (random/with_port)
-    macros.append(f"\n% Control Test Results (random/with_port)")
+    macros.append(f"\n% Kết quả Thực nghiệm Đối chứng trên Random Split (Control: random/with_port)")
     for model in ["decision_tree", "random_forest", "xgboost"]:
         row = test_comp[(test_comp["model"] == model) & (test_comp["scenario"] == "with_port") & (test_comp["split"] == "random")].iloc[0]
         prefix = {"decision_tree": "DT", "random_forest": "RF", "xgboost": "XGB"}[model]
-        macros.append(f"\\newcommand{{\\{prefix}RandomFOne}}{{{row['f1_attack']:.4f}}}")
+        macros.append(f"\\newcommand{{\\{prefix}RandomAccuracy}}{{{row['accuracy']:.4f}}}")
         macros.append(f"\\newcommand{{\\{prefix}RandomPrecision}}{{{row['precision_attack']:.4f}}}")
         macros.append(f"\\newcommand{{\\{prefix}RandomRecall}}{{{row['recall_attack']:.4f}}}")
-        macros.append(f"\\newcommand{{\\{prefix}RandomAccuracy}}{{{row['accuracy']:.4f}}}")
+        macros.append(f"\\newcommand{{\\{prefix}RandomFOne}}{{{row['f1_attack']:.4f}}}")
         macros.append(f"\\newcommand{{\\{prefix}RandomAP}}{{{row['average_precision']:.4f}}}")
         macros.append(f"\\newcommand{{\\{prefix}RandomROCAUC}}{{{row['roc_auc']:.4f}}}")
         macros.append(f"\\newcommand{{\\{prefix}RandomFTPRecall}}{{{row['ftp_recall']*100:.2f}\\%}}")
@@ -145,17 +204,26 @@ def main():
 
     # Differences & Gaps
     diff_rf = split_diff[(split_diff["model"] == "random_forest") & (split_diff["scenario"] == "with_port")].iloc[0]
-    macros.append(f"\n% Differences (Validation & Gaps)")
+    diff_dt = split_diff[(split_diff["model"] == "decision_tree") & (split_diff["scenario"] == "with_port")].iloc[0]
+    diff_xgb = split_diff[(split_diff["model"] == "xgboost") & (split_diff["scenario"] == "with_port")].iloc[0]
+    macros.append(f"\n% Chênh lệch và độ lệch hiệu năng (Gaps & Bias)")
     macros.append(f"\\newcommand{{\\DeltaFOneRFRandomTime}}{{{diff_rf['delta_f1_random_minus_time']:.4f}}}")
+    macros.append(f"\\newcommand{{\\DeltaFOneDTRandomTime}}{{{diff_dt['delta_f1_random_minus_time']:.4f}}}")
+    macros.append(f"\\newcommand{{\\DeltaFOneXGBRandomTime}}{{{diff_xgb['delta_f1_random_minus_time']:.4f}}}")
 
     # SHAP Top features
-    macros.append(f"\n% SHAP Top Features")
+    macros.append(f"\n% Tầm quan trọng đặc trưng SHAP (Validation Top features)")
     macros.append(f"\\newcommand{{\\SHAPTopOneFeature}}{{{shap_df.iloc[0]['feature']}}}")
     macros.append(f"\\newcommand{{\\SHAPTopOneVal}}{{{shap_df.iloc[0]['mean_abs_shap']:.4f}}}")
     macros.append(f"\\newcommand{{\\SHAPTopTwoFeature}}{{{shap_df.iloc[1]['feature']}}}")
     macros.append(f"\\newcommand{{\\SHAPTopTwoVal}}{{{shap_df.iloc[1]['mean_abs_shap']:.4f}}}")
     ratio_top = shap_df.iloc[0]['mean_abs_shap'] / shap_df.iloc[1]['mean_abs_shap']
     macros.append(f"\\newcommand{{\\SHAPRatioTopOneTwo}}{{{ratio_top:.1f}}}")
+
+    # Case Study: XGBoost Refit on Validation
+    macros.append(f"\n% Case Study: Hiệu năng XGBoost khi Refit trên Validation")
+    macros.append(f"\\newcommand{{\\XGBRefitTestFOne}}{{{xgb_refit_metrics['f1_score']:.4f}}}")
+    macros.append(f"\\newcommand{{\\XGBRefitTestSSHRecall}}{{{xgb_refit_metrics['recall']*100:.2f}\\%}}")
 
     # Write macro registry
     with open(out_cfg / "generated_metrics.tex", "w", encoding="utf-8") as f:

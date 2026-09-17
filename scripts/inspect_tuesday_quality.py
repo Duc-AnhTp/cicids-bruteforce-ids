@@ -2,10 +2,25 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-DATA_PATH = Path(
-    "data/raw/cicids2017/GeneratedLabelledFlows/"
-    "Tuesday-WorkingHours.pcap_ISCX.csv"
-)
+def resolve_data_path() -> Path:
+    candidates = [
+        Path("data/raw/Tuesday-WorkingHours.pcap_ISCX.csv"),
+        Path("data/raw/cicids2017/GeneratedLabelledFlows/Tuesday-WorkingHours.pcap_ISCX.csv"),
+    ]
+    for candidate in candidates:
+        if candidate.is_file():
+            return candidate
+    return candidates[0]
+
+
+DATA_PATH = resolve_data_path()
+
+if not DATA_PATH.is_file():
+    print(f"FAIL: Không tìm thấy file dữ liệu raw Tuesday tại các đường dẫn mặc định:")
+    print(f"  - data/raw/Tuesday-WorkingHours.pcap_ISCX.csv")
+    print(f"  - data/raw/cicids2017/GeneratedLabelledFlows/Tuesday-WorkingHours.pcap_ISCX.csv")
+    print("Vui lòng tải file và đặt vào một trong các thư mục trên.")
+    exit(1)
 
 df = pd.read_csv(DATA_PATH)
 df.columns = df.columns.astype(str).str.strip()

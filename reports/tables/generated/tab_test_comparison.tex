@@ -1,29 +1,24 @@
-% ==============================================================================
-% reports/tables/generated/tab_test_comparison.tex
-% ==============================================================================
 \begin{table}[htbp]
 \centering
-\caption{Hiệu năng đối chuẩn 12 tổ hợp trên tập Test sau khi đã đóng băng mô hình.}
+\caption{Hiệu năng tổng thể trên tập Test đối chuẩn giữa 12 tổ hợp thực nghiệm (Đánh giá sau khi khóa cấu hình).}
 \label{tab:test_comparison}
-\resizebox{\textwidth}{!}{%
+\adjustbox{max width=\textwidth}{%
 \begin{tabular}{lllrrrrrrrr}
 \toprule
-\textbf{Mô hình} & \textbf{Phân tách} & \textbf{Kịch bản} & \textbf{\Accuracy} & \textbf{\Precision} & \textbf{\Recall} & \textbf{\FOne} & \textbf{\AP} & \textbf{\ROCAUC} & \textbf{FTP Rec.} & \textbf{SSH Rec.} \\
+\textbf{Mô hình} & \textbf{Phân tách} & \textbf{Kịch bản} & \textbf{Accuracy} & \textbf{Precision} & \textbf{Recall} & \textbf{F1} & \textbf{AP} & \textbf{ROC-AUC} & \textbf{FTP Rec.} & \textbf{SSH Rec.} \\
 \midrule
-\multicolumn{11}{l}{\textbf{A. Thực nghiệm Chính: Phân tách theo Thời gian (Time-based Zero-shot Transfer)}} \\
-Decision Tree & Time & With Port & \DTTestAccuracy & \DTTestPrecision & \DTTestRecall & \textbf{\DTTestFOne} & \DTTestAP & \DTTestROCAUC & \na & \DTTestSSHRecall \\
-\textbf{Random Forest} & \textbf{Time} & \textbf{With Port} & \textbf{\RFTestAccuracy} & \textbf{\RFTestPrecision} & \textbf{\RFTestRecall} & \textbf{\RFTestFOne} & \textbf{\RFTestAP} & \textbf{\RFTestROCAUC} & \textbf{\na} & \textbf{\RFTestSSHRecall} \\
-XGBoost & Time & With Port & \XGBTestAccuracy & \XGBTestPrecision & \XGBTestRecall & \textbf{\XGBTestFOne} & \XGBTestAP & \XGBTestROCAUC & \na & \XGBTestSSHRecall \\
-\midrule
-Decision Tree & Time & Without Port & 0.9741 & 0.4375 & 0.0019 & \textbf{\DTTestWithoutPortFOne} & 0.0272 & 0.5009 & \na & \DTTestWithoutPortSSHRecall \\
-Random Forest & Time & Without Port & 0.9739 & 0.2414 & 0.0038 & \textbf{\RFTestWithoutPortFOne} & 0.0268 & 0.4932 & \na & \RFTestWithoutPortSSHRecall \\
-XGBoost & Time & Without Port & 0.9740 & 0.2653 & 0.0035 & \textbf{\XGBTestWithoutPortFOne} & 0.2447 & 0.9304 & \na & \XGBTestWithoutPortSSHRecall \\
+\multicolumn{11}{l}{\textbf{A. Thực nghiệm Chính: Phân tách theo Thời gian (Time-based Zero-shot)}} \\
+Decision Tree & Time & With Port & 0.9740 & 0.0000 & 0.0000 & \textbf{0.0000} & 0.0259 & 0.5000 & \text{N/A} & 0.00\% \\
+Random Forest & Time & With Port & 0.9742 & 1.0000 & 0.0019 & \textbf{0.0037} & 0.3591 & 0.7483 & \text{N/A} & 0.19\% \\
+XGBoost & Time & With Port & 0.9741 & 0.0000 & 0.0000 & \textbf{0.0000} & 0.0879 & 0.7503 & \text{N/A} & 0.00\% \\
+Decision Tree & Time & Without Port & 0.9741 & 0.4375 & 0.0019 & \textbf{0.0037} & 0.0272 & 0.5009 & \text{N/A} & 0.19\% \\
+Random Forest & Time & Without Port & 0.9739 & 0.2414 & 0.0038 & \textbf{0.0074} & 0.0268 & 0.4932 & \text{N/A} & 0.38\% \\
+XGBoost & Time & Without Port & 0.9740 & 0.2653 & 0.0035 & \textbf{0.0069} & 0.2447 & 0.9304 & \text{N/A} & 0.35\% \\
 \midrule
 \multicolumn{11}{l}{\textbf{B. Thực nghiệm Đối chứng: Phân tách Ngẫu nhiên (Random Split Control)}} \\
-Decision Tree & Random & With Port & \DTRandomAccuracy & \DTRandomPrecision & \DTRandomRecall & \textbf{\DTRandomFOne} & \DTRandomAP & \DTRandomROCAUC & \DTRandomFTPRecall & \DTRandomSSHRecall \\
-Random Forest & Random & With Port & \RFRandomAccuracy & \RFRandomPrecision & \RFRandomRecall & \textbf{\RFRandomFOne} & \RFRandomAP & \RFRandomROCAUC & \RFRandomFTPRecall & \RFRandomSSHRecall \\
-XGBoost & Random & With Port & \XGBRandomAccuracy & \XGBRandomPrecision & \XGBRandomRecall & \textbf{\XGBRandomFOne} & \XGBRandomAP & \XGBRandomROCAUC & \XGBRandomFTPRecall & \XGBRandomSSHRecall \\
-\midrule
+Decision Tree & Random & With Port & 0.9996 & 0.9904 & 0.9980 & \textbf{0.9942} & 0.9963 & 0.9990 & 100.00\% & 99.54\% \\
+Random Forest & Random & With Port & 1.0000 & 1.0000 & 0.9993 & \textbf{0.9997} & 1.0000 & 1.0000 & 100.00\% & 99.85\% \\
+XGBoost & Random & With Port & 1.0000 & 0.9993 & 1.0000 & \textbf{0.9997} & 1.0000 & 1.0000 & 100.00\% & 100.00\% \\
 Decision Tree & Random & Without Port & 0.9989 & 0.9700 & 0.9949 & \textbf{0.9823} & 0.9890 & 0.9974 & 99.69\% & 99.23\% \\
 Random Forest & Random & Without Port & 0.9997 & 0.9934 & 0.9954 & \textbf{0.9944} & 0.9994 & 1.0000 & 99.73\% & 99.28\% \\
 XGBoost & Random & Without Port & 0.9999 & 0.9980 & 0.9987 & \textbf{0.9984} & 0.9999 & 1.0000 & 99.92\% & 99.79\% \\

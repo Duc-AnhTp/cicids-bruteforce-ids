@@ -104,7 +104,7 @@ Mọi pipeline chỉ sử dụng các cột thống kê đặc trưng mạng n�
 - **Áp dụng trong**: Script tuning `src/ids/tune_xgboost.py` (TV4).
 - **Cơ chế**: Sử dụng `RandomizedSearchCV` với custom CV trên `X_combined = pd.concat([X_train, X_val])`. Do mặc định của thư viện là `refit=True`, mô hình sau khi chọn tham số tối ưu đã được **tự động fit lại trên toàn bộ tập gộp Train + Validation**.
 - **Tác động**: Vì tập Validation có chứa 1,886 flow `SSH-Patator`, mô hình XGBoost trong chế độ này **đã được học trước mẫu SSH** trước khi đánh giá trên Test.
-- **Kết quả thực tế**: Test F1 nhảy vọt lên **~0.9910**.
+- **Kết quả thực tế**: Test F1 nhảy vọt lên **~0.9912** (`0.991222`).
 - **Quy tắc báo cáo**: Báo cáo **bắt buộc phải ghi rõ đây là chế độ đã tiếp xúc với subtype SSH (Seen Subtype Evaluation)**, dùng làm đối chứng chuyên sâu để giải thích tầm quan trọng của việc kiểm soát ranh giới dữ liệu trong MLOps/NIDS, tuyệt đối không trình bày lẫn lộn với kết quả Zero-Shot của Chế độ 1.
 
 ---

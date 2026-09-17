@@ -181,7 +181,7 @@ Kết quả `without_port` trên Test cũng rất thấp: Decision Tree có SSH 
 
 Trong quá trình thực nghiệm, xuất hiện sự chênh lệch đáng kể giữa hai kết quả của XGBoost trên kịch bản thời gian:
 1. **Benchmark gốc (`artifacts/week3_week4/test_comparison.csv`)**: XGBoost đạt `Test F1 = 0.0000`, `SSH Recall = 0.0%`.
-2. **Thực nghiệm Tuning mới (`experiments/w3_05_time_tuning/`)**: XGBoost sau khi chạy script `src/ids/tune_xgboost.py` đạt `Test F1 ≈ 0.9910`.
+2. **Thực nghiệm Tuning mới (`experiments/w3_05_time_tuning/`)**: XGBoost sau khi chạy script `src/ids/tune_xgboost.py` đạt `Test F1 ≈ 0.9912` (`0.991222`).
 
 **Nguyên nhân kỹ thuật & Bản chất thực nghiệm:**
 - Kiểm tra mã nguồn `src/ids/tune_xgboost.py` cho thấy script sử dụng `RandomizedSearchCV` với custom CV trên tập dữ liệu gộp `X_combined = pd.concat([X_train, X_val])`.

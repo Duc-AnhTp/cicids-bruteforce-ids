@@ -12,6 +12,9 @@ data/raw/*
 
 artifacts/*
 !artifacts/.gitkeep
+!artifacts/TV2_decision_tree/
+!artifacts/TV3_random_forest/
+!artifacts/week3_week4/
 
 demo_workspace/
 .ipynb_checkpoints/
@@ -20,6 +23,7 @@ demo_workspace/
 *.zip
 *.pcap
 *.pcapng
+*.docx
 
 # LaTeX build artifacts
 *.aux

@@ -11,6 +11,7 @@ Trọng tâm nghiên cứu là **phân tích tác động của chiến lược 
 1. **RQ1 (Khả năng tổng quát hóa theo thời gian & Chuyển giao Zero-Shot)**: Khi mô hình chỉ được huấn luyện trên dữ liệu quá khứ chứa `FTP-Patator` (buổi sáng), liệu mô hình có thể phát hiện được cuộc tấn công `SSH-Patator` (buổi chiều) trong dữ liệu tương lai hay không?
 2. **RQ2 (Độ lệch đánh giá của phép chia ngẫu nhiên - Optimistic Evaluation Bias)**: Việc phân chia dữ liệu ngẫu nhiên (Random Split) — vốn phổ biến trong các nghiên cứu học thuật — làm sai lệch kết quả đánh giá như thế nào do vi phạm tính độc lập thời gian giữa các flow cùng chiến dịch tấn công?
 3. **RQ3 (Độ phụ thuộc vào cổng dịch vụ - Port Ablation & Diễn giải mô hình)**: Việc đưa cổng đích (`Destination Port`) vào không gian đặc trưng ảnh hưởng như thế nào đến khả năng tổng quát hóa, và mô hình thực sự học được các đặc trưng hành vi mạng nào (thông qua SHAP và Cây quyết định)?
+4. **RQ4 (Tác động của Giao thức Huấn luyện lại - Refit Protocol Impact)**: Việc mô hình tiếp xúc với dữ liệu kiểm định thông qua cơ chế refit mặc định của các thư viện học máy làm sai lệch bản chất đánh giá từ Zero-Shot sang Supervised Learning như thế nào?
 
 ---
 
@@ -20,7 +21,7 @@ Dự án được phân chia thành 4 mảng công việc chuyên biệt với k
 
 | Thành viên | Vai trò | Mã công việc | Trọng tâm & Đóng góp | Sản phẩm & Thư mục Artifacts |
 |---|---|---|---|---|
-| **TV1** | Data Preprocessing Lead | W3-00 | • Phục hồi chuỗi thời gian 24h (1–5h → 13–17h chiều).<br>• Xây dựng pipeline chia dữ liệu thời gian (`split_v1`) và ngẫu nhiên (`random_split_v1`).<br>• Chuẩn hóa dữ liệu mô hình hóa. | • `scripts/prepare_splits.py`<br>• `scripts/generate_model_ready.py`<br>• `data/model_ready/` |
+| **TV1** | Data Preprocessing Lead | W3-00 | • Phục hồi chuỗi thời gian 24h (1–5h → 13–17h chiều).<br>• Xây dựng pipeline chia dữ liệu thời gian (`split_v1`) và ngẫu nhiên (`random_split_v1`).<br>• Chuẩn hóa dữ liệu mô hình hóa. | • `scripts/prepare_splits.py`<br>• `scripts/preprocess_data.py`<br>• `data/model_ready/` |
 | **TV2** | Decision Tree Lead | W3-01<br>W3-02 | • Tinh chỉnh siêu tham số Decision Tree (`criterion`, `max_depth`, `min_samples_leaf`).<br>• Trực quan hóa cấu trúc cây, trích xuất quy tắc phân lớp logic.<br>• Phân tích quá khớp theo độ sâu (`max_depth`) và sinh bộ 6 biểu đồ khoa học 300 DPI. | • `notebooks/TV2_DecisionTree_W3-01_W3-02.ipynb`<br>• `scripts/train_tv2_all.py`<br>• `scripts/generate_detailed_visualizations.py`<br>• `artifacts/TV2_decision_tree/`<br>• `experiments/figures/` |
 | **TV3** | Random Forest Lead | W3-03<br>W3-04 | • Huấn luyện & tinh chỉnh Random Forest.<br>• Thực nghiệm loại bỏ cổng mạng (Port Ablation: `with_port` vs `without_port`).<br>• Giải thích mô hình bằng SHAP (TreeExplainer). | • `notebooks/TV3_RandomForest_W3-03_W3-04.ipynb`<br>• `artifacts/TV3_random_forest/` |
 | **TV4** | XGBoost Lead | W3-05<br>W3-06 | • Xây dựng kịch bản tuning tự động `RandomizedSearchCV` cho XGBoost.<br>• Đánh giá hiệu năng trên cả 2 kịch bản phân tách dữ liệu.<br>• Nghiên cứu hiện tượng tác động của cơ chế refit protocol. | • `src/ids/tune_xgboost.py`<br>• `src/ids/evaluate_tuned_model.py`<br>• `experiments/w3_05_time_tuning/`<br>• `experiments/w3_06_random_tuning/` |
@@ -70,14 +71,14 @@ Kết quả đối chuẩn hợp nhất trên tập Test mở đúng một lần
 
 ### 2. Sự khác biệt về Protocol Refit của XGBoost
 - Trong benchmark hợp nhất (`artifacts/week3_week4/test_comparison.csv`), mô hình XGBoost tuân thủ **Strict Train-only fit** (chỉ huấn luyện trên Train gồm FTP), nên đạt F1 = 0.0000 trên Test (chỉ gồm SSH).
-- Trong script tuning mở rộng `src/ids/tune_xgboost.py`, việc sử dụng `RandomizedSearchCV` mà không tắt `refit` (mặc định `refit=True`) dẫn đến việc mô hình sau khi chọn tham số được tự động huấn luyện lại trên toàn bộ tập gộp `Train + Validation`. Vì tập Validation chứa 1,886 flow `SSH-Patator`, mô hình đã được "học mồi" dạng tấn công SSH trước khi nộp vào Test, khiến F1 đạt 0.9910. Trong báo cáo, đây được ghi nhận là **thực nghiệm Few-shot / Seen Subtype** có chủ đích để so sánh với kịch bản Zero-Shot gốc.
+- Trong script tuning mở rộng `src/ids/tune_xgboost.py`, việc sử dụng `RandomizedSearchCV` mà không tắt `refit` (mặc định `refit=True`) dẫn đến việc mô hình sau khi chọn tham số được tự động huấn luyện lại trên toàn bộ tập gộp `Train + Validation`. Vì tập Validation chứa 1,886 flow `SSH-Patator`, mô hình đã được "học mồi" dạng tấn công SSH trước khi nộp vào Test, khiến F1 đạt 0.9912. Trong báo cáo, đây được ghi nhận là **thực nghiệm Few-shot / Seen Subtype** có chủ đích để so sánh với kịch bản Zero-Shot gốc.
 
 ---
 
 ## 🚀 Hướng dẫn Cài đặt & Chạy Thực nghiệm
 
 ### 1. Thiết lập Môi trường Python
-Khuyến nghị sử dụng Python 3.10 – 3.12 trên môi trường ảo:
+Khuyến nghị sử dụng Python 3.11 – 3.12 trên môi trường ảo:
 
 ```powershell
 # Windows PowerShell
@@ -122,7 +123,7 @@ python src/ids/tune_xgboost.py --split data/processed/split_v1 --output experime
 cicids-bruteforce-ids/
 ├── artifacts/
 │   ├── TV2_decision_tree/      # Mô hình .joblib, metrics, figures của TV2
-│   ├── TV3_random_forest/      # Mô hình .joblib, docx nháp, SHAP của TV3
+│   ├── TV3_random_forest/      # Mô hình .joblib, validation metrics của TV3
 │   └── week3_week4/            # Benchmark hợp nhất 3 mô hình (RESULTS.md, test_comparison.csv)
 ├── configs/
 │   └── experiment.yaml         # Cấu hình mốc thời gian, tham số audit và tiền xử lý
@@ -141,11 +142,19 @@ cicids-bruteforce-ids/
 ├── notebooks/
 │   ├── TV2_DecisionTree_W3-01_W3-02.ipynb
 │   └── TV3_RandomForest_W3-03_W3-04.ipynb
+├── reports/                    # Chuyên khảo báo cáo khoa học 9 chương (LaTeX)
+│   ├── chapters/               # 01_gioi_thieu đến 09_ket_luan
+│   ├── config/                 # typography, packages, generated_metrics.tex
+│   ├── tables/generated/       # Bảng LaTeX tự động đồng bộ từ artifacts
+│   ├── Makefile                # make pdf, make metrics, make clean
+│   └── main.pdf                # Báo cáo đồ án hoàn chỉnh xuất bản
 ├── scripts/
 │   ├── generate_detailed_visualizations.py  # Script sinh 6 biểu đồ khoa học
 │   ├── prepare_splits.py                    # Script chuẩn hóa thời gian & chia dữ liệu
-│   ├── generate_model_ready.py              # Script tạo dữ liệu model_ready
-│   └── train_tv2_all.py                     # Master script huấn luyện TV2
+│   ├── preprocess_data.py                   # Script tạo dữ liệu model_ready
+│   ├── train_tv2_all.py                     # Master script huấn luyện TV2
+│   └── report/
+│       └── generate_latex_registry.py       # Tự động xuất số liệu & bảng biểu sang LaTeX
 └── src/ids/                                 # Package mã nguồn lõi của hệ thống
     ├── tune_decision_tree.py
     ├── tune_xgboost.py

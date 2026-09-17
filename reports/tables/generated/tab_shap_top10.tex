@@ -1,21 +1,18 @@
-% ==============================================================================
-% reports/tables/generated/tab_shap_top10.tex
-% ==============================================================================
 \begin{table}[htbp]
 \centering
-\caption{Top 10 đặc trưng mạng có mức độ đóng góp phân loại lớn nhất theo SHAP TreeExplainer trên tập Validation.}
+\caption{Top 10 đặc trưng mạng có đóng góp lớn nhất vào quyết định phân loại theo giá trị SHAP trung bình.}
 \label{tab:shap_top10}
-\resizebox{\textwidth}{!}{%
+\adjustbox{max width=\textwidth}{%
 \begin{tabular}{rlrl}
 \toprule
 \textbf{Hạng} & \textbf{Tên đặc trưng mạng} & \textbf{Mean $|$SHAP$|$} & \textbf{Ý nghĩa giao thức / thống kê mạng} \\
 \midrule
-1 & \texttt{Destination Port} & \SHAPTopOneVal & Cổng đích dịch vụ (Port 21 FTP, Port 22 SSH) \\
-2 & \texttt{Fwd Packet Length Std} & \SHAPTopTwoVal & Độ lệch chuẩn kích thước gói tin hướng đi (Fwd) \\
+1 & \texttt{Destination Port} & 0.1237 & Cổng đích dịch vụ (Port 21 FTP, Port 22 SSH) \\
+2 & \texttt{Fwd Packet Length Std} & 0.0339 & Độ lệch chuẩn kích thước gói tin hướng đi (Fwd) \\
 3 & \texttt{Avg Fwd Segment Size} & 0.0292 & Kích thước phân đoạn trung bình hướng đi \\
 4 & \texttt{Max Packet Length} & 0.0289 & Độ dài gói tin lớn nhất quan sát được trong flow \\
 5 & \texttt{Packet Length Mean} & 0.0275 & Độ dài gói tin trung bình của toàn flow \\
-6 & \texttt{min\_seg\_size\_forward} & 0.0272 & Kích thước header TCP tối thiểu phía forward \\
+6 & \texttt{min_seg_size_forward} & 0.0272 & Kích thước header TCP tối thiểu phía forward \\
 7 & \texttt{Packet Length Std} & 0.0271 & Độ lệch chuẩn độ dài toàn bộ gói tin trong flow \\
 8 & \texttt{Fwd Packet Length Mean} & 0.0271 & Độ dài gói tin trung bình hướng đi (Fwd) \\
 9 & \texttt{Average Packet Size} & 0.0262 & Kích thước gói tin trung bình tổng thể \\

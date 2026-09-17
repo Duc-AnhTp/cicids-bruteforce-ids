@@ -4,10 +4,18 @@ import numpy as np
 import pandas as pd
 
 
-DATA_PATH = Path(
-    "data/raw/cicids2017/GeneratedLabelledFlows/"
-    "Tuesday-WorkingHours.pcap_ISCX.csv"
-)
+def resolve_data_path() -> Path:
+    candidates = [
+        Path("data/raw/Tuesday-WorkingHours.pcap_ISCX.csv"),
+        Path("data/raw/cicids2017/GeneratedLabelledFlows/Tuesday-WorkingHours.pcap_ISCX.csv"),
+    ]
+    for candidate in candidates:
+        if candidate.is_file():
+            return candidate
+    return candidates[0]
+
+
+DATA_PATH = resolve_data_path()
 
 REQUIRED_COLS = ["Label", "Timestamp", "Flow Duration"]
 
