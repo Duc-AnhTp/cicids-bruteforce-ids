@@ -19,6 +19,13 @@ Trên tập kiểm định $\Dval$, việc loại bỏ cổng làm giảm nhẹ 
     \item \textbf{XGBoost}: Điểm F1 tăng từ 0.0000 lên \textbf{\XGBTestWithoutPortFOne}, bắt được \XGBTestWithoutPortSSHRecall\ tấn công SSH (13 trên tổng số 3,732 mẫu).
 \end{itemize}
 
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\textwidth]{experiments/figures/04_roc_and_pr_curves_comparative.png}
+\caption{Đường cong ROC và Precision-Recall đối chiếu giữa các mô hình và kịch bản thực nghiệm, phản ánh sự biến thiên diện tích dưới đường cong khi có và không có đặc trưng cổng mạng.}
+\label{fig:roc_pr_comparative}
+\end{figure}
+
 \noindent\textbf{Kết luận then chốt về vai trò của Cổng dịch vụ:}
 Việc loại bỏ cổng dịch vụ quả thực đã giúp các mô hình giải phóng một phần sự ràng buộc để bắt đầu nhận diện được một lượng rất nhỏ các flow SSH dựa trên đặc trưng hành vi (tỷ lệ SSH Recall tăng từ 0.00\% lên $0.19\% - 0.38\%$).
 

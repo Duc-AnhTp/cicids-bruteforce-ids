@@ -18,4 +18,11 @@ Bảng \ref{tab:split_diff} trình bày sự chênh lệch trực tiếp giữa 
 
 Khoảng cách chênh lệch hiệu năng ($\Delta\FOne$) giữa Random Split và Time-based Split trên tập Validation dao động từ \textbf{0.2631 đến 0.2848}. Trên tập Test chính thức, khoảng cách này bị khuếch đại lên mức cực đại: đối với Random Forest, điểm F1 nhảy vọt từ \textbf{\RFTestFOne} (trên Time Split) lên \textbf{\RFRandomFOne} (trên Random Split).
 
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\textwidth]{experiments/figures/06_data_leakage_benchmark.png}
+\caption{Đối chiếu hiệu năng giữa Phân tách Ngẫu nhiên và Phân tách Thời gian, trực quan hóa mức độ thổi phồng hiệu năng (Optimistic Bias) do rò rỉ phân phối phiên kết nối.}
+\label{fig:data_leakage_benchmark}
+\end{figure}
+
 Hiện tượng này phản ánh trực tiếp kết luận của Arp et al. \cite{arp2022dos} và Pendlebury et al. \cite{pendlebury2019tesseract}: Việc xáo trộn ngẫu nhiên đã vô tình biến bài toán đánh giá năng lực khái quát hóa thành một bài toán "nhận dạng lại" (re-identification) các phiên kết nối thuộc cùng một chiến dịch tấn công đã xuất hiện trong tập huấn luyện.

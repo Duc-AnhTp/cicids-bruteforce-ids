@@ -28,13 +28,11 @@ Kết quả định lượng cho thấy:
 \end{figure}
 
 \subsection{Trích Xuất Cấu Trúc Cây Quyết Định}
-Quan sát cấu trúc logic của Cây Quyết Định (trích xuất từ \texttt{tree\_structure.png} và \texttt{tree\_rules\_top.txt}, thể hiện trên Hình \ref{fig:tree_structure}) càng làm sáng tỏ cơ chế này:
+\label{sec:tree_structure_analysis}
+Quan sát cấu trúc logic của Cây Quyết Định càng làm sáng tỏ cơ chế thiên vị đặc trưng này:
 \begin{itemize}
-    \item \textbf{Nút gốc (Root Node)} của cây quyết định phân chia trực tiếp dựa trên điều kiện:
-    \begin{center}
-        \texttt{Destination Port <= 21.5}
-    \end{center}
-    \item Các nhánh tiếp theo tiếp tục cô lập các flow có \texttt{Destination Port <= 20.5} (loại bỏ traffic cổng thấp) để định vị chính xác \textbf{Cổng 21 (FTP)}.
+    \item \textbf{Kịch bản Có Cổng (\texttt{with\_port}):} Nút gốc (Root Node) phân chia dựa trên điều kiện \texttt{Destination Port <= 21.5} (Hình \ref{fig:tree_structure}). Các nhánh tiếp theo tiếp tục cô lập các flow có \texttt{Destination Port <= 20.5} (loại bỏ traffic cổng thấp) để định vị chính xác \textbf{Cổng 21 (FTP)}.
+    \item \textbf{Kịch bản Không Cổng (\texttt{without\_port}):} Khi đặc trưng cổng bị loại bỏ, cây quyết định chọn nút gốc là \texttt{Average Packet Size <= 14.12} (chi tiết quy tắc văn bản trình bày tại Phụ lục \ref{app:tree_rules}).
 \end{itemize}
 
 \begin{figure}[htbp]

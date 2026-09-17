@@ -15,6 +15,13 @@ Kết quả thực nghiệm ghi nhận một \textbf{sự sụp đổ hiệu nă
     \item \textbf{XGBoost}: Đạt $\FOne = \textbf{\XGBTestFOne}$, $\Precision = \XGBTestPrecision$, $\Recall = \XGBTestRecall$, $\AP = \XGBTestAP$, $\ROCAUC = \XGBTestROCAUC$. Ma trận nhầm lẫn: $TP = \XGBTestTP$, $FP = \XGBTestFP$, $FN = \XGBTestFN$, $TN = \XGBTestTN$. Tương tự Decision Tree, XGBoost không nhận diện được bất kỳ cuộc tấn công SSH nào ($\text{SSH Recall} = \XGBTestSSHRecall$).
 \end{itemize}
 
+\begin{figure}[htbp]
+\centering
+\includegraphics[width=0.92\textwidth]{experiments/figures/03_confusion_matrices_detailed.png}
+\caption{Ma trận nhầm lẫn chi tiết của các mô hình trên tập kiểm thử phân tách theo thời gian, thể hiện trực quan sự sụp đổ của True Positive đối với biến thể tấn công SSH.}
+\label{fig:confusion_matrices_detailed}
+\end{figure}
+
 \noindent\textbf{Ghi nhận về Support và FTP Recall trên tập Test:}
 Do tập $\Dtest$ theo thời gian diễn ra từ 14:32 đến 17:00 chiều (chỉ có chiến dịch \SSH), số lượng mẫu hỗ trợ của \FTP\ là $0$ ($\text{FTP Support} = 0$). Theo đúng nguyên tắc trung thực học thuật đã đề ra, chỉ số \textbf{FTP Recall trên tập Test bắt buộc phải ghi nhận là N/A (Not Applicable)}, tuyệt đối không được gán giá trị 0\% hay 100\%.
 

@@ -38,7 +38,7 @@ Khi áp dụng phép chia ngẫu nhiên trên một tập dữ liệu lưu lư�
 
 \section{Mục Tiêu Nghiên Cứu và Câu Hỏi Nghiên Cứu (RQs)}
 
-Đồ án này không hướng tới mục tiêu "chạy đua điểm số" bằng cách sao chép các giao thức đánh giá ngẫu nhiên truyền thống. Thay vào đó, mục tiêu cốt lõi của đồ án là \textbf{xây dựng một quy trình thực nghiệm chuẩn mực, minh bạch, kiểm soát chặt chẽ rò rỉ dữ liệu theo thời gian thực (Temporal Leakage Prevention)} trên tập dữ liệu CICIDS2017 Tuesday, từ đó bóc tách bản chất thực sự của các mô hình học máy khi đối mặt với các dạng tấn công dò quét mật khẩu chưa từng thấy.
+Bài tập lớn này không hướng tới mục tiêu "chạy đua điểm số" bằng cách sao chép các giao thức đánh giá ngẫu nhiên truyền thống. Thay vào đó, mục tiêu cốt lõi của nghiên cứu là \textbf{xây dựng một quy trình thực nghiệm chuẩn mực, minh bạch, kiểm soát chặt chẽ rò rỉ dữ liệu theo thời gian thực (Temporal Leakage Prevention)} trên tập dữ liệu CICIDS2017 Tuesday, từ đó bóc tách bản chất thực sự của các mô hình học máy khi đối mặt với các dạng tấn công dò quét mật khẩu chưa từng thấy.
 
 Đề tài tập trung giải quyết 4 Câu hỏi nghiên cứu (Research Questions - RQ) sau:
 \begin{itemize}
@@ -48,15 +48,15 @@ Khi áp dụng phép chia ngẫu nhiên trên một tập dữ liệu lưu lư�
     \item[\textbf{RQ4:}] \textit{(Tác động của giao thức huấn luyện lại - Refit Protocol Impact)} Việc vô tình cho phép mô hình tiếp xúc với dữ liệu của tập Validation (thông qua cơ chế refit mặc định của các thư viện tự động) làm thay đổi bản chất bài toán đánh giá NIDS từ Zero-Shot sang Supervised Learning như thế nào?
 \end{itemize}
 
-\section{Đóng Góp của Đồ Án}
+\section{Đóng Góp của Đề Tài}
 
-Các đóng góp cụ thể của đồ án bao gồm:
+Các đóng góp cụ thể của đề tài bao gồm:
 \begin{enumerate}
     \item \textbf{Xác lập bộ quy chuẩn thực nghiệm nghiêm ngặt (Canonical Protocol):} Thực hiện tiền xử lý và phục hồi dòng thời gian 24h dựa trên phân tích EDA; áp dụng kỹ thuật làm sạch bảo thủ Purge ($q=60\text{s}$) và Embargo ($g=120\text{s}$) loại bỏ \DataPurgedRows\ dòng ranh giới; thiết lập bài toán Zero-Shot Subtype Transfer tự nhiên trên CICIDS2017 Tuesday.
     \item \textbf{Đánh giá trung thực và khách quan 3 mô hình học máy dạng cây:} Đối chuẩn Decision Tree, Random Forest và XGBoost qua 12 tổ hợp thực nghiệm (3 mô hình $\times$ 2 chiến lược chia $\times$ 2 kịch bản cổng). Ghi nhận minh bạch sự sụp đổ của mô hình trên tập Test theo thời gian ($\FOne \le \RFTestFOne$, bắt được \RFTestSSHRecall\ tấn công SSH).
     \item \textbf{Bóc tách cơ chế ra quyết định thông qua XAI:} Sử dụng SHAP TreeExplainer và phân tích cấu trúc cây quyết định để chứng minh hiện tượng mô hình học vẹt cổng dịch vụ (\texttt{Destination Port} chiếm giá trị đóng góp áp đảo \SHAPTopOneVal).
     \item \textbf{Phát hiện và cảnh báo case study MLOps thực tế:} Phân tích chi tiết trường hợp cờ \texttt{refit=True} của thư viện scikit-learn vô tình gây rò rỉ dữ liệu tập Validation, làm sai lệch F1 từ 0.0 lên \XGBRefitTestFOne, cung cấp bài học thực tiễn đắt giá cho cộng đồng kỹ thuật.
-    \item \textbf{Mã nguồn và báo cáo có tính tái lập tuyệt đối:} Toàn bộ số liệu trong báo cáo được truy xuất tự động từ các artifact đã đóng băng, đi kèm mã băm SHA-256 xác minh.
+    \item \textbf{Mã nguồn và báo cáo có tính tái lập tuyệt đối:} Toàn bộ số liệu trong báo cáo được truy xuất tự động từ các artifact đã đóng băng, đi kèm mã băm SHA-256 xác minh (hướng dẫn tái lập thực nghiệm và kiểm tra bộ test suite được cung cấp tại Phụ lục \ref{app:reproducibility}).
 \end{enumerate}
 
 \section{Cấu Trúc của Báo Cáo}

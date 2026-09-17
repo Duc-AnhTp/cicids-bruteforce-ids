@@ -45,6 +45,7 @@ Bảng \ref{tab:refit_comparison} tổng hợp sự đối lập sâu sắc gi�
 \centering
 \caption{Đối chiếu hiệu năng của XGBoost giữa Chế độ Zero-Shot Chuẩn mực và Chế độ Tiếp xúc Validation (Refit).}
 \label{tab:refit_comparison}
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{lllrr}
 \toprule
 \textbf{Chế độ thực nghiệm} & \textbf{Dữ liệu thực tế fit mô hình} & \textbf{Số mẫu SSH đã học} & \textbf{Test F1-Score} & \textbf{Test SSH Recall} \\
@@ -52,7 +53,8 @@ Bảng \ref{tab:refit_comparison} tổng hợp sự đối lập sâu sắc gi�
 Chế độ 1: Strict Zero-Shot & Duy nhất Train ($\Dtrain$) & 0 mẫu (Chưa từng thấy) & \textbf{0.0000} & \textbf{0.00\%} \\
 Chế độ 2: Subtype-Aware Refit & Train + Val ($\Dtrain \cup \Dval$) & 1,886 mẫu (Đã học trước) & \textbf{\XGBRefitTestFOne} & \textbf{\XGBRefitTestSSHRecall} \\
 \bottomrule
-\end{tabular}
+\end{tabular}%
+}
 \end{table}
 
 Phát hiện này cung cấp một bài học thực tiễn vô cùng giá trị trong kỹ nghệ MLOps cho an ninh mạng: một cấu hình mặc định tưởng chừng vô hại của thư viện học máy (\texttt{refit=True}) có thể âm thầm xóa bỏ ranh giới dữ liệu và làm sai lệch hoàn toàn kết luận khoa học của một nghiên cứu nếu không được kiểm soát chặt chẽ.

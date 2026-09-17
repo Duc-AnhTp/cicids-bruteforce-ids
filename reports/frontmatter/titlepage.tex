@@ -6,30 +6,38 @@
 \begin{titlepage}
 \begin{center}
     % Tên trường và khoa
-    {\bfseries\Large \ReportUniversity}\\[0.3cm]
-    {\bfseries\large \ReportFaculty}\\[0.2cm]
-    {\bfseries\normalsize \ReportDepartment}\\[0.8cm]
+    {\bfseries\Large \ReportUniversity}\\[0.2cm]
+    {\bfseries\large \ReportFaculty}\\[0.15cm]
+    {\bfseries\normalsize \ReportDepartment}\\[0.5cm]
 
     % Logo trường
-    \includegraphics[width=3.2cm]{LogoHUCE.jpg}\\[1.0cm]
+    \includegraphics[width=2.5cm]{LogoHUCE.jpg}\\[0.5cm]
 
     % Cấp đề tài / loại đồ án
-    {\bfseries\large \MakeUppercase{\ReportSubject}}\\[0.2cm]
-    {\itshape\normalsize \ReportMajor}\\[1.5cm]
+    {\bfseries\large \MakeUppercase{\ReportSubject}}\\[0.15cm]
+    {\itshape\normalsize \ReportMajor}\\[0.6cm]
 
     % Tên đề tài
-    {\bfseries\LARGE \ReportTitle}\\[0.5cm]
-    {\bfseries\large (\ReportTitleEn)}\\[2.0cm]
+    {\bfseries\Large \ReportTitle}\\[0.3cm]
+    {\bfseries\normalsize (\ReportTitleEn)}\\[0.8cm]
 
-    % Thông tin sinh viên và người hướng dẫn
-    \begin{minipage}{0.85\textwidth}
-        \begin{flushleft}
-            \large
-            \textbf{Sinh viên thực hiện:} \ReportAuthor\\[0.2cm]
-            \textbf{Mã số sinh viên:} \ReportStudentID\\[0.2cm]
-            \textbf{Lớp:} \ReportClass\\[0.5cm]
-            \textbf{\ReportSupervisorTitle} \ReportSupervisor
-        \end{flushleft}
+    % Thông tin giảng viên hướng dẫn và nhóm sinh viên
+    \begin{minipage}{0.9\textwidth}
+        \large
+        \textbf{\ReportSupervisorTitle} \ReportSupervisor\\[0.3cm]
+        \textbf{Nhóm sinh viên thực hiện:}\\[0.2cm]
+        \normalsize
+        \begin{tabular}{p{6.0cm}l}
+            \toprule
+            \textbf{Họ và tên sinh viên} & \textbf{Mã số sinh viên} \\
+            \midrule
+            Trần Phùng Đức Anh & 0204168 \\
+            Nguyễn Thu Hương & 0209168 \\
+            Nguyễn Việt Tuấn Anh & \dots\dots\dots\dots \\
+            Nguyễn Vũ Dũng & \dots\dots\dots\dots \\
+            Võ Nguyễn Anh Kiệt & \dots\dots\dots\dots \\
+            \bottomrule
+        \end{tabular}
     \end{minipage}
 
     \vfill

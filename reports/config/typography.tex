@@ -26,6 +26,9 @@
 \setlength{\parindent}{1.27cm}
 \setlength{\parskip}{6pt}
 
+% Đảm bảo longtable không bị lỗi glue shrinkage do parskip
+\AtBeginEnvironment{longtable}{\setlength{\parskip}{0pt}}
+
 % Định dạng tiêu đề chương và các mục con
 \titleformat{\chapter}[display]
   {\normalfont\bfseries\Large\centering}
@@ -50,14 +53,21 @@
   {\thesubsubsection}{1em}{}
 \titlespacing*{\subsubsection}{0pt}{8pt}{4pt}
 
-% Header và Footer
+% Header và Footer chuẩn mực cho tài liệu oneside
 \pagestyle{fancy}
 \fancyhf{}
-\fancyhead[LE,RO]{\thepage}
-\fancyhead[RE]{\small\nouppercase{\leftmark}}
-\fancyhead[LO]{\small\nouppercase{\rightmark}}
+\fancyhead[L]{\small\nouppercase{\leftmark}}
+\fancyfoot[C]{\thepage}
 \renewcommand{\headrulewidth}{0.5pt}
 \renewcommand{\footrulewidth}{0pt}
+
+% Đồng bộ định dạng trang đầu chương (plain style)
+\fancypagestyle{plain}{
+    \fancyhf{}
+    \fancyfoot[C]{\thepage}
+    \renewcommand{\headrulewidth}{0pt}
+    \renewcommand{\footrulewidth}{0pt}
+}
 
 % Cấu hình Hyperref
 \hypersetup{
@@ -65,8 +75,8 @@
     linkcolor=blue!70!black,
     citecolor=red!70!black,
     urlcolor=teal!70!black,
-    pdfauthor={Nguyễn Đức Anh},
+    pdfauthor={Nguyễn Việt Tuấn Anh, Nguyễn Thu Hương, Nguyễn Vũ Dũng, Trần Phùng Đức Anh, Võ Nguyễn Anh Kiệt},
     pdftitle={Ứng dụng học máy trong phát hiện tấn công Brute Force từ dữ liệu lưu lượng mạng sử dụng CICIDS2017},
     pdfkeywords={NIDS, CICIDS2017, Brute Force, Machine Learning, Temporal Leakage, Zero-shot},
-    pdfsubject={Báo cáo Đồ án An toàn Thông tin}
+    pdfsubject={Báo cáo Bài tập lớn Môn An toàn bảo mật thông tin}
 }

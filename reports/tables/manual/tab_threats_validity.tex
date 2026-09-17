@@ -3,9 +3,9 @@
 % ==============================================================================
 \begin{table}[htbp]
 \centering
-\small
 \caption{Tổng hợp các mối đe dọa đến tính hợp lệ của nghiên cứu và giải pháp kiểm soát.}
 \label{tab:threats_validity}
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{lp{5.5cm}p{6.5cm}}
 \toprule
 \textbf{Khía cạnh hợp lệ} & \textbf{Nguy cơ tiềm ẩn} & \textbf{Biện pháp kiểm soát trong nghiên cứu} \\
@@ -18,5 +18,6 @@
 \midrule
 \textbf{Statistical Validity} & Tỷ lệ tấn công thấp ($\sim 2-5\%$) gây nhiễu chỉ số Accuracy. & Sử dụng F1-Score, Precision-Recall Curve, AP và FPR làm hệ quy chiếu cốt lõi; loại bỏ sự phụ thuộc vào Accuracy Paradox. \\
 \bottomrule
-\end{tabular}
+\end{tabular}%
+}
 \end{table}

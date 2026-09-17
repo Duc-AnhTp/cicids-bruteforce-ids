@@ -38,13 +38,28 @@
 \usepackage{fancyhdr}
 
 % Trích dẫn và liên kết
-\usepackage{csquotes}
-\usepackage[backend=biber,style=ieee,sorting=none]{biblatex}
+\usepackage[autostyle=true]{csquotes}
+\usepackage[backend=biber,style=ieee,sorting=none,language=english]{biblatex}
 \usepackage{hyperref}
 \usepackage{bookmark}
+\usepackage{adjustbox}
 
 % Mã nguồn và thuật toán
 \usepackage{listings}
+\lstset{
+    basicstyle=\ttfamily\footnotesize,
+    breaklines=true,
+    breakatwhitespace=true,
+    columns=fullflexible,
+    keepspaces=true,
+    showstringspaces=false,
+    commentstyle=\color{gray},
+    keywordstyle=\color{blue!70!black}\bfseries,
+    stringstyle=\color{teal!70!black},
+    frame=single,
+    rulecolor=\color{black!20},
+    numbers=none
+}
 \usepackage[linesnumbered,ruled,vlined]{algorithm2e}
 
 % Ký hiệu và macro mở rộng

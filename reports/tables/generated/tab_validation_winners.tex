@@ -3,9 +3,9 @@
 % ==============================================================================
 \begin{table}[htbp]
 \centering
-\small
 \caption{Kết quả đánh giá và lựa chọn cấu hình mô hình tối ưu trên tập Validation (Mốc 10:02 -- 14:28).}
 \label{tab:validation_winners}
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{lllrrrrrr}
 \toprule
 \textbf{Mô hình} & \textbf{Phân tách} & \textbf{Cổng} & \textbf{\FOne} & \textbf{\Precision} & \textbf{\Recall} & \textbf{\AP} & \textbf{\ROCAUC} & \textbf{\FPR} \\
@@ -26,5 +26,6 @@ Decision Tree & Ngẫu nhiên & Không cổng & 0.9799 & 0.9662 & 0.9941 & 0.989
 Random Forest & Ngẫu nhiên & Không cổng & 0.9942 & 0.9930 & 0.9953 & 0.9993 & 0.9999 & $2.24\times 10^{-4}$ \\
 XGBoost & Ngẫu nhiên & Không cổng & 0.9984 & 0.9984 & 0.9983 & 0.9999 & 1.0000 & $4.97\times 10^{-5}$ \\
 \bottomrule
-\end{tabular}
+\end{tabular}%
+}
 \end{table}

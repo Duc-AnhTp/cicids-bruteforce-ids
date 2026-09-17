@@ -10,9 +10,9 @@ Phụ lục này cung cấp chi tiết toàn bộ các cấu hình siêu tham s�
 
 \begin{table}[htbp]
 \centering
-\small
 \caption{Chi tiết tham số tối ưu của 12 mô hình được lựa chọn trên tập Validation.}
 \label{tab:app_best_params}
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{llllp{6.5cm}}
 \toprule
 \textbf{Kịch bản thực nghiệm} & \textbf{Mô hình} & \textbf{Phân tách} & \textbf{Cổng} & \textbf{Tham số tối ưu được khóa} \\
@@ -33,5 +33,6 @@ W3-02 & Decision Tree & Random & Without & \texttt{criterion='gini'}, \texttt{ma
 W3-04 & Random Forest & Random & Without & \texttt{n\_estimators=150}, \texttt{max\_depth=None}, \texttt{min\_samples\_leaf=5} \\
 W3-06 & XGBoost & Random & Without & \texttt{n\_estimators=200}, \texttt{max\_depth=6}, \texttt{learning\_rate=0.08} \\
 \bottomrule
-\end{tabular}
+\end{tabular}%
+}
 \end{table}

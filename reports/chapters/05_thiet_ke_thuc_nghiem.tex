@@ -82,7 +82,7 @@ Mô hình đạt điểm số tối ưu trên $\Dval$ sẽ được lựa chọn
 Nhằm đảm bảo tính minh bạch khoa học và tránh việc diễn giải sai lệch kết quả, nghiên cứu phân định rõ ràng \textbf{hai chế độ thực nghiệm} độc lập đã được thực hiện:
 
 \subsection{Chế độ 1: Canonical Strict Zero-Shot Regime (Chuẩn Mực Chính)}
-Đây là giao thức đánh giá trung tâm của đồ án được triển khai trong \texttt{scripts/run\_remaining.py} và lưu trữ tại \texttt{artifacts/week3\_week4/test\_comparison.csv}:
+Đây là giao thức đánh giá trung tâm của bài tập lớn được triển khai trong \texttt{scripts/run\_remaining.py} và lưu trữ tại \texttt{artifacts/week3\_week4/test\_comparison.csv}:
 \begin{itemize}
     \item Mô hình được \textbf{fit duy nhất trên tập $\Dtrain$} (chỉ chứa \FTP).
     \item Tập $\Dval$ chỉ được đưa vào phương thức \texttt{predict\_proba} để lựa chọn cấu hình tham số tốt nhất.
@@ -98,3 +98,6 @@ Nhằm đảm bảo tính minh bạch khoa học và tránh việc diễn giải
     \item Do $\mathbf{X}_{\text{val}}$ có chứa 1,886 mẫu \SSH, mô hình XGBoost trong chế độ này \textbf{đã được tiếp xúc và học trước các mẫu tấn công SSH} trước khi bước vào tập Test.
     \item Chế độ này được sử dụng như một \textbf{Case Study chuyên sâu về MLOps} trong Chương 7 để minh chứng cho tầm quan trọng của việc kiểm soát ranh giới dữ liệu và cờ refit trong NIDS.
 \end{itemize}
+
+\section{Đảm Bảo Tính Toàn Vẹn và Khả Năng Tái Lập}
+Nhằm đảm bảo tính toàn vẹn khoa học và ngăn chặn tuyệt đối lỗi hồi quy trong toàn bộ đường ống xử lý dữ liệu, mọi ràng buộc về mốc thời gian, kỹ thuật Purge/Embargo và tính đóng băng của tập Test được tự động hóa kiểm định thông qua bộ kiểm thử hồi quy \texttt{tests/test\_protocol.py} (đạt 100\% tỷ lệ kiểm thử thành công, quy trình thực thi và mã nguồn chi tiết xem tại Phụ lục \ref{app:reproducibility}).

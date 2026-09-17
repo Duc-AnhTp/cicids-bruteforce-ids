@@ -3,9 +3,9 @@
 % ==============================================================================
 \begin{table}[htbp]
 \centering
-\scriptsize
 \caption{Hiệu năng đối chuẩn 12 tổ hợp trên tập Test sau khi đã đóng băng mô hình.}
 \label{tab:test_comparison}
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{lllrrrrrrrr}
 \toprule
 \textbf{Mô hình} & \textbf{Phân tách} & \textbf{Kịch bản} & \textbf{\Accuracy} & \textbf{\Precision} & \textbf{\Recall} & \textbf{\FOne} & \textbf{\AP} & \textbf{\ROCAUC} & \textbf{FTP Rec.} & \textbf{SSH Rec.} \\
@@ -28,5 +28,6 @@ Decision Tree & Random & Without Port & 0.9989 & 0.9700 & 0.9949 & \textbf{0.982
 Random Forest & Random & Without Port & 0.9997 & 0.9934 & 0.9954 & \textbf{0.9944} & 0.9994 & 1.0000 & 99.73\% & 99.28\% \\
 XGBoost & Random & Without Port & 0.9999 & 0.9980 & 0.9987 & \textbf{0.9984} & 0.9999 & 1.0000 & 99.92\% & 99.79\% \\
 \bottomrule
-\end{tabular}
+\end{tabular}%
+}
 \end{table}

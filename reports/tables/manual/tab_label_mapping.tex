@@ -5,6 +5,7 @@
 \centering
 \caption{Quy tắc ánh xạ nhãn bài toán phân loại nhị phân phát hiện tấn công dò quét mật khẩu.}
 \label{tab:label_mapping}
+\resizebox{\textwidth}{!}{%
 \begin{tabular}{lclp{7.5cm}}
 \toprule
 \textbf{Nhãn gốc trong dữ liệu} & \textbf{Nhãn $y$} & \textbf{Xử lý bài toán} & \textbf{Mô tả bản chất an ninh mạng} \\
@@ -13,5 +14,6 @@
 \FTP & 1 & Lớp tấn công (\Attack) & Hành vi dò quét thử mật khẩu liên tục đối với dịch vụ FTP (Cổng đích 21). \\
 \SSH & 1 & Lớp tấn công (\Attack) & Hành vi dò quét thử mật khẩu tự động đối với dịch vụ SSH (Cổng đích 22). \\
 \bottomrule
-\end{tabular}
+\end{tabular}%
+}
 \end{table}
