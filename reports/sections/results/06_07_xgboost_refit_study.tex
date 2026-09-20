@@ -2,24 +2,25 @@
 % reports/sections/results/06_07_xgboost_refit_study.tex
 % ==============================================================================
 
-\section{Nghiên Cứu Điển Hình (Case Study): Tác Động Của Giao Thức Refit Trên XGBoost}
+\section{Nghiên cứu điển hình: Tác động của thiết kế pipeline và cờ refit trên XGBoost}
+\label{sec:results_refit}
 
-Trong quá trình đối soát thực nghiệm giữa các đường ống trong mã nguồn, chúng tôi phát hiện một sự phân kỳ số liệu đặc biệt lớn đối với thuật toán XGBoost:
+Trong quá trình đối soát thực nghiệm giữa các đường ống trong mã nguồn, nhóm phát hiện sự phân kỳ số liệu đáng chú ý đối với thuật toán XGBoost:
 \begin{itemize}
     \item Trong benchmark chuẩn mực tại \path{artifacts/week3_week4/test_comparison.csv}, XGBoost đạt $\FOne = \textbf{0.0000}$ ($\text{SSH Recall} = 0.00\%$).
     \item Trong kết quả tuning độc lập tại \path{experiments/w3_05_time_tuning/test_eval/test_metrics.json}, XGBoost lại đạt $\FOne = \textbf{\XGBRefitTestFOne}$ ($\text{SSH Recall} = \textbf{\XGBRefitTestSSHRecall}$).
 \end{itemize}
 
-\subsection{Truy Vết Nguyên Nhân Kỹ Thuật Trong Mã Nguồn}
-Tiến hành phân tích chuyên sâu mã nguồn \path{src/ids/tune_xgboost.py}, nguyên nhân gốc rễ (Root Cause) đã được xác định một cách tường minh tại dòng 151--168:
-\begin{lstlisting}[language=Python]
+\subsection{Truy vết nguyên nhân kỹ thuật trong mã nguồn}
+Tiến hành phân tích mã nguồn \path{src/ids/tune_xgboost.py}, nguyên nhân kỹ thuật được xác định tại dòng 151--168:
+\begin{lstlisting}[language=Python, caption={Đoạn mã cấu hình RandomizedSearchCV và gộp dữ liệu gây kích hoạt refit trên tập gộp.}]
 search = RandomizedSearchCV(
     estimator=base_model,
     param_distributions=param_distributions,
     n_iter=n_iter,
     scoring=f1_scorer,
-    cv=cv_split, # custom train vs validation split
-    # refit=True mac dinh cua scikit-learn!
+    cv=cv_split, # Phân tách tùy biến giữa Train và Validation
+    # refit=True là giá trị mặc định của scikit-learn
 )
 X_combined = pd.concat([X_train, X_val], axis=0).reset_index(drop=True)
 y_combined = pd.concat([y_train, y_val], axis=0).reset_index(drop=True)
@@ -27,34 +28,36 @@ search.fit(X_combined, y_combined)
 joblib.dump(search.best_estimator_, best_model_path)
 \end{lstlisting}
 
-Theo tài liệu đặc tả của thư viện \texttt{scikit-learn}, tham số \texttt{refit} có giá trị mặc định là \texttt{True}. Sau khi hoàn tất việc đánh giá các tổ hợp siêu tham số trên \texttt{cv\_split} (sử dụng tập con Train làm fold huấn luyện và Val làm fold kiểm định), đối tượng \texttt{RandomizedSearchCV} sẽ \textbf{tự động gọi hàm \texttt{fit()} của mô hình tốt nhất trên toàn bộ tập dữ liệu được truyền vào hàm \texttt{fit()}}, tức là toàn bộ tập gộp $\mathbf{X}_{\text{combined}} = \Xtrain \cup \Xval$.
+Theo tài liệu đặc tả của thư viện \texttt{scikit-learn} \cite{scikit_learn_refit}, tham số \texttt{refit} có giá trị mặc định là \texttt{True}. Sau khi hoàn tất việc đánh giá các tổ hợp siêu tham số trên \texttt{cv\_split} (sử dụng tập con Train làm fold huấn luyện và Val làm fold kiểm định), đối tượng \texttt{RandomizedSearchCV} hoạt động đúng theo đặc tả: gọi hàm \texttt{fit()} của mô hình tốt nhất trên toàn bộ tập dữ liệu đầu vào đã truyền vào hàm \texttt{fit()}, tức là toàn bộ tập gộp $\mathbf{X}_{\text{combined}} = \Xtrain \cup \Xval$.
 
-\subsection{Hậu Quả Đối Với Bản Chất Bài Toán Đánh Giá}
-Trong khi tập $\Dtrain$ hoàn toàn không có bất kỳ mẫu \SSH\ nào (0 flow), thì tập kiểm định $\Dval$ lại chứa tới \textbf{1,886 flow tấn công \SSH}.
+Lỗi ở đây nằm ở thiết kế đường ống: dữ liệu Train và Validation được chủ động gộp trước khi truyền vào \texttt{RandomizedSearchCV.fit()}, trong khi \texttt{refit=True} khiến mô hình tốt nhất được huấn luyện lại trên toàn bộ tập gộp đó.
 
-Khi cơ chế \texttt{refit=True} diễn ra:
+\subsection{Hậu quả đối với bản chất bài toán đánh giá}
+Trong khi tập $\Dtrain$ không chứa mẫu \SSH\ nào (0 flow), thì tập kiểm định $\Dval$ lại chứa \textbf{1,886 flow tấn công \SSH}.
+
+Khi cơ chế \texttt{refit=True} diễn ra trên tập dữ liệu gộp:
 \begin{enumerate}
-    \item Mô hình XGBoost đã được huấn luyện trực tiếp trên 1,886 mẫu tấn công SSH từ tập Validation.
-    \item Bài toán đánh giá trên tập Test theo thời gian đã bị biến đổi bản chất từ \textbf{Zero-Shot Subtype Transfer (hoàn toàn chưa từng thấy SSH)} thành \textbf{Seen-Subtype Supervised Learning (đã được học có giám sát trên 1,886 mẫu SSH)}.
-    \item Việc được tiếp xúc với 1,886 mẫu SSH này đã giúp XGBoost học được các đặc trưng hành vi và số cổng 22 của SSH, làm cho điểm số trên tập Test nhảy vọt từ \textbf{0.0000 lên \XGBRefitTestFOne}.
+    \item Mô hình XGBoost được huấn luyện trực tiếp trên 1,886 mẫu tấn công SSH từ tập Validation.
+    \item Bài toán đánh giá trên tập Test theo thời gian đã bị biến đổi bản chất từ \textbf{kịch bản tổng quát hóa FTP $\to$ SSH (không có SSH trong tập huấn luyện)} thành \textbf{học có giám sát trên biến thể đã biết (\textit{Seen-Subtype Supervised Learning}) do được huấn luyện trên 1,886 mẫu SSH}.
+    \item Việc được học trên 1,886 mẫu SSH này đã giúp XGBoost tiếp thu phân phối đặc trưng và cổng 22 của SSH, làm cho điểm số trên tập Test tăng từ \textbf{0.0000 lên \XGBRefitTestFOne}.
 \end{enumerate}
 
-Bảng \ref{tab:refit_comparison} tổng hợp sự đối lập sâu sắc giữa hai chế độ đánh giá này.
+Bảng \ref{tab:refit_comparison} tổng hợp sự đối lập giữa hai chế độ đánh giá này.
 
 \begin{table}[htbp]
 \centering
-\caption{Đối chiếu hiệu năng của XGBoost giữa Chế độ Zero-Shot Chuẩn mực và Chế độ Tiếp xúc Validation (Refit).}
+\caption{Đối chiếu hiệu năng của XGBoost giữa chế độ đánh giá tổng quát hóa chuẩn mực và chế độ tiếp xúc validation do thiết kế pipeline (Refit).}
 \label{tab:refit_comparison}
 \adjustbox{max width=\textwidth}{%
 \begin{tabular}{lllrr}
 \toprule
-\textbf{Chế độ thực nghiệm} & \textbf{Dữ liệu thực tế fit mô hình} & \textbf{Số mẫu SSH đã học} & \textbf{Test F1-Score} & \textbf{Test SSH Recall} \\
+\textbf{Chế độ thực nghiệm} & \textbf{Dữ liệu thực tế fit mô hình} & \textbf{Mẫu SSH trong tập fit} & \textbf{Test F1-Score} & \textbf{Test SSH Recall} \\
 \midrule
-Chế độ 1: Strict Zero-Shot & Duy nhất Train ($\Dtrain$) & 0 mẫu (Chưa từng thấy) & \textbf{0.0000} & \textbf{0.00\%} \\
-Chế độ 2: Subtype-Aware Refit & Train + Val ($\Dtrain \cup \Dval$) & 1,886 mẫu (Đã học trước) & \textbf{\XGBRefitTestFOne} & \textbf{\XGBRefitTestSSHRecall} \\
+Chế độ 1: Tổng quát hóa chuẩn mực & Duy nhất Train ($\Dtrain$) & \DataTrainSSH\ mẫu & \textbf{\XGBTestFOne} & \textbf{\XGBTestSSHRecall} \\
+Chế độ 2: Pipeline gộp tập (Refit) & Train + Val ($\Dtrain \cup \Dval$) & \DataValidationSSH\ mẫu & \textbf{\XGBRefitTestFOne} & \textbf{\XGBRefitTestSSHRecall} \\
 \bottomrule
 \end{tabular}%
 }
 \end{table}
 
-Phát hiện này mang lại một bài học thực tiễn giá trị trong kỹ nghệ MLOps cho an ninh mạng: một cấu hình mặc định tưởng chừng vô hại của thư viện học máy (\texttt{refit=True}) có thể âm thầm xóa bỏ ranh giới dữ liệu và làm sai lệch hoàn toàn kết luận khoa học nếu không được kiểm soát chặt chẽ.
+Phát hiện này mang lại một bài học thực hành giá trị trong kỹ nghệ MLOps: việc chủ động gộp Train và Validation trước khi gọi hàm tìm kiếm siêu tham số kết hợp với hành vi mặc định \texttt{refit=True} của thư viện có thể làm thay đổi bản chất bài toán đánh giá nếu không được kiểm soát ranh giới dữ liệu một cách cẩn trọng.

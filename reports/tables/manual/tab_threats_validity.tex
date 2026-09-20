@@ -6,17 +6,17 @@
 \caption{Tổng hợp các mối đe dọa đến tính hợp lệ của nghiên cứu và giải pháp kiểm soát.}
 \label{tab:threats_validity}
 \adjustbox{max width=\textwidth}{%
-\begin{tabular}{lp{5.5cm}p{6.5cm}}
+\begin{tabular}{l>{\raggedright\arraybackslash}p{5.5cm}>{\raggedright\arraybackslash}p{6.5cm}}
 \toprule
 \textbf{Khía cạnh hợp lệ} & \textbf{Nguy cơ tiềm ẩn} & \textbf{Biện pháp kiểm soát trong nghiên cứu} \\
 \midrule
-\textbf{Internal Validity} & Sai lệch do phục hồi thời gian hoặc rò rỉ thông tin ranh giới. & Áp dụng Purge ($q=60$s) và Embargo ($g=120$s); loại bỏ 7,632 dòng ranh giới; kiểm tra toàn vẹn băm SHA-256. \\
+\textbf{Tính hợp lệ bên trong}\newline(\textit{Internal Validity}) & Sai lệch do phục hồi thời gian hoặc rò rỉ thông tin ranh giới giữa các tập dữ liệu. & Áp dụng Purge ($q=60$s) và Embargo ($g=120$s); loại bỏ \DataPurgedRows\ dòng ranh giới; kiểm tra toàn vẹn chuỗi băm SHA-256. \\
 \midrule
-\textbf{Construct Validity} & Nhầm lẫn giữa phân loại flow đã đóng và NIDS thời gian thực. & Tuyên bố minh bạch phạm vi Post-Flow Classification; không đo lường độ trễ phát hiện gói tin; không tuyên bố triển khai online. \\
+\textbf{Tính hợp lệ xây dựng}\newline(\textit{Construct Validity}) & Nhầm lẫn giữa phân loại luồng đã hoàn tất và hệ thống NIDS thời gian thực. & Tuyên bố minh bạch phạm vi phân loại luồng đã hoàn tất (Completed-Flow Classification); không đo lường độ trễ phát hiện gói tin; không tuyên bố triển khai trực tuyến. \\
 \midrule
-\textbf{External Validity} & Dữ liệu mô phỏng trong môi trường phòng thí nghiệm (CICIDS2017). & Phân tích cơ chế suy giảm tổng quát hóa; nhấn mạnh yêu cầu đánh giá trên traffic đa dạng và hạ tầng thực tế. \\
+\textbf{Tính hợp lệ bên ngoài}\newline(\textit{External Validity}) & Dữ liệu mô phỏng trong môi trường phòng thí nghiệm (CICIDS2017). & Phân tích cơ chế suy giảm tổng quát hóa; nhấn mạnh yêu cầu đánh giá trên lưu lượng mạng đa dạng và hạ tầng thực tế. \\
 \midrule
-\textbf{Statistical Validity} & Tỷ lệ tấn công thấp ($\sim 2-5\%$) gây nhiễu chỉ số Accuracy. & Sử dụng F1-Score, Precision-Recall Curve, AP và FPR làm hệ quy chiếu cốt lõi; loại bỏ sự phụ thuộc vào Accuracy Paradox. \\
+\textbf{Tính hợp lệ thống kê}\newline(\textit{Statistical Validity}) & Tỷ lệ tấn công thấp ($2\% -- 5\%$) gây nhiễu chỉ số Accuracy. & Sử dụng F1-Score, đường cong Precision-Recall, AP và FPR làm hệ quy chiếu cốt lõi; loại bỏ sự phụ thuộc vào nghịch lý độ chính xác (Accuracy Paradox). \\
 \bottomrule
 \end{tabular}%
 }

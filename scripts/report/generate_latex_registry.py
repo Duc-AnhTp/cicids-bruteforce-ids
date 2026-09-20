@@ -46,7 +46,7 @@ def format_fpr(val):
         s = f"{val:.2e}"
         base, exp = s.split("e")
         exp_int = int(exp)
-        return f"{base}\\times 10^{{{exp_int}}}"
+        return f"\\ensuremath{{{base}\\times 10^{{{exp_int}}}}}"
     return f"{val:.4f}"
 
 
@@ -213,9 +213,11 @@ def main():
 
     # SHAP Top features
     macros.append(f"\n% Tầm quan trọng đặc trưng SHAP (Validation Top features)")
-    macros.append(f"\\newcommand{{\\SHAPTopOneFeature}}{{{shap_df.iloc[0]['feature']}}}")
+    f1_name = shap_df.iloc[0]['feature'].replace('_', r'\_')
+    f2_name = shap_df.iloc[1]['feature'].replace('_', r'\_')
+    macros.append(f"\\newcommand{{\\SHAPTopOneFeature}}{{{f1_name}}}")
     macros.append(f"\\newcommand{{\\SHAPTopOneVal}}{{{shap_df.iloc[0]['mean_abs_shap']:.4f}}}")
-    macros.append(f"\\newcommand{{\\SHAPTopTwoFeature}}{{{shap_df.iloc[1]['feature']}}}")
+    macros.append(f"\\newcommand{{\\SHAPTopTwoFeature}}{{{f2_name}}}")
     macros.append(f"\\newcommand{{\\SHAPTopTwoVal}}{{{shap_df.iloc[1]['mean_abs_shap']:.4f}}}")
     ratio_top = shap_df.iloc[0]['mean_abs_shap'] / shap_df.iloc[1]['mean_abs_shap']
     macros.append(f"\\newcommand{{\\SHAPRatioTopOneTwo}}{{{ratio_top:.1f}}}")
@@ -249,10 +251,23 @@ def main():
     for s in split_meta["splits"]:
         sname = s["split"]
         t1.append(f"{sname} & {s['rows']:,} & {s['BENIGN']:,} & {s['Attack']:,} & {s['FTP_Patator']:,} & {s['SSH_Patator']:,} & {s['Attack_percent']:.2f}\\% \\\\")
+
+    purge_benign = sum(b.get("BENIGN", 0) for b in split_meta.get("boundary_audit", []))
+    purge_attack = sum(b.get("FTP", 0) + b.get("SSH", 0) for b in split_meta.get("boundary_audit", []))
+    purge_ftp = sum(b.get("FTP", 0) for b in split_meta.get("boundary_audit", []))
+    purge_ssh = sum(b.get("SSH", 0) for b in split_meta.get("boundary_audit", []))
+    purge_pct = (purge_attack / purged_rows * 100) if purged_rows > 0 else 0.0
+
+    total_benign = sum(s["BENIGN"] for s in split_meta["splits"]) + purge_benign
+    total_attack = sum(s["Attack"] for s in split_meta["splits"]) + purge_attack
+    total_ftp = sum(s["FTP_Patator"] for s in split_meta["splits"]) + purge_ftp
+    total_ssh = sum(s["SSH_Patator"] for s in split_meta["splits"]) + purge_ssh
+    total_pct = (total_attack / cleaned_rows * 100) if cleaned_rows > 0 else 0.0
+
     t1.extend([
         r"\midrule",
-        f"Purge/Embargo & {purged_rows:,} & 6,967 & 665 & 386 & 279 & 8.71\\% \\\\",
-        f"\\textbf{{Tổng số hợp lệ}} & \\textbf{{{cleaned_rows:,}}} & \\textbf{{432,053}} & \\textbf{{13,835}} & \\textbf{{7,938}} & \\textbf{{5,897}} & \\textbf{{3.10\\%}} \\\\",
+        f"Purge/Embargo & {purged_rows:,} & {purge_benign:,} & {purge_attack:,} & {purge_ftp:,} & {purge_ssh:,} & {purge_pct:.2f}\\% \\\\",
+        f"\\textbf{{Tổng số hợp lệ}} & \\textbf{{{cleaned_rows:,}}} & \\textbf{{{total_benign:,}}} & \\textbf{{{total_attack:,}}} & \\textbf{{{total_ftp:,}}} & \\textbf{{{total_ssh:,}}} & \\textbf{{{total_pct:.2f}\\%}} \\\\",
         r"\bottomrule",
         r"\end{tabular}%",
         r"}",
@@ -278,7 +293,7 @@ def main():
         mname = name_map.get(r["model"], r["model"])
         scen = "Có cổng" if r["scenario"] == "with_port" else "Không cổng"
         sp = "Thời gian" if r["split"] == "time" else "Ngẫu nhiên"
-        t2.append(f"{mname} & {sp} & {scen} & {r['f1_attack']:.4f} & {r['precision_attack']:.4f} & {r['recall_attack']:.4f} & {r['average_precision']:.4f} & {r['roc_auc']:.4f} & {format_num(r['fpr'])} \\\\")
+        t2.append(f"{mname} & {sp} & {scen} & {r['f1_attack']:.4f} & {r['precision_attack']:.4f} & {r['recall_attack']:.4f} & {r['average_precision']:.4f} & {r['roc_auc']:.4f} & {format_fpr(r['fpr'])} \\\\")
     t2.extend([
         r"\bottomrule",
         r"\end{tabular}%",
@@ -299,24 +314,24 @@ def main():
         r"\toprule",
         r"\textbf{Mô hình} & \textbf{Phân tách} & \textbf{Kịch bản} & \textbf{Accuracy} & \textbf{Precision} & \textbf{Recall} & \textbf{F1} & \textbf{AP} & \textbf{ROC-AUC} & \textbf{FTP Rec.} & \textbf{SSH Rec.} \\",
         r"\midrule",
-        r"\multicolumn{11}{l}{\textbf{A. Thực nghiệm Chính: Phân tách theo Thời gian (Time-based Zero-shot)}} \\",
+        r"\multicolumn{11}{l}{\textbf{A. Thực nghiệm chính: Phân tách theo thời gian (kịch bản FTP $\to$ SSH)}} \\",
     ]
     for _, r in test_comp[test_comp["split"] == "time"].iterrows():
         mname = name_map.get(r["model"], r["model"])
-        scen = "With Port" if r["scenario"] == "with_port" else "Without Port"
+        scen = "Có cổng" if r["scenario"] == "with_port" else "Không cổng"
         ftp_rec = r"\text{N/A}" if pd.isna(r["ftp_recall"]) or r["ftp_support"] == 0 else f"{r['ftp_recall']*100:.2f}\\%"
         ssh_rec = f"{r['ssh_recall']*100:.2f}\\%"
-        t3.append(f"{mname} & Time & {scen} & {r['accuracy']:.4f} & {r['precision_attack']:.4f} & {r['recall_attack']:.4f} & \\textbf{{{r['f1_attack']:.4f}}} & {r['average_precision']:.4f} & {r['roc_auc']:.4f} & {ftp_rec} & {ssh_rec} \\\\")
+        t3.append(f"{mname} & Thời gian & {scen} & {r['accuracy']:.4f} & {r['precision_attack']:.4f} & {r['recall_attack']:.4f} & \\textbf{{{r['f1_attack']:.4f}}} & {r['average_precision']:.4f} & {r['roc_auc']:.4f} & {ftp_rec} & {ssh_rec} \\\\")
     t3.extend([
         r"\midrule",
-        r"\multicolumn{11}{l}{\textbf{B. Thực nghiệm Đối chứng: Phân tách Ngẫu nhiên (Random Split Control)}} \\",
+        r"\multicolumn{11}{l}{\textbf{B. Thực nghiệm đối chứng: Phân tách ngẫu nhiên (đối chứng rò rỉ dữ liệu)}} \\",
     ])
     for _, r in test_comp[test_comp["split"] == "random"].iterrows():
         mname = name_map.get(r["model"], r["model"])
-        scen = "With Port" if r["scenario"] == "with_port" else "Without Port"
+        scen = "Có cổng" if r["scenario"] == "with_port" else "Không cổng"
         ftp_rec = f"{r['ftp_recall']*100:.2f}\\%" if not pd.isna(r["ftp_recall"]) else r"\text{N/A}"
         ssh_rec = f"{r['ssh_recall']*100:.2f}\\%"
-        t3.append(f"{mname} & Random & {scen} & {r['accuracy']:.4f} & {r['precision_attack']:.4f} & {r['recall_attack']:.4f} & \\textbf{{{r['f1_attack']:.4f}}} & {r['average_precision']:.4f} & {r['roc_auc']:.4f} & {ftp_rec} & {ssh_rec} \\\\")
+        t3.append(f"{mname} & Ngẫu nhiên & {scen} & {r['accuracy']:.4f} & {r['precision_attack']:.4f} & {r['recall_attack']:.4f} & \\textbf{{{r['f1_attack']:.4f}}} & {r['average_precision']:.4f} & {r['roc_auc']:.4f} & {ftp_rec} & {ssh_rec} \\\\")
     t3.extend([
         r"\bottomrule",
         r"\end{tabular}%",
@@ -402,9 +417,10 @@ def main():
     for i in range(10):
         row = shap_df.iloc[i]
         fname = row["feature"]
+        fname_latex = fname.replace("_", r"\_")
         fval = row["mean_abs_shap"]
         fdesc = feature_desc.get(fname, "Đặc trưng thống kê luồng mạng")
-        t6.append(f"{i+1} & \\texttt{{{fname}}} & {fval:.4f} & {fdesc} \\\\")
+        t6.append(f"{i+1} & \\texttt{{{fname_latex}}} & {fval:.4f} & {fdesc} \\\\")
     t6.extend([
         r"\bottomrule",
         r"\end{tabular}%",

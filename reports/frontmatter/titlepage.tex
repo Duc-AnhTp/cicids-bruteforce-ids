@@ -1,12 +1,20 @@
 % ==============================================================================
 % reports/frontmatter/titlepage.tex
-% Trang bìa chuẩn đồ án tốt nghiệp / đề tài nghiên cứu HUCE
+% Trang bìa chuẩn đồ án môn học / bài tập lớn HUCE
 % ==============================================================================
 
 \begin{titlepage}
+% Khung viền đôi chuẩn đồ án
+\begin{tikzpicture}[remember picture,overlay]
+    \draw[line width=2.5pt] ($(current page.north west)+(2.5cm,-2cm)$)
+          rectangle ($(current page.south east)+(-1.5cm,2cm)$);
+    \draw[line width=0.6pt] ($(current page.north west)+(2.65cm,-2.15cm)$)
+          rectangle ($(current page.south east)+(-1.65cm,2.15cm)$);
+\end{tikzpicture}
+
 \begin{center}
     % Tên trường và khoa
-    {\bfseries\Large \ReportUniversity}\\[0.2cm]
+    {\bfseries\Large \ReportUniversity}\\[0.25cm]
     {\bfseries\large \ReportFaculty}\\[0.15cm]
     {\bfseries\normalsize \ReportDepartment}\\[0.5cm]
 
@@ -15,27 +23,29 @@
 
     % Cấp đề tài / loại đồ án
     {\bfseries\large \MakeUppercase{\ReportSubject}}\\[0.15cm]
-    {\itshape\normalsize \ReportMajor}\\[0.6cm]
+    {\itshape\normalsize \ReportMajor}\\[0.7cm]
 
-    % Tên đề tài
-    {\bfseries\Large \ReportTitle}\\[0.3cm]
-    {\bfseries\normalsize (\ReportTitleEn)}\\[0.8cm]
+    % Tên đề tài ngắt dòng thủ công chuẩn xác
+    {\bfseries\Large ỨNG DỤNG HỌC MÁY TRONG PHÁT HIỆN\\[0.2cm]
+    TẤN CÔNG BRUTE FORCE TỪ DỮ LIỆU LƯU LƯỢNG MẠNG\\[0.2cm]
+    SỬ DỤNG BỘ DỮ LIỆU CICIDS2017\par}
+    \vspace{1.0cm}
 
     % Thông tin giảng viên hướng dẫn và nhóm sinh viên
-    \begin{minipage}{0.9\textwidth}
-        \large
-        \textbf{\ReportSupervisorTitle} \ReportSupervisor\\[0.3cm]
-        \textbf{Nhóm sinh viên thực hiện:}\\[0.2cm]
+    \begin{minipage}{0.88\textwidth}
+        \centering
+        \textbf{\ReportSupervisorTitle} \ReportSupervisor\\[0.4cm]
+        \textbf{NHÓM SINH VIÊN THỰC HIỆN:}\\[0.25cm]
         \normalsize
-        \begin{tabular}{p{6.0cm}l}
+        \begin{tabular}{c p{5.2cm} c c}
             \toprule
-            \textbf{Họ và tên sinh viên} & \textbf{Mã số sinh viên} \\
+            \textbf{STT} & \textbf{Họ và tên sinh viên} & \textbf{Mã số sinh viên} & \textbf{Lớp} \\
             \midrule
-            Trần Phùng Đức Anh & 0204168 \\
-            Nguyễn Thu Hương & 0209168 \\
-            Nguyễn Việt Tuấn Anh & \dots\dots\dots\dots \\
-            Nguyễn Vũ Dũng & \dots\dots\dots\dots \\
-            Võ Nguyễn Anh Kiệt & 0209968 \\
+            1 & Nguyễn Việt Tuấn Anh & 0204068 & 67PM2 \\
+            2 & Trần Phùng Đức Anh   & 0204168 & 67PM2 \\
+            3 & Nguyễn Vũ Dũng       & 0205968 & 67PM2 \\
+            4 & Nguyễn Thu Hương     & 0209168 & 67PM2 \\
+            5 & Võ Nguyễn Anh Kiệt   & 0209968 & 67PM2 \\
             \bottomrule
         \end{tabular}
     \end{minipage}
@@ -44,5 +54,6 @@
 
     % Địa điểm và năm hoàn thành
     {\bfseries\large \ReportLocation, \ReportYear}
+    \vspace{0.3cm}
 \end{center}
 \end{titlepage}

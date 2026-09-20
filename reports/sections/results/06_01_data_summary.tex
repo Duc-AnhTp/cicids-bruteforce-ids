@@ -2,9 +2,9 @@
 % reports/sections/results/06_01_data_summary.tex
 % ==============================================================================
 
-\section{Tổng Hợp Thống Kê Dữ Liệu Sau Tiền Xử Lý}
+\section{Tổng hợp thống kê dữ liệu sau tiền xử lý}
 
-Sau khi hoàn tất quy trình tiền xử lý chỉ học từ tập Train (\texttt{preprocess\_data.py}), không gian đặc trưng cuối cùng được xác định rõ ràng:
+Sau khi hoàn tất quy trình tiền xử lý chỉ học từ tập Train độc lập, không gian đặc trưng cuối cùng được xác định rõ ràng:
 \begin{itemize}
     \item Số lượng đặc trưng ban đầu: \FeatInitialCount\ đặc trưng mạng (sau khi đã loại bỏ các trường định danh và cột trùng lặp \texttt{Fwd Header Length.1}).
     \item Số lượng đặc trưng hằng số bị loại bỏ: \FeatConstantDropped\ đặc trưng có phương sai bằng 0 trên $\Dtrain$.
@@ -14,7 +14,7 @@ Sau khi hoàn tất quy trình tiền xử lý chỉ học từ tập Train (\te
 
 Về số lượng mẫu (xem lại Bảng \ref{tab:dataset_splits}):
 \begin{itemize}
-    \item \textbf{Tập Huấn luyện ($\Dtrain$)}: \DataTrainRows\ dòng, gồm \DataTrainBenign\ mẫu bình thường và \DataTrainFTP\ mẫu \FTP\ (tỷ lệ tấn công \DataTrainAttackPercent). Hoàn toàn không có \SSH.
+    \item \textbf{Tập Huấn luyện ($\Dtrain$)}: \DataTrainRows\ dòng, gồm \DataTrainBenign\ mẫu bình thường và \DataTrainFTP\ mẫu \FTP\ (tỷ lệ tấn công \DataTrainAttackPercent). Không có mẫu \SSH\ nào.
     \item \textbf{Tập Kiểm định ($\Dval$)}: \DataValidationRows\ dòng, gồm \DataValidationBenign\ mẫu bình thường và \DataValidationAttack\ mẫu tấn công (\DataValidationFTP\ mẫu \FTP\ và \DataValidationSSH\ mẫu \SSH, tỷ lệ tấn công \DataValidationAttackPercent).
-    \item \textbf{Tập Kiểm thử ($\Dtest$)}: \DataTestRows\ dòng, gồm \DataTestBenign\ mẫu bình thường và \DataTestAttack\ mẫu \SSH\ (tỷ lệ tấn công \DataTestAttackPercent). Hoàn toàn không có \FTP.
+    \item \textbf{Tập Kiểm thử ($\Dtest$)}: \DataTestRows\ dòng, gồm \DataTestBenign\ mẫu bình thường và \DataTestAttack\ mẫu \SSH\ (tỷ lệ tấn công \DataTestAttackPercent). Không có mẫu \FTP\ nào.
 \end{itemize}

@@ -2,22 +2,24 @@
 % reports/sections/results/06_05_port_ablation.tex
 % ==============================================================================
 
-\section{Kết Quả Thực Nghiệm Bóc Tách Cổng Mạng (Port Ablation)}
+\section{Kết quả thực nghiệm bóc tách cổng mạng}
 
-Để kiểm chứng giả thuyết cho rằng mô hình thất bại trên tập Test theo thời gian chỉ đơn thuần là do "học vẹt" vào cổng dịch vụ đích (\texttt{Destination Port}), chúng tôi tiến hành phân tích kịch bản bóc tách cổng (\texttt{without\_port}), trong đó đặc trưng này bị loại bỏ hoàn toàn.
+Để kiểm chứng giả thuyết cho rằng mô hình gặp khó khăn trên tập Test theo thời gian chỉ đơn thuần là do dựa vào lối tắt cổng dịch vụ đích (\texttt{Destination Port}), nhóm tiến hành phân tích kịch bản bóc tách cổng (\texttt{without\_port}), trong đó đặc trưng này bị loại bỏ khỏi không gian huấn luyện.
 
 Bảng \ref{tab:port_ablation} tổng hợp kết quả bóc tách cổng trên tập kiểm định $\Dval$.
 
 \input{tables/generated/tab_port_ablation.tex}
 
-Trên tập kiểm định $\Dval$, việc loại bỏ cổng làm giảm nhẹ điểm F1 của cả 3 mô hình (khoảng 0.0001 đến 0.0047), nhưng tỷ lệ phát hiện tấn công SSH vẫn giữ ở mức 0.00\% (vì các mô hình chỉ ưu tiên tối ưu hóa phát hiện các mẫu FTP quen thuộc chiếm đa số trong Val).
+Trên tập kiểm định $\Dval$, việc loại bỏ cổng làm giảm nhẹ điểm F1 của cả 3 mô hình (khoảng 0.0001 đến 0.0047), và tỷ lệ phát hiện tấn công SSH vẫn giữ ở mức 0.00\% (do mô hình tối ưu theo mẫu FTP chiếm đa số trong tập Val).
 
-Đặc biệt, khi quan sát kết quả trên tập kiểm thử $\Dtest$ theo thời gian (xem lại Phần A của Bảng \ref{tab:test_comparison}):
+Khi quan sát kết quả trên tập kiểm thử $\Dtest$ theo thời gian (xem lại Phần A của Bảng \ref{tab:test_comparison}):
 \begin{itemize}
-    \item \textbf{Cây Quyết Định (Decision Tree)}: Điểm F1 tăng nhẹ từ 0.0000 lên \textbf{\DTTestWithoutPortFOne}, bắt được \DTTestWithoutPortSSHRecall\ tấn công SSH (7 mẫu).
-    \item \textbf{Rừng Ngẫu Nhiên (Random Forest)}: Điểm F1 tăng từ \RFTestFOne\ lên \textbf{\RFTestWithoutPortFOne}, bắt được \RFTestWithoutPortSSHRecall\ tấn công SSH (14 trên tổng số 3,732 mẫu).
-    \item \textbf{XGBoost}: Điểm F1 tăng từ 0.0000 lên \textbf{\XGBTestWithoutPortFOne}, bắt được \XGBTestWithoutPortSSHRecall\ tấn công SSH (13 trên tổng số 3,732 mẫu).
+    \item \textbf{Cây Quyết Định (Decision Tree)}: Điểm F1 tăng nhẹ từ 0.0000 lên \textbf{\DTTestWithoutPortFOne}, nhận diện được \DTTestWithoutPortSSHRecall\ tấn công SSH (7 mẫu).
+    \item \textbf{Rừng Ngẫu Nhiên (Random Forest)}: Điểm F1 tăng từ \RFTestFOne\ lên \textbf{\RFTestWithoutPortFOne}, nhận diện được \RFTestWithoutPortSSHRecall\ tấn công SSH (14 trên tổng số 3,732 mẫu).
+    \item \textbf{XGBoost}: Điểm F1 tăng từ 0.0000 lên \textbf{\XGBTestWithoutPortFOne}, nhận diện được \XGBTestWithoutPortSSHRecall\ tấn công SSH (13 trên tổng số 3,732 mẫu).
 \end{itemize}
+
+Sự thay đổi diện tích dưới đường cong ROC và đường cong Precision-Recall giữa hai kịch bản có và không có cổng được đối chiếu trực quan trên Hình \ref{fig:roc_pr_comparative}.
 
 \begin{figure}[htbp]
 \centering
@@ -26,7 +28,7 @@ Trên tập kiểm định $\Dval$, việc loại bỏ cổng làm giảm nhẹ 
 \label{fig:roc_pr_comparative}
 \end{figure}
 
-\noindent\textbf{Kết luận then chốt về vai trò của Cổng dịch vụ:}
-Việc loại bỏ cổng dịch vụ quả thực đã giúp các mô hình giải phóng một phần sự ràng buộc để bắt đầu nhận diện được một lượng rất nhỏ các flow SSH dựa trên đặc trưng hành vi (tỷ lệ SSH Recall tăng từ 0.00\% lên $0.19\% - 0.38\%$).
+\noindent\textbf{Kết luận về vai trò của cổng dịch vụ:}
+Việc loại bỏ cổng dịch vụ giúp các mô hình nhận diện được thêm một lượng nhỏ các flow SSH dựa trên đặc trưng hành vi (tỷ lệ SSH Recall tăng từ $0.00\% \text{ -- } 0.19\%$ lên $0.19\% \text{ -- } 0.38\%$).
 
-Tuy nhiên, \textbf{hiệu năng tổng thể của mô hình vẫn ở mức sụp đổ hoàn toàn} ($\FOne \le 0.0074$). Kết quả này bác bỏ giả thuyết cho rằng thất bại của NIDS chỉ đơn thuần là do đặc trưng cổng. Nó chứng minh một sự thật sâu sắc hơn: \textbf{Các đặc trưng thống kê hình thái gói tin (Packet length statistics, IAT, Flags) của tấn công FTP và SSH có sự phân kỳ phân phối (Distribution Divergence) quá lớn}, khiến mô hình học trên FTP không thể nhận diện được SSH ngay cả khi không còn cổng dẫn hướng!
+Tuy nhiên, hiệu năng tổng thể của mô hình trong toàn bộ các tổ hợp theo thời gian vẫn ở mức rất thấp, với giá trị F1 cao nhất được ghi nhận là \textbf{\RFTestWithoutPortFOne} ở Random Forest (nhận diện được \RFTestWithoutPortSSHRecall\ tấn công SSH, tức 14/3,732 flow). Kết quả này cho thấy: mặc dù \texttt{Destination Port} là một lối tắt quan trọng của mô hình, việc loại bỏ cổng không đủ để giải quyết sự suy giảm hiệu năng tổng quát hóa. Nói cách khác, sự sụt giảm hiệu năng trong việc phát hiện SSH không thể được giải thích chỉ bằng riêng yếu tố cổng dịch vụ. Sự khác biệt về cơ chế hoạt động và phân phối đặc trưng thống kê gói tin giữa hai giao thức FTP và SSH (kết hợp với yếu tố thời gian và chiến dịch tấn công) là một cơ chế hợp lý góp phần tạo nên sự dịch chuyển phân phối này.

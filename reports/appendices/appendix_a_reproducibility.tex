@@ -6,7 +6,7 @@
 \chapter{Hướng Dẫn Cài Đặt và Tái Lập Thực Nghiệm}
 \label{app:reproducibility}
 
-\section{Yêu Cầu Môi Trường và Cài Đặt Phụ Thuộc}
+\section{Yêu cầu môi trường và cài đặt phụ thuộc}
 
 Để tái lập toàn bộ các kết quả thực nghiệm trong báo cáo, người nghiên cứu cần chuẩn bị môi trường Python $\ge 3.11$ và thực hiện các bước sau:
 
@@ -26,7 +26,7 @@ source .venv/bin/activate
 pip install -e .
 \end{lstlisting}
 
-\section{Chuẩn Bị Dữ Liệu và Phân Tách}
+\section{Chuẩn bị dữ liệu và phân tách}
 
 \begin{lstlisting}[language=bash, caption={Thực hiện làm sạch và phân tách dữ liệu chuẩn mực}]
 # Kiem tra ma bam SHA-256 cua tep CSV goc
@@ -39,10 +39,10 @@ python scripts/prepare_splits.py
 python scripts/preprocess_data.py
 \end{lstlisting}
 
-\section{Chạy Thực Nghiệm và Kiểm Thử Đóng Băng}
+\section{Chạy thực nghiệm và kiểm thử đóng băng}
 
 \begin{lstlisting}[language=bash, caption={Huấn luyện, tìm kiếm siêu tham số và đánh giá tập Test}]
-# Chay toan bo quy trinh benchmark W3-W4 (dong bang va danh gia Test)
+# Chay toan bo quy trinh benchmark (dong bang va danh gia Test)
 python scripts/run_remaining.py
 
 # Sinh lai toan bo macro so lieu va bang LaTeX tu artifact

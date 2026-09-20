@@ -2,13 +2,13 @@
 % reports/sections/results/06_02_validation.tex
 % ==============================================================================
 
-\section{Kết Quả Đánh Giá và Lựa Chọn Mô Hình Trên Tập Validation}
+\section{Kết quả đánh giá và lựa chọn mô hình trên tập kiểm định}
 
 Quá trình tìm kiếm siêu tham số trên tập kiểm định $\Dval$ mang lại các kết quả định lượng chi tiết được tổng hợp trong Bảng \ref{tab:validation_winners}. Không gian siêu tham số và bộ tham số tối ưu được khóa của toàn bộ 12 kịch bản mô hình được thống kê đầy đủ tại Phụ lục \ref{app:hyperparameters}.
 
 \input{tables/generated/tab_validation_winners.tex}
 
-Trong kịch bản đánh giá chính theo thời gian có cổng (\texttt{time/with\_port}):
+Trong kịch bản đánh giá chính theo thời gian có cổng:
 \begin{enumerate}
     \item \textbf{Cây Quyết Định (Decision Tree)}:
     Đạt $\FOne = 0.7170$, $\Precision = 0.9971$, $\Recall = 0.5597$, $\AP = 0.5690$ và $\FPR = 3.51\times 10^{-5}$ với cấu hình gồm \texttt{max\_depth=6} và \texttt{min\_samples\_leaf=5}.
@@ -18,7 +18,7 @@ Trong kịch bản đánh giá chính theo thời gian có cổng (\texttt{time/
     Đạt $\FOne = 0.7181$, $\Precision = 1.0000$, $\Recall = 0.5602$, $\AP = 0.6045$ và $\FPR = 0.00$ với cấu hình \texttt{n\_estimators=200}, \texttt{max\_depth=4}, \texttt{learning\_rate=0.08}.
 \end{enumerate}
 
-\noindent\textbf{Quyết định lựa chọn mô hình chiến thắng (Winner Selection):}
-Mặc dù Random Forest và XGBoost đạt điểm F1 ngang nhau ($0.7181$) và cùng có tỷ lệ báo động giả bằng 0, Random Forest có chỉ số Average Precision vượt trội đáng kể ($\AP = \textbf{\WinnerValAP}$ so với $0.6045$ của XGBoost). Điều này chứng minh chất lượng xếp hạng xác suất (Probability Calibration) trên đường cong Precision-Recall của Random Forest ổn định và tin cậy hơn.
+\noindent\textbf{Quyết định lựa chọn mô hình đại diện:}
+Mặc dù Random Forest và XGBoost đạt điểm F1 xấp xỉ ngang nhau ($0.7181$) và cùng có tỷ lệ báo động giả cực thấp ($\FPR \le 10^{-5}$), Random Forest có chỉ số Average Precision cao hơn ($\AP = \textbf{\WinnerValAP}$ so với $0.6045$ của XGBoost). Điều này cho thấy chất lượng xếp hạng (ranking) các mẫu dương trên dải ngưỡng phân loại của Random Forest tốt hơn theo độ đo AP.
 
-Do đó, theo tiêu chuẩn lựa chọn đã định trước, \textbf{Random Forest (\texttt{time/with\_port})} được chọn là mô hình tối ưu đại diện cho toàn bộ benchmark để tiến hành đánh giá trên tập kiểm thử $\Dtest$.
+Do đó, theo thứ tự ưu tiên lựa chọn đã thiết lập, \textbf{Random Forest (\texttt{time/with\_port})} được chọn là mô hình đại diện cho kịch bản đánh giá chính để tiến hành đánh giá trên tập kiểm thử $\Dtest$.

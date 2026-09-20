@@ -26,20 +26,21 @@
 \pagenumbering{roman}
 \setcounter{page}{1}
 
-\input{frontmatter/declaration.tex}
 \input{frontmatter/acknowledgement.tex}
 \input{frontmatter/abstract_vi.tex}
-\input{frontmatter/abstract_en.tex}
 
-% Mục lục tự động
+% Mục lục tự động và các danh mục bổ trợ
 \tableofcontents
-\newpage
-\listoftables
-\newpage
-\listoffigures
 \newpage
 
 \input{frontmatter/abbreviations.tex}
+\newpage
+
+\listoftables
+\newpage
+
+\listoffigures
+\newpage
 
 % ------------------------------------------------------------------------------
 % NỘI DUNG CHÍNH (MAINMATTER)
@@ -48,16 +49,14 @@
 \pagenumbering{arabic}
 \setcounter{page}{1}
 
-% Chương 1 đến Chương 9
+% Chương 1 đến Chương 7 (Bài tập lớn thực nghiệm)
 \input{chapters/01_gioi_thieu.tex}
 \input{chapters/02_co_so_ly_thuyet.tex}
 \input{chapters/03_du_lieu_va_bai_toan.tex}
 \input{chapters/04_phuong_phap_de_xuat.tex}
 \input{chapters/05_thiet_ke_thuc_nghiem.tex}
 \input{chapters/06_ket_qua.tex}
-\input{chapters/07_thao_luan.tex}
-\input{chapters/08_han_che.tex}
-\input{chapters/09_ket_luan.tex}
+\input{chapters/07_ket_luan.tex}
 
 % ------------------------------------------------------------------------------
 % TÀI LIỆU THAM KHẢO VÀ PHỤ LỤC (BACKMATTER)
