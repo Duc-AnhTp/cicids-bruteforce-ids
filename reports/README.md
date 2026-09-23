@@ -22,20 +22,25 @@ reports/
 │
 ├── frontmatter/                   # Các trang thủ tục đầu báo cáo
 │   ├── titlepage.tex              # Trang bìa chuẩn HUCE
+│   ├── declaration.tex            # Lời cam đoan tính trung thực học thuật
 │   ├── acknowledgement.tex        # Lời cảm ơn
-│   ├── abstract_vi.tex            # Tóm tắt báo cáo tiếng Việt (vừa vặn 1 trang)
+│   ├── abstract_vi.tex            # Tóm tắt báo cáo tiếng Việt
+│   ├── abstract_en.tex            # Tóm tắt báo cáo tiếng Anh (Abstract)
 │   └── abbreviations.tex          # Bảng danh mục chữ viết tắt
 │
-├── chapters/                      # Các chương báo cáo (Chương 1 đến 6)
+├── chapters/                      # Các chương báo cáo (Chương 1 đến 7)
 │   ├── 01_gioi_thieu.tex          # Chương 1: Giới thiệu & Đặt vấn đề
 │   ├── 02_co_so_ly_thuyet.tex     # Chương 2: Cơ sở lý thuyết Flow-NIDS & ML cây
 │   ├── 03_du_lieu_va_bai_toan.tex # Chương 3: Dữ liệu CICIDS2017 & Làm sạch
 │   ├── 04_phuong_phap_de_xuat.tex # Chương 4: Kiến trúc hệ thống & Purge/Embargo
 │   ├── 05_thiet_ke_thuc_nghiem.tex# Chương 5: Thiết kế thực nghiệm & Không gian siêu tham số
-│   └── 06_ket_qua.tex             # Chương 6: Kết quả thực nghiệm đối chuẩn & Tổng kết RQ1-RQ4
+│   ├── 06_ket_qua.tex             # Chương 6: Kết quả thực nghiệm đối chuẩn (tập hợp 7 sections)
+│   └── 07_ket_luan.tex            # Chương 7: Kết luận, trả lời RQ1-RQ4, tính hợp lệ & phân công
+│   # Ghi chú: các bản thảo 07_thao_luan, 08_han_che, 09_ket_luan là tài liệu lưu trữ, không nạp vào main.tex
 │
 ├── sections/                      # Module nội dung chi tiết
-│   └── results/                   # 8 module kết quả định lượng và tổng kết diễn giải (06_01 đến 06_08)
+│   ├── results/                   # 7 module kết quả định lượng và nghiên cứu điển hình (06_01 đến 06_07)
+│   └── discussion/                # Bản thảo thảo luận lưu trữ (07_01 đến 07_03, không nạp vào main.tex)
 │
 ├── tables/                        # Bảng biểu
 │   ├── generated/                 # TỰ ĐỘNG SINH: 6 bảng booktabs từ artifact

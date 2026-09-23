@@ -8,29 +8,33 @@
 
 \section{Yêu cầu môi trường và cài đặt phụ thuộc}
 
-Để tái lập toàn bộ các kết quả thực nghiệm trong báo cáo, người nghiên cứu cần chuẩn bị môi trường Python $\ge 3.11$ và thực hiện các bước sau:
+Dự án hỗ trợ môi trường Python trong dải tương thích \texttt{>=3.11,<3.13} (khai báo tại \path{pyproject.toml}). Môi trường máy trạm thực tế dùng để chạy và kiểm chứng toàn bộ số liệu báo cáo là Python 3.12 trên Windows 11 với các thư viện đã được xác thực: \texttt{numpy==1.26.4}, \texttt{pandas==2.2.2}, \texttt{scikit-learn==1.6.1}, \texttt{xgboost==3.0.5}, \texttt{shap==0.48.0} và \texttt{matplotlib==3.9.2}.
 
-\begin{lstlisting}[language=bash, caption={Thiết lập môi trường ảo và cài đặt thư viện}]
+Để cài đặt mã nguồn cùng các thành phần giải thích mô hình (SHAP/XAI), người nghiên cứu thực hiện các bước sau:
+
+\begin{lstlisting}[language=bash, caption={Thiết lập môi trường ảo và cài đặt thư viện bao gồm gói mở rộng XAI}]
 # 1. Clone repository
 git clone https://github.com/Duc-AnhTp/cicids-bruteforce-ids.git
 cd cicids-bruteforce-ids
 
-# 2. Tao va kich hoat moi truong ao
+# 2. Tao va kich hoat moi truong ao (khuyen nghi Python 3.12)
 python -m venv .venv
 # Tren Linux / macOS:
 source .venv/bin/activate
 # Tren Windows PowerShell:
 .\.venv\Scripts\Activate.ps1
 
-# 3. Cai dat cac thu vien phu thuoc da kiem chung
-pip install -e .
+# 3. Cai dat package o che do editable kem goi mo rong giai thich SHAP (xai)
+pip install -e ".[xai]"
 \end{lstlisting}
 
 \section{Chuẩn bị dữ liệu và phân tách}
 
 \begin{lstlisting}[language=bash, caption={Thực hiện làm sạch và phân tách dữ liệu chuẩn mực}]
-# Kiem tra ma bam SHA-256 cua tep CSV goc
-python -m ids check-integrity data/raw/Tuesday-WorkingHours.pcap_ISCX.csv
+# Kiem tra ma bam SHA-256 cua tep CSV goc (Linux / macOS: sha256sum, Windows: certutil)
+sha256sum data/raw/Tuesday-WorkingHours.pcap_ISCX.csv
+# hoac chay kiem toan toan ven va phan bo thoi gian bang CLI cua he thong:
+python -m ids audit
 
 # Chay quy trinh phuc hoi timestamp va chia tach du lieu theo thoi gian
 python scripts/prepare_splits.py
@@ -39,15 +43,18 @@ python scripts/prepare_splits.py
 python scripts/preprocess_data.py
 \end{lstlisting}
 
-\section{Chạy thực nghiệm và kiểm thử đóng băng}
+\section{Chạy thực nghiệm và kiểm thử tự động}
 
-\begin{lstlisting}[language=bash, caption={Huấn luyện, tìm kiếm siêu tham số và đánh giá tập Test}]
+\begin{lstlisting}[language=bash, caption={Huấn luyện, tìm kiếm siêu tham số và chạy bộ kiểm thử chuẩn CI}]
 # Chay toan bo quy trinh benchmark (dong bang va danh gia Test)
 python scripts/run_remaining.py
 
 # Sinh lai toan bo macro so lieu va bang LaTeX tu artifact
 python scripts/report/generate_latex_registry.py
 
-# Chay bo kiem thu tu dong (Unit tests)
-pytest tests/ -v
+# Chay bo kiem thu tu dong (Unit & Protocol tests khop cau hinh CI)
+python -m unittest discover -s tests -v
+
+# Chay smoke test kiem tra quy trinh va giai thich mo hinh
+python scripts/smoke_test.py --output ci_demo --explain
 \end{lstlisting}

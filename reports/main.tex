@@ -25,9 +25,19 @@
 
 \pagenumbering{roman}
 \setcounter{page}{1}
+\pagestyle{plain}
+
+\input{frontmatter/declaration.tex}
+\newpage
 
 \input{frontmatter/acknowledgement.tex}
+\newpage
+
 \input{frontmatter/abstract_vi.tex}
+\newpage
+
+\input{frontmatter/abstract_en.tex}
+\newpage
 
 % Mục lục tự động và các danh mục bổ trợ
 \tableofcontents
@@ -48,6 +58,7 @@
 \cleardoublepage
 \pagenumbering{arabic}
 \setcounter{page}{1}
+\pagestyle{fancy}
 
 % Chương 1 đến Chương 7 (Bài tập lớn thực nghiệm)
 \input{chapters/01_gioi_thieu.tex}

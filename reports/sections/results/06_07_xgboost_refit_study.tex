@@ -12,25 +12,40 @@ Trong quá trình đối soát thực nghiệm giữa các đường ống trong
 \end{itemize}
 
 \subsection{Truy vết nguyên nhân kỹ thuật trong mã nguồn}
-Tiến hành phân tích mã nguồn \path{src/ids/tune_xgboost.py}, nguyên nhân kỹ thuật được xác định tại dòng 151--168:
-\begin{lstlisting}[language=Python, caption={Đoạn mã cấu hình RandomizedSearchCV và gộp dữ liệu gây kích hoạt refit trên tập gộp.}]
+Tiến hành phân tích mã nguồn \path{src/ids/tune_xgboost.py} (khối điều phối tuning và refit), cơ chế gây phân kỳ số liệu được thể hiện qua cờ \texttt{strict\_train\_only}:
+\begin{lstlisting}[language=Python, caption={Đoạn mã cấu hình RandomizedSearchCV và rẽ nhánh fit mô hình trong src/ids/tune\_xgboost.py.}, label={lst:tune_xgboost}]
 search = RandomizedSearchCV(
     estimator=base_model,
     param_distributions=param_distributions,
     n_iter=n_iter,
     scoring=f1_scorer,
-    cv=cv_split, # Phân tách tùy biến giữa Train và Validation
-    # refit=True là giá trị mặc định của scikit-learn
+    cv=cv_split,
+    refit=not strict_train_only, # Mac dinh False -> refit=True
+    verbose=2,
+    random_state=random_state,
+    n_jobs=1,
+    return_train_score=True
 )
+
+# Gop tap Train va Validation de chay phan tach tuy bien cv_split
 X_combined = pd.concat([X_train, X_val], axis=0).reset_index(drop=True)
 y_combined = pd.concat([y_train, y_val], axis=0).reset_index(drop=True)
 search.fit(X_combined, y_combined)
-joblib.dump(search.best_estimator_, best_model_path)
+
+if strict_train_only:
+    # Che do chuan: fit lai chi tren duy nhat X_train
+    best_model = clone(base_model).set_params(**search.best_params_)
+    best_model.fit(X_train, y_train)
+else:
+    # Che do mac dinh CLI: lay truc tiep best_estimator_ da refit tren X_combined
+    best_model = search.best_estimator_
+
+joblib.dump(best_model, best_model_path)
 \end{lstlisting}
 
-Theo tài liệu đặc tả của thư viện \texttt{scikit-learn} \cite{scikit_learn_refit}, tham số \texttt{refit} có giá trị mặc định là \texttt{True}. Sau khi hoàn tất việc đánh giá các tổ hợp siêu tham số trên \texttt{cv\_split} (sử dụng tập con Train làm fold huấn luyện và Val làm fold kiểm định), đối tượng \texttt{RandomizedSearchCV} hoạt động đúng theo đặc tả: gọi hàm \texttt{fit()} của mô hình tốt nhất trên toàn bộ tập dữ liệu đầu vào đã truyền vào hàm \texttt{fit()}, tức là toàn bộ tập gộp $\mathbf{X}_{\text{combined}} = \Xtrain \cup \Xval$.
+Theo tài liệu đặc tả của thư viện \texttt{scikit-learn} \cite{scikit_learn_refit}, khi tham số \texttt{refit=True} (tương ứng với chế độ mặc định của CLI khi không truyền cờ \texttt{--strict-train-only}), sau khi hoàn tất việc đánh giá các tổ hợp siêu tham số trên \texttt{cv\_split} (sử dụng tập con Train làm fold huấn luyện và Val làm fold kiểm định), đối tượng \texttt{RandomizedSearchCV} hoạt động đúng theo đặc tả: gọi hàm \texttt{fit()} của mô hình tốt nhất trên toàn bộ tập dữ liệu đầu vào đã truyền vào hàm \texttt{fit()}, tức là toàn bộ tập gộp $\mathbf{X}_{\text{combined}} = \Xtrain \cup \Xval$.
 
-Lỗi ở đây nằm ở thiết kế đường ống: dữ liệu Train và Validation được chủ động gộp trước khi truyền vào \texttt{RandomizedSearchCV.fit()}, trong khi \texttt{refit=True} khiến mô hình tốt nhất được huấn luyện lại trên toàn bộ tập gộp đó.
+Nguyên nhân dẫn đến phân kỳ số liệu nằm ở thiết kế đường ống: dữ liệu Train và Validation được chủ động gộp thành $\mathbf{X}_{\text{combined}}$ trước khi truyền vào \texttt{RandomizedSearchCV.fit()}, trong khi chế độ mặc định \texttt{refit=True} khiến mô hình được huấn luyện lại trên toàn bộ tập gộp đó thay vì chỉ trên $\Xtrain$. Khi truyền cờ \texttt{--strict-train-only}, script chủ động clone cấu hình tối ưu và fit lại duy nhất trên $\Xtrain$, bảo toàn bản chất tổng quát hóa sang subtype chưa từng thấy.
 
 \subsection{Hậu quả đối với bản chất bài toán đánh giá}
 Trong khi tập $\Dtrain$ không chứa mẫu \SSH\ nào (0 flow), thì tập kiểm định $\Dval$ lại chứa \textbf{1,886 flow tấn công \SSH}.
