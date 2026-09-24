@@ -2,9 +2,9 @@
 % reports/sections/results/06_04_random_control.tex
 % ==============================================================================
 
-\section{Kết quả thực nghiệm đối chứng trên phân tách ngẫu nhiên}
+\section{Kết quả thực nghiệm trên Random Split}
 
-Khác biệt rõ rệt với kết quả hiệu năng rất thấp trên phân tách theo thời gian, kết quả của các mô hình trên tập kiểm thử phân tách ngẫu nhiên (phân tách ngẫu nhiên có cổng) đạt điểm số rất cao (xem Phần B của Bảng \ref{tab:test_comparison}):
+Trong Random Split có cổng, các mô hình đạt F1 cao trên tập kiểm thử (xem Phần B của Bảng \ref{tab:test_comparison}). Kết quả này được so sánh với Time-based Split ở phần sau; hai giao thức khác nhau cả về cách phân tách lẫn thành phần subtype:
 \begin{itemize}
     \item Decision Tree: Đạt $\FOne = \DTRandomFOne$, $\Precision = \DTRandomPrecision$, $\Recall = \DTRandomRecall$, $\AP = \DTRandomAP$, $\ROCAUC = \DTRandomROCAUC$. Tỷ lệ phát hiện đạt \DTRandomFTPRecall\ đối với FTP và \DTRandomSSHRecall\ đối với SSH.
     \item Random Forest: Đạt $\FOne = \RFRandomFOne$, $\Precision = \RFRandomPrecision$, $\Recall = \RFRandomRecall$, $\AP = \RFRandomAP$, $\ROCAUC = \RFRandomROCAUC$. Tỷ lệ phát hiện đạt \RFRandomFTPRecall\ đối với FTP và \RFRandomSSHRecall\ đối với SSH.
@@ -12,18 +12,18 @@ Khác biệt rõ rệt với kết quả hiệu năng rất thấp trên phân t
     Đạt $\FOne = \XGBRandomFOne$, $\Precision = \XGBRandomPrecision$, $\Recall = \XGBRandomRecall$, $\AP = \XGBRandomAP$, $\ROCAUC = \XGBRandomROCAUC$. Tỷ lệ phát hiện đạt \XGBRandomFTPRecall\ đối với FTP và \XGBRandomSSHRecall\ đối với SSH.
 \end{itemize}
 
-\subsection{Đo lường định lượng độ lệch đánh giá}
-Bảng \ref{tab:split_diff} trình bày sự chênh lệch trực tiếp giữa hai chiến lược phân tách dữ liệu trên tập kiểm định.
+\subsection{Đối chiếu kết quả giữa hai giao thức}
+Bảng \ref{tab:split_diff} trình bày F1 và chênh lệch giữa hai giao thức phân tách trên tập Validation. Đây là phép đối chiếu tổng thể, không cô lập riêng tác động của chiến lược chia.
 
 \input{tables/generated/tab_split_diff.tex}
 
-Khoảng cách chênh lệch hiệu năng ($\Delta\FOne$) giữa Random Split và Time-based Split trên tập Validation dao động từ 0.2631 đến 0.2848. Trên tập Test chính thức, khoảng cách này thể hiện rất rõ: đối với Random Forest, điểm F1 tăng từ \RFTestFOne\ (trên Time Split) lên \RFRandomFOne\ (trên Random Split), như được minh họa đối chiếu trên Hình \ref{fig:data_leakage_benchmark}.
+Khoảng cách chênh lệch hiệu năng ($\Delta\FOne$) giữa Random Split và Time-based Split trên tập Validation dao động từ 0.2631 đến 0.2848. Trên tập Test, Random Forest đạt F1 lần lượt là \RFTestFOne\ và \RFRandomFOne\ trong hai giao thức. Tuy nhiên, thành phần subtype cũng khác nhau: Time-based Test chỉ có SSH, còn Random Test có SSH và FTP; Train của Random Split cũng đã có mẫu SSH, trong khi Train của Time-based Split không có SSH. Vì thế, chênh lệch không thể quy riêng cho thuật toán chia hoặc cho tương quan giữa các flow. Hình \ref{fig:data_leakage_benchmark} minh họa đối chiếu kết quả giữa hai giao thức.
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.92\textwidth]{experiments/figures/06_data_leakage_benchmark.png}
-\caption{Đối chiếu hiệu năng giữa phân tách ngẫu nhiên và phân tách theo thời gian, trực quan hóa mức độ chênh lệch hiệu năng do tương quan nội bộ chiến dịch.}
+\caption{Đối chiếu hiệu năng giữa Random Split và Time-based Split; chênh lệch đồng thời phản ánh khác biệt về giao thức và thành phần subtype.}
 \label{fig:data_leakage_benchmark}
 \end{figure}
 
-Hiện tượng này phù hợp với các phân tích của Arp và cộng sự \cite{arp2022dos} cũng như Pendlebury và cộng sự \cite{pendlebury2019tesseract}: Việc phân tách ngẫu nhiên trên dữ liệu chuỗi thời gian mạng có thể tạo ra độ lệch đánh giá quá lạc quan vì các flow có tương quan mạnh từ cùng một chiến dịch tấn công (tương quan nội bộ chiến dịch) được phân bổ vào cả tập huấn luyện và kiểm thử. Do đó, điểm số cao trong thiết lập ngẫu nhiên phản ánh một đánh giá mang tính chất nội suy trên các mẫu có độ trùng lặp phân phối cao, hơn là bằng chứng cho năng lực khái quát hóa sang các biến thể hoặc thời điểm mới.
+Kết quả này phù hợp với các phân tích của Arp và cộng sự \cite{arp2022dos} cũng như Pendlebury và cộng sự \cite{pendlebury2019tesseract}, theo đó chia ngẫu nhiên có thể tạo ra ước lượng lạc quan khi các mẫu phụ thuộc hoặc thuộc cùng chiến dịch xuất hiện ở nhiều tập. Trong thí nghiệm này, campaign-level dependence là một giải thích khả dĩ, nhưng chưa có bằng chứng trực tiếp về rò rỉ nhãn hay đặc trưng. Điểm số cao của Random Split không nên được diễn giải riêng như bằng chứng về khái quát hóa sang chiến dịch, subtype hoặc thời điểm mới; muốn cô lập tác động của chiến lược chia cần kiểm soát thành phần subtype và phân bố Test tương đương.

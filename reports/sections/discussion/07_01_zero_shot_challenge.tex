@@ -2,26 +2,16 @@
 % reports/sections/discussion/07_01_zero_shot_challenge.tex
 % ==============================================================================
 
-\section{Tại Sao Bài Toán Phân Tách Theo Thời Gian Lại Khó: Thách Thức Subtype Distribution Shift}
+\section{Thách thức dịch chuyển phân phối subtype trong đánh giá theo thời gian}
 
-Sự sụp đổ của cả 3 mô hình học máy dạng cây trên tập Test theo thời gian ($\FOne \le \RFTestFOne$) là phát hiện khoa học mang tính thực tiễn cao nhất của nghiên cứu này. Trong khi các nghiên cứu trước đây thường che giấu hoặc tránh né kịch bản này, chúng tôi khẳng định đây là một hiện tượng tự nhiên và tất yếu bắt nguồn từ \textbf{Sự dịch chuyển phân phối của các biến thể tấn công (Subtype Distribution Shift)}:
+F1 trên Test theo thời gian thấp ở các kịch bản được báo cáo (mức cao nhất là $\RFTestWithoutPortFOne$), phù hợp với sự khác biệt subtype giữa dữ liệu fit và Test. Đây là kết quả trên subtype SSH không có trong Train của benchmark chuẩn; tuy nhiên, Validation có chứa SSH và nhãn của các mẫu này tham gia lựa chọn siêu tham số. Vì vậy, kết quả không phải đánh giá zero-shot khép kín từ đầu đến cuối, và không nên khái quát thành quy luật tất yếu cho mọi dữ liệu mạng.
 
-\subsection{Sự Khác Biệt Căn Bản Về Cấu Trúc Giao Thức Mạng}
+\subsection{Khác biệt về cấu trúc giao thức mạng}
 FTP và SSH đại diện cho hai triết lý thiết kế giao thức mạng hoàn toàn trái ngược nhau:
 \begin{enumerate}
     \item \textbf{FTP (Truyền thông văn bản rõ)}: Quá trình bắt tay diễn ra tối giản. Các gói tin yêu cầu \texttt{USER} và \texttt{PASS} có độ dài rất ngắn và kích thước cố định. Do đó, các đặc trưng như \texttt{Fwd Packet Length Std}, \texttt{Fwd Packet Length Mean} và \texttt{Average Packet Size} tập trung ở các dải giá trị rất hẹp và thấp.
     \item \textbf{SSH (Truyền thông mã hóa kênh)}: Trước khi bước vào giai đoạn thử mật khẩu, SSH bắt buộc phải thực hiện pha trao đổi khóa mật mã phức tạp (Diffie-Hellman Key Exchange) và thương lượng thuật toán mã hóa đối xứng. Pha trao đổi này làm phát sinh các gói tin có kích thước lớn hơn gấp nhiều lần so với FTP, dẫn đến phân phối của \texttt{Packet Length Mean} và \texttt{Max Packet Length} dịch chuyển hoàn toàn sang một miền giá trị mới.
 \end{enumerate}
 
-\subsection{Bản Chất Của Thuật Toán Học Máy Giám Sát Cổ Điển}
-Các mô hình học máy dạng cây (Decision Tree, Random Forest, XGBoost) hoạt động dựa trên nguyên lý \textbf{học phân vùng không gian đặc trưng có giám sát (Supervised Partitioning)}. Khi toàn bộ dữ liệu huấn luyện $\Dtrain$ chỉ bao gồm các mẫu tấn công FTP, không gian quyết định (Decision Boundary) của mô hình bị khóa chặt vào vùng đặc trưng đại diện cho FTP:
-\begin{equation}
-    \mathcal{R}_{\text{Attack}} = \left\{ \mathbf{x} \mid \text{Port} \le 21.5 \land \text{Fwd Packet Length Std} \le \theta_{\text{FTP}} \dots \right\}
-\end{equation}
-
-Khi một cuộc tấn công SSH xuất hiện, tọa độ của nó trong không gian đặc trưng rơi hoàn toàn vào vùng không gian chưa từng được gán nhãn tấn công trong quá trình huấn luyện:
-\begin{equation}
-    \mathbf{x}_{\text{SSH}} \notin \mathcal{R}_{\text{Attack}} \implies P(y=1|\mathbf{x}_{\text{SSH}}) \approx 0
-\end{equation}
-
-Mô hình học máy không sở hữu khả năng suy luận logic bậc cao như con người để hiểu rằng "cả hai đều là hành vi dò quét mật khẩu lặp đi lặp lại". Đối với mô hình, SSH đơn thuần là một phân phối thống kê hoàn toàn xa lạ, và do đó nó bị phân loại nhầm thành lưu lượng bình thường (\Normal) với độ tin cậy tuyệt đối.
+\subsection{Giới hạn diễn giải của mô hình học máy giám sát}
+Các mô hình cây (Decision Tree, Random Forest, XGBoost) học các phân vùng có giám sát trong không gian đặc trưng từ dữ liệu fit. Vì Train của benchmark chuẩn chỉ có mẫu tấn công FTP, mô hình trọng số không được fit trên SSH; nhưng nhãn SSH trong Validation được dùng khi lựa chọn cấu hình, nên toàn bộ quy trình lựa chọn không hoàn toàn mù với subtype này. Kết quả Test cho thấy mô hình gặp khó khăn khi áp dụng cấu hình đã chọn lên các mẫu SSH trong phân bố thời gian sau. Không thể từ kết quả này suy ra mọi mẫu SSH đều nằm ngoài vùng quyết định tấn công, cũng không thể quy lỗi phân loại chỉ cho cổng dịch vụ; đó là các diễn giải cần được giới hạn theo cấu hình đặc trưng và số liệu thực nghiệm cụ thể.

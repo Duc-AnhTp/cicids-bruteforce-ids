@@ -6,7 +6,7 @@
 \chapter{Tập Dữ Liệu và Định Nghĩa Bài Toán}
 \label{chap:du_lieu}
 
-\section{Tổng Quan Tập Dữ Liệu CICIDS2017 Tuesday}
+\section{Tổng quan tập dữ liệu CICIDS2017 Tuesday}
 
 Tập dữ liệu CICIDS2017 \cite{sharafaldin2018generating,cicids2017dataset} được xây dựng bởi Viện An ninh mạng Canada (CIC), Đại học New Brunswick (UNB). Đây là một trong những bộ dữ liệu chuẩn mực và được sử dụng rộng rãi để nghiên cứu và đánh giá các hệ thống phát hiện xâm nhập mạng.
 
@@ -16,21 +16,21 @@ Tập dữ liệu ghi lại lưu lượng mạng trong 5 ngày làm việc liên
     \item \textbf{Tấn công buổi chiều}: \SSH\ thực hiện dò quét mật khẩu dịch vụ SSH (Cổng 22) từ 14:00 đến 15:00.
 \end{itemize}
 
-\section{Nguồn Gốc Dữ Liệu và Xác Minh Tính Toàn Vẹn SHA-256}
+\section{Nguồn gốc dữ liệu và xác minh tính toàn vẹn SHA-256}
 
 Dữ liệu thô được sử dụng trong bài tập lớn là tệp CSV trích xuất chính thức từ gói \texttt{GeneratedLabelledFlows.zip} của UNB:
 \begin{itemize}
     \item \textbf{Đường dẫn}: \texttt{data/raw/Tuesday-WorkingHours.pcap\_ISCX.csv}
-    \item \textbf{Mã băm SHA-256 đã xác minh}:
+    \item \textbf{Mã băm SHA-256 của tệp CSV đã xác minh}:
     \begin{center}
         \small\texttt{\DataShaFull}
     \end{center}
     \item \textbf{Tổng số dòng thô ban đầu}: \DataRawRows\ bản ghi flow (tương ứng 445,910 dòng trên đĩa tính cả 1 dòng tiêu đề).
 \end{itemize}
 
-Việc lưu trữ và kiểm tra mã băm SHA-256 cho phép xác minh tệp đầu vào có cùng nội dung byte với tệp đã ghi nhận mã băm, hỗ trợ tính tái lập thực nghiệm trên cùng tệp dữ liệu nguồn.
+Việc lưu trữ và kiểm tra mã băm SHA-256 xác minh tệp CSV đầu vào có cùng nội dung byte với tệp đã ghi nhận mã băm; mã băm này không xác minh độ chính xác của timestamp được tái dựng từ CSV.
 
-\section{Phục Hồi Dòng Thời Gian 24 Giờ}
+\section{Phục hồi dòng thời gian 24 giờ}
 
 Trong quá trình khám phá dữ liệu (EDA), chúng tôi nhận thấy trong tệp Tuesday được sử dụng, các timestamp quan sát được không đủ thông tin để phân biệt một số giờ buổi sáng/buổi chiều theo dòng thời gian kỳ vọng:
 \begin{itemize}
@@ -43,7 +43,7 @@ Trong quá trình khám phá dữ liệu (EDA), chúng tôi nhận thấy trong 
     \item Các bản ghi diễn ra vào buổi chiều (từ 13:00 đến 17:00) xuất hiện dưới dạng 1:00 đến 5:00.
 \end{itemize}
 
-Để phục hồi đúng thứ tự thời gian phục vụ phép phân chia theo thời gian, dự án áp dụng quy tắc tái dựng thời gian \texttt{reconstruct\_timestamp()} tại mã nguồn \path{scripts/prepare_splits.py}:
+Để xây dựng thứ tự thời gian quy ước phục vụ phép phân chia theo thời gian, dự án áp dụng quy tắc tái dựng timestamp \texttt{reconstruct\_timestamp()} tại mã nguồn \path{scripts/prepare_splits.py}:
 \begin{equation}
     H_{\text{24h}} = \begin{cases}
         H_{\text{raw}} + 12 & \text{nếu } H_{\text{raw}} \in \{1, 2, 3, 4, 5\} \\
@@ -51,9 +51,9 @@ Trong quá trình khám phá dữ liệu (EDA), chúng tôi nhận thấy trong 
     \end{cases}
 \end{equation}
 
-\noindent\textbf{Nguyên tắc kiểm soát rò rỉ dữ liệu:} Đây là một quy tắc tái dựng của pipeline dự án, được thiết lập hoàn toàn độc lập với nhãn tấn công và cổng đích, chỉ dựa trên phân tích dòng thời gian của toàn bộ traffic trong ngày Tuesday (thời gian làm việc từ 8:30 sáng đến 17:00 chiều).
+Quy tắc ánh xạ giờ 1--5 thành 13--17 là phép tái dựng trên timestamp của CSV, được thiết lập qua phân tích dữ liệu khám phá (EDA). Đây là thiết kế hồi cứu: các mốc cắt được chọn sau khi khảo sát diễn biến nhãn và thời gian. Không có đồng hồ PCAP gốc để xác minh độc lập từng timestamp đã tái dựng trong CSV; lịch tấn công công bố của CIC chỉ hỗ trợ bối cảnh thời gian chung, không xác nhận từng mốc thời gian trong bản ghi.
 
-\section{Định Nghĩa Bài Toán và Không Gian Nhãn}
+\section{Định nghĩa bài toán và không gian nhãn}
 
 Bài tập lớn định nghĩa bài toán phân loại là phân loại nhị phân nhằm nhận diện lưu lượng bất thường:
 \begin{equation}
@@ -69,19 +69,19 @@ Chi tiết ánh xạ nhãn được trình bày trong Bảng \ref{tab:label_mapp
 
 Mặc dù bài toán phân loại chính là nhị phân, thông tin chi tiết về dạng tấn công vẫn được bảo toàn trong một cột siêu dữ liệu riêng biệt để theo dõi tỷ lệ phát hiện chi tiết từng biến thể tấn công.
 
-\section{Quy Trình Làm Sạch Dữ Liệu Thô}
+\section{Quy trình làm sạch dữ liệu thô}
 
 Tệp dữ liệu thô trải qua các bước làm sạch kỹ thuật:
 \begin{enumerate}
-    \item Loại bỏ flow có thời lượng không hợp lệ: Loại bỏ \DataInvalidDurationRows\ bản ghi có $\text{Flow Duration} \le 0$ hoặc bị thiếu (NaN).
+    \item Loại bỏ flow có thời lượng không hợp lệ: Loại bỏ \DataInvalidDurationRows\ bản ghi có \texttt{Flow Duration} bị thiếu hoặc âm; giá trị bằng 0 được giữ lại trong dữ liệu.
     \item Loại bỏ bản ghi trùng lặp: Loại bỏ \DataDuplicatesRows\ dòng bản ghi trùng lặp hoàn toàn trên tất cả các cột dữ liệu.
     \item Loại bỏ cột đặc trưng trùng lặp: Cột \texttt{Fwd Header Length.1} có giá trị trùng lặp 100\% với cột \texttt{Fwd Header Length} được loại bỏ khỏi không gian đặc trưng.
-    \item Xử lý giá trị vô cùng: Có \DataInfinityValues\ giá trị vô cùng ($\pm\infty$, chủ yếu phát sinh do phép chia cho thời lượng bằng 0 trong các cột \texttt{Flow Bytes/s} và \texttt{Flow Packets/s}) được chuyển đổi thành giá trị \texttt{NaN} để xử lý qua bộ điền giá trị thiếu.
+    \item Xử lý giá trị vô cùng: Có \DataInfinityValues\ giá trị vô cùng ($\pm\infty$), chủ yếu phát sinh trong các đặc trưng tốc độ như \texttt{Flow Bytes/s} và \texttt{Flow Packets/s} khi mẫu số của phép tính bằng 0 hoặc rất nhỏ. Các giá trị này được chuyển thành \texttt{NaN} để xử lý qua bộ điền giá trị thiếu.
 \end{enumerate}
 
 Sau khi làm sạch kỹ thuật, tổng số bản ghi hợp lệ đưa vào quy trình phân tách là \DataCleanRows\ dòng.
 
-\section{Dòng Thời Gian Tấn Công Thực Tế và Phân Bổ Mẫu}
+\section{Dòng thời gian tấn công và phân bổ mẫu}
 
 Bảng \ref{tab:dataset_splits} tổng hợp chi tiết số lượng mẫu và phân bổ nhãn qua các tập sau khi áp dụng chiến lược phân tách theo thời gian (được trình bày chi tiết ở Chương 4).
 
@@ -94,4 +94,4 @@ Phân tích dòng thời gian cho thấy đặc điểm phân bố tự nhiên c
     \item Tập Test ($s \ge 14:32$): Chứa \DataTestBenign\ mẫu bình thường và \DataTestSSH\ mẫu \SSH. Không có mẫu \FTP\ nào (0 mẫu).
 \end{itemize}
 
-Đặc tính phân bố này tạo ra bài toán đánh giá khả năng tổng quát hóa sang biến thể mới (kịch bản FTP $\to$ SSH). Trong thiết lập này, mô hình hoàn toàn không được huấn luyện trên mẫu \SSH\ nào trong tập Train; tập Validation chứa \DataValidationSSH\ mẫu SSH tham gia vào quá trình lựa chọn siêu tham số, trước khi mô hình được đánh giá độc lập trên tập Test chỉ chứa biến thể SSH.
+Đặc tính phân bố này cho phép đánh giá mô hình trên biến thể SSH không có trong tập fit của benchmark chuẩn (kịch bản FTP $\to$ SSH). Tuy nhiên, tập Validation chứa \DataValidationSSH\ mẫu SSH có nhãn và được dùng để lựa chọn siêu tham số; vì vậy quy trình lựa chọn mô hình đã tiếp xúc với biến thể này và đây không phải là đánh giá zero-shot khép kín từ đầu đến cuối. Tập Test được giữ độc lập để đánh giá sau khi cấu hình đã được chọn.

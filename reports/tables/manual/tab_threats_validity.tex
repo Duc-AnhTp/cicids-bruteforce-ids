@@ -10,7 +10,7 @@
 \toprule
 \textbf{Khía cạnh hợp lệ} & \textbf{Nguy cơ tiềm ẩn} & \textbf{Biện pháp kiểm soát trong nghiên cứu} \\
 \midrule
-\textbf{Tính hợp lệ bên trong}\newline(\textit{Internal Validity}) & Sai lệch do phục hồi thời gian hoặc rò rỉ thông tin ranh giới giữa các tập dữ liệu. & Áp dụng Purge ($q=60$s) và Embargo ($g=120$s); loại bỏ \DataPurgedRows\ dòng ranh giới; kiểm tra toàn vẹn chuỗi băm SHA-256. \\
+\textbf{Tính hợp lệ bên trong}\newline(\textit{Internal Validity}) & Sai lệch do tái dựng timestamp từ CSV, nhãn SSH trong Validation tham gia chọn cấu hình và phụ thuộc giữa các quan sát qua ranh giới tập. & Nêu rõ giờ CSV 1--5 được ánh xạ thành 13--17 và mốc cắt chọn sau khi khảo sát nhãn/thời gian; không có PCAP gốc để xác minh. Nhãn SSH trong Validation tham gia chọn cấu hình nhưng không fit trọng số benchmark. Purge/Embargo giảm nguy cơ flow vượt ranh giới; SHA-256 chỉ xác minh byte CSV đầu vào. \\
 \midrule
 \textbf{Tính hợp lệ xây dựng}\newline(\textit{Construct Validity}) & Nhầm lẫn giữa phân loại luồng đã hoàn tất và hệ thống NIDS thời gian thực. & Tuyên bố minh bạch phạm vi phân loại luồng đã hoàn tất (Completed-Flow Classification); không đo lường độ trễ phát hiện gói tin; không tuyên bố triển khai trực tuyến. \\
 \midrule

@@ -8,9 +8,9 @@
 
 \section{Kiến trúc tổng thể của hệ thống thực nghiệm}
 
-Nhằm đảm bảo tính khách quan và kiểm soát nguy cơ rò rỉ dữ liệu, hệ thống thực nghiệm được thiết kế theo kiến trúc đường ống gồm 5 giai đoạn độc lập:
+Nhằm tổ chức quy trình thực nghiệm và giảm một số nguy cơ rò rỉ thông tin giữa các giai đoạn, hệ thống được thiết kế theo đường ống gồm 5 giai đoạn; các bước này không tự thân chứng minh tính độc lập hoàn toàn giữa các tập:
 \begin{enumerate}
-    \item \textbf{Giai đoạn 1: Chuẩn bị dữ liệu và phân tách}: Áp dụng phục hồi dòng thời gian và thuật toán Purge/Embargo để chia tách dữ liệu thành Train, Validation và Test độc lập.
+    \item \textbf{Giai đoạn 1: Chuẩn bị dữ liệu và phân tách}: Áp dụng tái dựng timestamp và Purge/Embargo để chia dữ liệu thành Train, Validation và Test theo giao thức thời gian đã xác định.
     \item \textbf{Giai đoạn 2: Tiền xử lý chỉ học từ tập Train}: Loại bỏ các đặc trưng hằng số và khớp bộ điền giá trị thiếu theo trung vị duy nhất trên $\Dtrain$.
     \item \textbf{Giai đoạn 3: Tinh chỉnh siêu tham số}: Tìm kiếm cấu hình tối ưu của 3 mô hình cây trên không gian $\Dtrain \times \Dval$.
     \item \textbf{Giai đoạn 4: Đóng băng cấu hình}: Khóa tham số và cấu hình tốt nhất vào tệp siêu dữ liệu \texttt{frozen.json}.
@@ -39,30 +39,30 @@ Danh mục định nghĩa chi tiết của toàn bộ \FeatWithPortCount\ đặc
 
 \section{Thiết kế chiến lược phân tách dữ liệu}
 
-\subsection{Cơ chế Purge và Embargo chống rò rỉ ranh giới thời gian}
-Trong phân tích chuỗi thời gian mạng, một flow có thời điểm bắt đầu $s$ và thời lượng $d$ (tính bằng micro-giây) sẽ kéo dài qua một khoảng thời gian. Để tính toán thời điểm hoàn tất một cách bảo thủ, nhóm lựa chọn bổ sung thêm sai số làm tròn $q = 60\text{s}$:
+\subsection{Cơ chế Purge và Embargo giảm nguy cơ vượt ranh giới thời gian}
+Trong phân tích chuỗi thời gian mạng, một flow có thời điểm bắt đầu $s$ và thời lượng $d$ (tính bằng micro-giây) sẽ kéo dài qua một khoảng thời gian. Để tính thời điểm kết thúc theo cách bảo thủ, thời lượng được đổi sang giây và cộng thêm sai số làm tròn $q = 60\text{s}$:
 \begin{equation}
-    e = s + d + q
+    e = s + \frac{d}{10^6}\,\text{s} + q
 \end{equation}
 
-Tại mỗi mốc thời gian cắt $T_{\text{cutoff}}$, nguy cơ rò rỉ thông tin xảy ra khi:
+Tại mỗi mốc cắt $T_{\text{cutoff}}$, các flow có khoảng tồn tại vượt qua ranh giới thời gian sẽ bị loại bỏ:
 \begin{enumerate}
-    \item \textbf{Flow vắt ngang ranh giới}: Flow bắt đầu trước $T_{\text{cutoff}}$ nhưng kết thúc sau $T_{\text{cutoff}}$ ($s < T_{\text{cutoff}}$ và $e \ge T_{\text{cutoff}}$). Nếu giữ lại, thông tin của tương lai đã rò rỉ vào quá khứ. Giải pháp là \textbf{Purge} (loại bỏ hoàn toàn các flow này).
-    \item \textbf{Flow diễn ra ngay sau ranh giới}: Để tránh các ảnh hưởng trễ của các kết nối TCP vừa đóng, một khoảng đệm an toàn Embargo $g = 120\text{s}$ được áp dụng ngay sau mốc cắt. Mọi flow bắt đầu trong khoảng $[T_{\text{cutoff}}, T_{\text{cutoff}} + g)$ đều bị loại bỏ.
+    \item \textbf{Purge}: Loại bỏ flow bắt đầu trước $T_{\text{cutoff}}$ nhưng có thời điểm kết thúc bảo thủ $e \ge T_{\text{cutoff}}$.
+    \item \textbf{Embargo}: Loại bỏ flow bắt đầu trong khoảng $[T_{\text{cutoff}}, T_{\text{cutoff}} + g)$, với khoảng đệm $g = 120\text{s}$.
 \end{enumerate}
 
-Việc lựa chọn các tham số $q = 60\text{s}$ và $g = 120\text{s}$ là quyết định thiết kế bảo thủ nhằm hạn chế tối đa rủi ro flow kéo dài hoặc lưu lượng phản hồi trễ vi phạm ranh giới phân tách.
+Các tham số $q = 60\text{s}$ và $g = 120\text{s}$ là lựa chọn thiết kế nhằm giảm nguy cơ flow vượt qua ranh giới thời gian hoặc có phản hồi trễ sát mốc cắt. Purge và Embargo không xác minh độ chính xác của đồng hồ nguồn, cũng không chứng minh tính độc lập hoàn toàn giữa các tập dữ liệu.
 
-Với hai mốc cắt thời gian được xác định từ trước:
+Sau khi khảo sát diễn biến nhãn và thời gian, nghiên cứu chốt hai mốc cắt:
 \begin{itemize}
     \item \textbf{Mốc A}: \texttt{2017-07-04 10:00:00} (Phân cách Train và Validation)
     \item \textbf{Mốc B}: \texttt{2017-07-04 14:30:00} (Phân cách Validation và Test)
 \end{itemize}
 
-Thuật toán Purge và Embargo đã loại bỏ tổng cộng \textbf{\DataPurgedRows\ dòng} ranh giới không an toàn (xem Bảng \ref{tab:dataset_splits}), giúp phân tách ranh giới thời gian rõ ràng giữa các tập dữ liệu.
+Thuật toán Purge và Embargo đã loại bỏ tổng cộng \textbf{\DataPurgedRows\ dòng} tại các vùng ranh giới (xem Bảng \ref{tab:dataset_splits}), qua đó giảm nguy cơ flow vượt qua các mốc phân tách thời gian.
 
-\subsection{Chiến lược đối chứng: Phân tách ngẫu nhiên}
-Để làm cơ sở đối chứng đo lường hiện tượng độ lệch đánh giá quá lạc quan, một phân vùng đối chứng được phân chia ngẫu nhiên phân tầng với tỷ lệ số lượng mẫu tương ứng: Train ($20.6\%$), Validation ($46.5\%$) và Test ($32.9\%$). Phép chia này phân bổ ngẫu nhiên các flow mà không xét đến thứ tự thời gian. Trong bối cảnh dữ liệu mạng, cách tiếp cận này có thể tạo ra độ lệch đánh giá quá lạc quan do các flow có tương quan mạnh từ cùng một chiến dịch tấn công (tương quan nội bộ chiến dịch) được phân bố đồng thời vào cả ba tập, dẫn đến một đánh giá mang tính chất nội suy thay vì phản ánh năng lực khái quát hóa thực tế.
+\subsection{Đối chiếu hai giao thức phân tách dữ liệu}
+Phân vùng Random Split được tạo bằng cách chia ngẫu nhiên phân tầng các flow, với Train ($20.6\%$), Validation ($46.5\%$) và Test ($32.9\%$). Kết quả của Random Split được đối chiếu với Time-based Split như hai giao thức đánh giá khác nhau, không phải phép thử cô lập riêng tác động của thuật toán chia. Trong Time-based Split, Train không có SSH và Test chỉ có SSH; trong Random Split, Train có 1,215 mẫu SSH và Test có 1,938 mẫu SSH cùng 2,610 mẫu FTP. Do thành phần subtype và phân bố lớp trong Test cũng khác nhau, chênh lệch điểm số phản ánh đồng thời các khác biệt này và chiến lược phân tách. Các flow phụ thuộc hoặc cùng chiến dịch xuất hiện ở nhiều tập là một cơ chế có thể góp phần làm ước lượng lạc quan, nhưng kết quả hiện có không trực tiếp chứng minh rò rỉ nhãn hay đặc trưng.
 
 \section{Quy trình tiền xử lý độc lập trên tập train}
 

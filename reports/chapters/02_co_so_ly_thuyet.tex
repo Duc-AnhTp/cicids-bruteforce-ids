@@ -18,7 +18,7 @@ Theo chuẩn RFC 7011 (IPFIX) \cite{rfc7011}, một luồng mạng được đ�
 Công cụ CICFlowMeter \cite{sharafaldin2018generating} thực hiện tổng hợp các gói tin thuộc cùng một 5-Tuple theo cả hai hướng truyền thông (hướng đi từ máy khách đến máy chủ, và hướng về từ máy chủ tới máy khách) để tạo thành một luồng hai chiều. Một flow được coi là kết thúc khi xảy ra một trong các điều kiện sau:
 \begin{enumerate}
     \item Xuất hiện cờ điều khiển đóng kết nối TCP (\texttt{FIN} hoặc \texttt{RST}).
-    \item Khoảng thời gian không có gói tin mới vượt quá ngưỡng chờ không hoạt động (mặc định 15 đến 60 giây).
+    \item Khoảng thời gian không có gói tin mới vượt quá ngưỡng chờ không hoạt động do cấu hình CICFlowMeter xác định; giá trị cụ thể phụ thuộc vào phiên bản và thiết lập sử dụng.
     \item Tổng thời lượng của flow vượt quá thời gian tối đa cho phép (Flow Timeout).
 \end{enumerate}
 
@@ -37,7 +37,7 @@ FTP là giao thức truyền tệp hoạt động trên kênh văn bản rõ (pl
     \item Quá trình xác thực diễn ra thông qua các cặp lệnh \texttt{USER} và \texttt{PASS}.
     \item Máy chủ phản hồi bằng mã trạng thái \texttt{230 User logged in} (thành công) hoặc \texttt{530 Login incorrect} (thất bại).
     \item Khi công cụ Patator (\texttt{ftp\_patator}) thực hiện tấn công dò quét mật khẩu, nó thiết lập liên tục các kết nối TCP mới, gửi lệnh thử mật khẩu và đóng kết nối ngay khi nhận mã 530.
-    \item \textbf{Đặc trưng thống kê}: Vì là văn bản rõ, các gói tin yêu cầu và phản hồi có kích thước ngắn và tương đối cố định. Lưu lượng hướng đi (Fwd) thường có độ lệch chuẩn kích thước gói tin nhỏ.
+    \item Vì là văn bản rõ, các gói tin yêu cầu và phản hồi có kích thước ngắn và tương đối cố định. Lưu lượng hướng đi (Fwd) thường có độ lệch chuẩn kích thước gói tin nhỏ.
 \end{itemize}
 
 \subsection{Tấn công Brute Force đối với SSH (Cổng 22)}
@@ -53,7 +53,7 @@ SSH là giao thức truyền thông an toàn cung cấp kênh xác thực và đ
 \subsection{Decision Tree}
 Decision Tree \cite{quinlan1986induction} phân chia không gian đặc trưng thành các vùng siêu hình hộp rời rạc thông qua một tập hợp các quy tắc rẽ nhánh dạng bậc thang ($x_j \le \theta$).
 
-Tại mỗi nút phân chia, thuật toán tìm kiếm đặc trưng $j$ và ngưỡng $\theta$ tối ưu nhằm tối đa hóa mức giảm độ vẩn đục. Chỉ số vẩn đục phổ biến là \textbf{Gini Impurity}:
+Tại mỗi nút phân chia, thuật toán tìm kiếm đặc trưng $j$ và ngưỡng $\theta$ tối ưu nhằm tối đa hóa mức giảm độ không thuần khiết. Chỉ số thường dùng là độ không thuần khiết Gini:
 \begin{equation}
     I_G(p) = 1 - \sum_{k=0}^{1} p_k^2
 \end{equation}

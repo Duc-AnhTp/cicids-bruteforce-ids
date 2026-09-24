@@ -6,7 +6,7 @@
 \chapter{Thiết Kế Thực Nghiệm}
 \label{chap:thiet_ke}
 
-\section{Môi Trường Thực Thi Phần Cứng và Phần Mềm}
+\section{Môi trường thực thi phần cứng và phần mềm}
 
 Toàn bộ các thực nghiệm trong bài tập lớn được triển khai trên môi trường máy trạm độc lập với các thông số kỹ thuật được kiểm soát và ghi nhận:
 \begin{itemize}
@@ -16,14 +16,14 @@ Toàn bộ các thực nghiệm trong bài tập lớn được triển khai tr�
     \item \textbf{Tương thích dự án}: Mã nguồn khai báo dải phụ thuộc \texttt{requires-python = ">=3.11,<3.13"} trong \path{pyproject.toml}, trong đó gói giải thích mô hình SHAP được quản lý dưới dạng thành phần tùy chọn (\texttt{pip install -e ".[xai]"}).
 \end{itemize}
 
-\section{Kiểm Soát Tính Ngẫu Nhiên}
+\section{Kiểm soát tính ngẫu nhiên}
 
 Để đảm bảo khả năng tái lập có kiểm soát với cấu hình thực nghiệm đã ghi nhận và đối chiếu, toàn bộ các tiến trình sinh số giả ngẫu nhiên từ quá trình phân chia dữ liệu, lấy mẫu bootstrap của Random Forest, khởi tạo trọng số của XGBoost và lấy mẫu nền của SHAP đều được cố định với một hạt giống ngẫu nhiên:
 \begin{equation}
     \texttt{random\_state} = 42
 \end{equation}
 
-\section{Xử Lý Mất Cân Bằng Lớp Trên Tập Huấn Luyện}
+\section{Xử lý mất cân bằng lớp trên tập huấn luyện}
 
 Như đã phân tích tại Bảng \ref{tab:dataset_splits}, trong tập $\Dtrain$ theo thời gian, số lượng mẫu bình thường là \DataTrainBenign\ mẫu trong khi số lượng mẫu tấn công chỉ có \DataTrainAttack\ mẫu (tỷ lệ tấn công là \DataTrainAttackPercent). Tỷ lệ mất cân bằng lớp xấp xỉ $1 : 16.58$.
 
@@ -40,7 +40,7 @@ Như đã phân tích tại Bảng \ref{tab:dataset_splits}, trong tập $\Dtrai
     \end{equation}
 \end{itemize}
 
-\section{Thiết Lập Không Gian Tìm Kiếm Siêu Tham Số}
+\section{Thiết lập không gian tìm kiếm siêu tham số}
 
 Để đảm bảo tính khách quan và khả năng đối chiếu, không gian siêu tham số được chuẩn hóa thành lưới tìm kiếm chính thức và được khóa cấu hình trong tệp lưu vết \texttt{artifacts/week3\_week4/frozen.json}. Các tham số quan trọng nhất của từng thuật toán được xác định như sau:
 
@@ -70,7 +70,7 @@ Như đã phân tích tại Bảng \ref{tab:dataset_splits}, trong tập $\Dtrai
 
 Bên cạnh lưới chính thức trên, các thực nghiệm mở rộng (như khảo sát 50 lượt lặp với công cụ \texttt{RandomizedSearchCV} cho Decision Tree hoặc khảo sát tốc độ học $[0.05, 0.08, 0.1]$ cho XGBoost) được ghi nhận độc lập tại các thư mục thực nghiệm riêng lẻ để phục vụ phân tích độ nhạy. Chi tiết cấu hình tối ưu được lựa chọn cho 12 mô hình được tổng hợp tại Phụ lục \ref{app:hyperparameters}.
 
-\section{Tiêu Chí Lựa Chọn Mô Hình trên Tập Validation}
+\section{Tiêu chí lựa chọn mô hình trên tập Validation}
 
 Trên tập kiểm định $\Dval$, các cấu hình được đánh giá theo thứ tự ưu tiên:
 \begin{enumerate}
@@ -85,12 +85,12 @@ Mô hình đạt điểm số tối ưu trên $\Dval$ sẽ được lựa chọn
 
 Nhằm đảm bảo tính minh bạch khoa học và tránh việc diễn giải sai lệch kết quả, bài tập lớn phân định rõ ràng hai chế độ thực nghiệm độc lập đã được thực hiện:
 
-\subsection{Chế độ 1: Đánh giá khả năng tổng quát hóa sang biến thể mới (kịch bản FTP \texorpdfstring{$\to$}{->} SSH)}
+\subsection{Chế độ 1: Đánh giá trên subtype SSH không có trong tập fit}
 Đây là giao thức đánh giá trung tâm của bài tập lớn:
 \begin{itemize}
-    \item Mô hình được fit duy nhất trên tập $\Dtrain$ (chỉ chứa \FTP, không chứa mẫu \SSH\ nào).
+    \item Mô hình benchmark được fit duy nhất trên tập $\Dtrain$ (chỉ chứa \FTP, không chứa mẫu \SSH\ nào).
     \item Tập $\Dval$ chứa \DataValidationSSH\ mẫu \SSH\ và được sử dụng để đánh giá phân loại, phục vụ lựa chọn cấu hình siêu tham số tốt nhất (mô hình không được huấn luyện trên tập này trong benchmark chuẩn).
-    \item Thiết lập này thể hiện khả năng tổng quát hóa sang biến thể chưa xuất hiện trong dữ liệu huấn luyện (với mô hình fit trên Train-only), kèm lưu ý phương pháp luận rằng sự hiện diện của SSH trong $\Dval$ hỗ trợ việc lựa chọn mô hình nên đây không phải là một quy trình zero-shot nghiêm ngặt hoàn toàn khép kín từ đầu đến cuối.
+    \item Đây là đánh giá trên subtype SSH không có trong tập fit của benchmark chuẩn, nhưng nhãn SSH trong $\Dval$ tham gia lựa chọn cấu hình; vì vậy thiết lập không phải quy trình zero-shot khép kín từ đầu đến cuối.
     \item Sau khi chọn được tham số tốt nhất, mô hình đại diện giữ nguyên trọng số đã học từ $\Dtrain$ để đánh giá độc lập trên tập $\Dtest$ (chỉ chứa \SSH).
 \end{itemize}
 

@@ -33,24 +33,24 @@ Khi áp dụng phân chia ngẫu nhiên trên tập dữ liệu mạng như CICI
 
 \section{Mục tiêu và câu hỏi nghiên cứu}
 
-Bài tập lớn này tập trung xây dựng một quy trình thực nghiệm khách quan, kiểm soát chặt chẽ rò rỉ thông tin theo thời gian trên tập dữ liệu CICIDS2017 Tuesday, nhằm khảo sát năng lực thực tế của các mô hình học máy dạng cây khi đối mặt với biến thể tấn công chưa xuất hiện trong tập huấn luyện.
+Bài tập lớn này xây dựng một quy trình thực nghiệm trên tập dữ liệu CICIDS2017 Tuesday, so sánh các giao thức phân tách theo thời gian và ngẫu nhiên, đồng thời khảo sát cách các mô hình học máy dạng cây xử lý biến thể SSH không có trong tập fit của benchmark chuẩn. Do SSH xuất hiện trong Validation và nhãn của các mẫu này tham gia lựa chọn cấu hình, thiết lập không phải quy trình zero-shot khép kín từ đầu đến cuối.
 
 Đề tài giải quyết 4 câu hỏi nghiên cứu (RQ) sau:
 \begin{itemize}
-    \item[\textbf{RQ1:}] \textit{(Khả năng tổng quát hóa sang biến thể chưa học theo thời gian)} Khi mô hình dạng cây được huấn luyện trên dữ liệu Train chỉ chứa \FTP, khả năng phát hiện \SSH\ xuất hiện ở giai đoạn thời gian sau thay đổi như thế nào?
-    \item[\textbf{RQ2:}] \textit{(Mức độ ảnh hưởng của phép chia ngẫu nhiên)} Phép chia ngẫu nhiên tạo ra sự khác biệt hiệu năng (độ lệch đánh giá quá lạc quan) ở mức độ định lượng bao nhiêu so với phép chia phân tách theo thứ tự thời gian?
+    \item[\textbf{RQ1:}] \textit{(Đánh giá trên subtype SSH vắng mặt trong tập fit theo thời gian)} Khi mô hình dạng cây được huấn luyện trên dữ liệu Train chỉ chứa \FTP, khả năng phát hiện \SSH\ xuất hiện ở giai đoạn thời gian sau thay đổi như thế nào?
+    \item[\textbf{RQ2:}] \textit{(So sánh các giao thức phân tách)} Kết quả của Random Split và Time-based Split khác nhau như thế nào khi đồng thời xét đến chiến lược chia, thành phần subtype và phân bố tập kiểm thử?
     \item[\textbf{RQ3:}] \textit{(Vai trò của cổng dịch vụ và các đặc trưng hành vi)} Cổng dịch vụ đích (\texttt{Destination Port}) đóng vai trò như thế nào trong dự đoán của mô hình? Khi loại bỏ cổng mạng, các đặc trưng thống kê hành vi gói tin có đủ để nhận diện lưu lượng tấn công hay không?
-    \item[\textbf{RQ4:}] \textit{(Tác động của thiết kế pipeline và giao thức huấn luyện lại)} Lỗi thiết kế pipeline khi chủ động gộp Train và Validation trước khi truyền vào tìm kiếm siêu tham số kết hợp với cờ \texttt{refit=True} làm thay đổi bản chất bài toán đánh giá từ tổng quát hóa sang học có giám sát như thế nào?
+    \item[\textbf{RQ4:}] \textit{(So sánh hai pipeline XGBoost)} Hai pipeline XGBoost được ghi nhận khác nhau như thế nào về dữ liệu fit, đặc trưng, tiền xử lý và cấu hình; những khác biệt này giới hạn ra sao khả năng quy kết chênh lệch kết quả cho chính sách refit?
 \end{itemize}
 
 \section{Đóng góp thực nghiệm của bài tập lớn}
 
 Các kết quả thực nghiệm chính của bài tập lớn bao gồm:
 \begin{enumerate}
-    \item \textbf{Xây dựng quy trình thực nghiệm kiểm soát thời gian:} Thực hiện tiền xử lý và phục hồi thứ tự thời gian 24h; áp dụng kỹ thuật làm sạch ranh giới bảo thủ Purge ($q=60\text{s}$) và Embargo ($g=120\text{s}$) loại bỏ \DataPurgedRows\ dòng ranh giới; thiết lập bài toán đánh giá khả năng tổng quát hóa sang biến thể mới với mô hình fit trên Train-only (kịch bản FTP $\to$ SSH) trên dữ liệu CICIDS2017 Tuesday, trong đó tập Validation chứa \DataValidationSSH\ mẫu SSH chỉ tham gia vào việc chọn cấu hình tối ưu chứ không tham gia fit trọng số mô hình trong benchmark chuẩn.
+    \item \textbf{Xây dựng quy trình thực nghiệm theo thời gian:} Thực hiện tiền xử lý và tái dựng timestamp 24 giờ từ CSV; áp dụng Purge ($q=60\text{s}$) và Embargo ($g=120\text{s}$), loại bỏ \DataPurgedRows\ dòng tại vùng ranh giới để giảm nguy cơ flow vượt mốc cắt. Benchmark chuẩn fit mô hình trên Train-only (kịch bản FTP $\to$ SSH); Validation có \DataValidationSSH\ mẫu SSH và nhãn của chúng tham gia lựa chọn cấu hình, nhưng không tham gia fit trọng số mô hình benchmark.
     \item \textbf{Đánh giá thực nghiệm 3 mô hình học máy dạng cây:} Đối chuẩn Decision Tree, Random Forest và XGBoost qua 12 tổ hợp thực nghiệm (3 mô hình $\times$ 2 chiến lược chia $\times$ 2 kịch bản cổng). Ghi nhận trung thực sự suy giảm hiệu năng của mô hình trên tập Test theo thời gian: trong kịch bản chính có cổng mạng, Random Forest đạt $\FOne = \RFTestFOne$, nhận diện được \RFTestSSHRecall\ tấn công SSH (\RFTestTP/\DataTestSSH\ flow).
     \item \textbf{Phân tích cơ chế suy luận qua SHAP và cấu trúc cây:} Sử dụng SHAP TreeExplainer và phân tích nhánh rẽ của cây quyết định để làm rõ việc mô hình phụ thuộc mạnh vào cổng dịch vụ (có giá trị SHAP trung bình lớn nhất \SHAPTopOneVal, gấp \SHAPRatioTopOneTwo\ lần đặc trưng thứ hai).
-    \item \textbf{Phân tích nghiên cứu tình huống MLOps thực tế về cờ refit:} Làm rõ trường hợp pipeline chủ động gộp Train và Validation trước khi truyền vào \texttt{RandomizedSearchCV}\allowbreak\texttt{.fit()} kết hợp với cờ \texttt{refit=True} mặc định của scikit-learn, khiến mô hình được huấn luyện lại trên toàn bộ tập gộp (chứa \DataValidationSSH\ mẫu SSH từ Validation), dẫn đến việc điểm Test F1 tăng từ \XGBTestFOne\ lên \XGBRefitTestFOne.
+    \item \textbf{Đối chiếu hai pipeline XGBoost:} Phân tích khác biệt về ranh giới fit, tập đặc trưng, tiền xử lý và cấu hình giữa benchmark chuẩn và lần chạy tuning độc lập. Lần chạy tuning dùng \texttt{refit=True} theo đúng thiết kế của scikit-learn và fit mô hình cuối cùng trên Train + Validation, trong đó có \DataValidationSSH\ mẫu SSH; do các pipeline khác nhau ở nhiều yếu tố, chênh lệch Test F1 không được quy riêng cho refit.
     \item \textbf{Tổ chức mã nguồn và số liệu có tính tái lập cao:} Toàn bộ số liệu trong báo cáo được truy xuất tự động từ các artifact đã đóng băng, đi kèm mã băm SHA-256 xác minh tệp nguồn, với khả năng tái lập được kiểm soát thông qua cấu hình môi trường đã ghi nhận và kiểm chứng (xem Phụ lục \ref{app:reproducibility}).
 \end{enumerate}
 

@@ -2,30 +2,30 @@
 % reports/sections/discussion/07_03_mlops_lessons.tex
 % ==============================================================================
 
-\section{Bài Học Thực Tiễn MLOps và Quản Trị Ranh Giới Dữ Liệu Trong An Ninh Mạng}
+\section{Bài học thực tiễn MLOps và quản trị ranh giới dữ liệu}
 
 Từ các phát hiện thực nghiệm và case study đối soát mã nguồn của nghiên cứu, chúng tôi đúc kết các bài học kỹ nghệ thực tiễn then chốt cho việc phát triển và triển khai hệ thống học máy trong an ninh mạng (MLOps for Cybersecurity):
 
-\subsection{Hiểm Họa Từ Các Hành Vi Mặc Định Của Thư Viện Học Máy}
-Case study về cờ \texttt{refit=True} của thư viện \texttt{scikit-learn} là một lời cảnh tỉnh sâu sắc:
+\subsection{Diễn giải đúng hành vi refit trong pipeline}
+Case study cho thấy cần ghi rõ dữ liệu được truyền vào quy trình tìm kiếm siêu tham số và dữ liệu dùng để fit mô hình cuối:
 \begin{itemize}
-    \item Trong các bài toán học máy thông thường (nơi dữ liệu giả định $i.i.d.$), việc huấn luyện lại mô hình tốt nhất trên toàn bộ dữ liệu $\mathbf{X}_{\text{train}} \cup \mathbf{X}_{\text{val}}$ sau khi tuning là một thực hành tiêu chuẩn nhằm tận dụng tối đa số lượng mẫu huấn luyện.
-    \item Tuy nhiên, trong an ninh mạng và dữ liệu chuỗi thời gian có sự phân tầng biến thể tấn công (Temporal Subtype Shift), hành động refit này đã vô tình phá vỡ hoàn toàn ranh giới giữa "quá khứ" và "hiện tại". Việc để mô hình tiếp xúc với tập Validation đã biến một bài toán Zero-Shot thành bài toán Supervised Learning, làm sai lệch kết quả từ 0.0000 thành 0.9912.
-    \item \textbf{Khuyến nghị MLOps}: Trong các pipeline đánh giá NIDS theo thời gian, các kỹ sư bắt buộc phải tắt cờ refit (\texttt{refit=False}) hoặc thực hiện huấn luyện lại một cách tường minh duy nhất trên tập $\Dtrain$.
+    \item Theo thiết kế của scikit-learn, \texttt{RandomizedSearchCV(refit=True)} fit cấu hình tốt nhất trên toàn bộ dữ liệu nhận vào sau khi hoàn tất tìm kiếm.
+    \item Trong lần chạy tuning độc lập được phân tích, dữ liệu đầu vào gồm Train + Validation, trong đó Validation có chứa SSH. Vì vậy mô hình cuối đã được fit trên SSH; đây là chế độ fit có tiếp xúc với subtype, không phải lỗi thư viện hay quy trình zero-shot.
+    \item Benchmark chuẩn và lần tuning độc lập khác nhau về tập đặc trưng, tiền xử lý và cấu hình. Do đó, chênh lệch F1 giữa hai artifact không thể quy riêng cho refit. Khi mục tiêu là giữ mô hình cuối chỉ được huấn luyện trên tập huấn luyện, cần thiết kế rõ ranh giới fit; khi mục tiêu là refit, cần mô tả chính xác phạm vi dữ liệu được gộp.
 \end{itemize}
 
-\subsection{Thiết Lập Cơ Chế Khóa Cấu Hình Bất Biến (Immutable Audit Markers)}
-Việc áp dụng cơ chế đánh dấu mốc kiểm thử \texttt{TEST\_OPENED.json} gắn liền với mã băm SHA-256 của tệp cấu hình \texttt{frozen.json} đã chứng minh tính hiệu quả vượt trội trong việc ngăn chặn rò rỉ dữ liệu qua con người (Human Feedback Leakage). Một quy trình MLOps an toàn bắt buộc phải đảm bảo:
+\subsection{Thiết lập cơ chế khóa cấu hình bất biến}
+Cơ chế đánh dấu mốc kiểm thử \texttt{TEST\_OPENED.json} và mã băm SHA-256 của tệp cấu hình \texttt{frozen.json} hỗ trợ lưu vết trạng thái đánh giá; các cơ chế này không tự thân chứng minh rằng không có rò rỉ thông tin qua phản hồi của con người. Một quy trình MLOps có kiểm soát nên đảm bảo:
 \begin{enumerate}
     \item Không được phép thay đổi siêu tham số sau khi đã nhìn thấy kết quả kiểm thử.
     \item Mọi bước tiền xử lý (loại bỏ đặc trưng, tính giá trị trung vị) bắt buộc phải được đóng gói vào các Pipeline chỉ học (fit) từ tập Train.
 \end{enumerate}
 
-\subsection{Quy Chuẩn 5 Bước Cho Đánh Giá NIDS Bằng Học Máy}
+\subsection{Quy chuẩn 5 bước cho đánh giá NIDS bằng học máy}
 Chúng tôi đề xuất một bộ quy chuẩn thực nghiệm gồm 5 bước bắt buộc cho các nghiên cứu ML-NIDS trong tương lai:
 \begin{enumerate}
-    \item \textbf{Phân tách theo Thời gian (Temporal Split)}: Loại bỏ việc sử dụng Random Split làm thước đo đánh giá chính.
-    \item \textbf{Áp dụng Purge và Embargo}: Làm sạch các flow vắt ngang ranh giới và tạo khoảng đệm an toàn giữa các tập dữ liệu.
+    \item \textbf{Phân tách theo thời gian (Time-based Split)}: Dùng như một giao thức đánh giá bổ sung cho Random Split; báo cáo rõ subtype và phân bố của từng tập.
+    \item \textbf{Áp dụng Purge và Embargo}: Loại các flow ở vùng biên để giảm nguy cơ flow vượt mốc cắt; không xem đây là bằng chứng về độ chính xác đồng hồ nguồn hay độc lập tuyệt đối.
     \item \textbf{Báo cáo Độc lập Tỷ lệ Phát hiện Theo Biến thể (Subtype Recall)}: Không chỉ báo cáo điểm F1 gộp chung; bắt buộc theo dõi tỷ lệ phát hiện riêng biệt cho từng dạng tấn công mới xuất hiện.
     \item \textbf{Thực hiện Port Ablation}: Kiểm chứng độ bền vững của mô hình khi không có thông tin cổng dịch vụ để tránh rơi vào bẫy học vẹt số cổng.
     \item \textbf{Minh Bạch Hóa Kết Quả Thấp}: Dũng cảm công bố các điểm số thấp trong điều kiện đánh giá thực tế thay vì cố gắng tìm kiếm các phương pháp gượng ép để đạt điểm số hoàn hảo ảo.

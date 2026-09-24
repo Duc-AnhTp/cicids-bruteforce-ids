@@ -7,21 +7,21 @@
 \toprule
 \textbf{Mô hình} & \textbf{Phân tách} & \textbf{Kịch bản} & \textbf{Accuracy} & \textbf{Precision} & \textbf{Recall} & \textbf{F1} & \textbf{AP} & \textbf{ROC-AUC} & \textbf{FTP Rec.} & \textbf{SSH Rec.} \\
 \midrule
-\multicolumn{11}{l}{\textbf{A. Thực nghiệm chính: Phân tách theo thời gian (kịch bản FTP $\to$ SSH)}} \\
-Decision Tree & Thời gian & Có cổng & 0.9740 & 0.0000 & 0.0000 & \textbf{0.0000} & 0.0259 & 0.5000 & \text{N/A} & 0.00\% \\
-Random Forest & Thời gian & Có cổng & 0.9742 & 1.0000 & 0.0019 & \textbf{0.0037} & 0.3591 & 0.7483 & \text{N/A} & 0.19\% \\
-XGBoost & Thời gian & Có cổng & 0.9741 & 0.0000 & 0.0000 & \textbf{0.0000} & 0.0879 & 0.7503 & \text{N/A} & 0.00\% \\
-Decision Tree & Thời gian & Không cổng & 0.9741 & 0.4375 & 0.0019 & \textbf{0.0037} & 0.0272 & 0.5009 & \text{N/A} & 0.19\% \\
-Random Forest & Thời gian & Không cổng & 0.9739 & 0.2414 & 0.0038 & \textbf{0.0074} & 0.0268 & 0.4932 & \text{N/A} & 0.38\% \\
-XGBoost & Thời gian & Không cổng & 0.9740 & 0.2653 & 0.0035 & \textbf{0.0069} & 0.2447 & 0.9304 & \text{N/A} & 0.35\% \\
+\multicolumn{11}{l}{\textbf{A. Đối chiếu: Time-based Split (kịch bản FTP $\to$ SSH)}} \\
+Decision Tree & Thời gian & Có cổng & 0.9740 & 0.0000 & 0.0000 & 0.0000 & 0.0259 & 0.5000 & \text{N/A} & 0.00\% \\
+Random Forest & Thời gian & Có cổng & 0.9742 & 1.0000 & 0.0019 & 0.0037 & 0.3591 & 0.7483 & \text{N/A} & 0.19\% \\
+XGBoost & Thời gian & Có cổng & 0.9741 & 0.0000 & 0.0000 & 0.0000 & 0.0879 & 0.7503 & \text{N/A} & 0.00\% \\
+Decision Tree & Thời gian & Không cổng & 0.9741 & 0.4375 & 0.0019 & 0.0037 & 0.0272 & 0.5009 & \text{N/A} & 0.19\% \\
+Random Forest & Thời gian & Không cổng & 0.9739 & 0.2414 & 0.0038 & 0.0074 & 0.0268 & 0.4932 & \text{N/A} & 0.38\% \\
+XGBoost & Thời gian & Không cổng & 0.9740 & 0.2653 & 0.0035 & 0.0069 & 0.2447 & 0.9304 & \text{N/A} & 0.35\% \\
 \midrule
-\multicolumn{11}{l}{\textbf{B. Thực nghiệm đối chứng: Phân tách ngẫu nhiên (độ lệch đánh giá quá lạc quan do tương quan nội bộ chiến dịch)}} \\
-Decision Tree & Ngẫu nhiên & Có cổng & 0.9996 & 0.9904 & 0.9980 & \textbf{0.9942} & 0.9963 & 0.9990 & 100.00\% & 99.54\% \\
-Random Forest & Ngẫu nhiên & Có cổng & 1.0000 & 1.0000 & 0.9993 & \textbf{0.9997} & 1.0000 & 1.0000 & 100.00\% & 99.85\% \\
-XGBoost & Ngẫu nhiên & Có cổng & 1.0000 & 0.9993 & 1.0000 & \textbf{0.9997} & 1.0000 & 1.0000 & 100.00\% & 100.00\% \\
-Decision Tree & Ngẫu nhiên & Không cổng & 0.9989 & 0.9700 & 0.9949 & \textbf{0.9823} & 0.9890 & 0.9974 & 99.69\% & 99.23\% \\
-Random Forest & Ngẫu nhiên & Không cổng & 0.9997 & 0.9934 & 0.9954 & \textbf{0.9944} & 0.9994 & 1.0000 & 99.73\% & 99.28\% \\
-XGBoost & Ngẫu nhiên & Không cổng & 0.9999 & 0.9980 & 0.9987 & \textbf{0.9984} & 0.9999 & 1.0000 & 99.92\% & 99.79\% \\
+\multicolumn{11}{l}{\textbf{B. Đối chiếu: Phân tách ngẫu nhiên (Random Split)}} \\
+Decision Tree & Ngẫu nhiên & Có cổng & 0.9996 & 0.9904 & 0.9980 & 0.9942 & 0.9963 & 0.9990 & 100.00\% & 99.54\% \\
+Random Forest & Ngẫu nhiên & Có cổng & 1.0000 & 1.0000 & 0.9993 & 0.9997 & 1.0000 & 1.0000 & 100.00\% & 99.85\% \\
+XGBoost & Ngẫu nhiên & Có cổng & 1.0000 & 0.9993 & 1.0000 & 0.9997 & 1.0000 & 1.0000 & 100.00\% & 100.00\% \\
+Decision Tree & Ngẫu nhiên & Không cổng & 0.9989 & 0.9700 & 0.9949 & 0.9823 & 0.9890 & 0.9974 & 99.69\% & 99.23\% \\
+Random Forest & Ngẫu nhiên & Không cổng & 0.9997 & 0.9934 & 0.9954 & 0.9944 & 0.9994 & 1.0000 & 99.73\% & 99.28\% \\
+XGBoost & Ngẫu nhiên & Không cổng & 0.9999 & 0.9980 & 0.9987 & 0.9984 & 0.9999 & 1.0000 & 99.92\% & 99.79\% \\
 \bottomrule
 \end{tabular}%
 }

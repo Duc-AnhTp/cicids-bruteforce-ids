@@ -10,10 +10,10 @@ Sau khi đóng băng cấu hình siêu tham số và lưu vết mã băm trong \
 
 Kết quả thực nghiệm ghi nhận sự suy giảm hiệu năng rõ rệt đối với biến thể tấn công mới:
 \begin{itemize}
-    \item Decision Tree: Đạt $\FOne = \textbf{\DTTestFOne}$, $\Precision = \DTTestPrecision$, $\Recall = \DTTestRecall$, $\AP = \DTTestAP$, $\ROCAUC = \DTTestROCAUC$. Ma trận nhầm lẫn: $TP = \DTTestTP$, $FP = \DTTestFP$, $FN = \DTTestFN$, $TN = \DTTestTN$. Mô hình không nhận diện được mẫu tấn công SSH nào ($\text{SSH Recall} = \DTTestSSHRecall$).
-    \item Random Forest: Đạt $\FOne = \textbf{\RFTestFOne}$, $\Precision = \RFTestPrecision$, $\Recall = \RFTestRecall$, $\AP = \RFTestAP$, $\ROCAUC = \RFTestROCAUC$. Ma trận nhầm lẫn: $TP = \RFTestTP$, $FP = \RFTestFP$, $FN = \RFTestFN$, $TN = \RFTestTN$. Mô hình chỉ nhận diện chính xác \textbf{\RFTestTP\ trên tổng số \DataTestSSH\ flow tấn công SSH}, tương ứng với tỷ lệ phát hiện $\text{SSH Recall} = \textbf{\RFTestSSHRecall}$.
+    \item Decision Tree: Đạt $\FOne = \DTTestFOne$, $\Precision = \DTTestPrecision$, $\Recall = \DTTestRecall$, $\AP = \DTTestAP$, $\ROCAUC = \DTTestROCAUC$. Ma trận nhầm lẫn: $TP = \DTTestTP$, $FP = \DTTestFP$, $FN = \DTTestFN$, $TN = \DTTestTN$. Mô hình không nhận diện được mẫu tấn công SSH nào ($\text{SSH Recall} = \DTTestSSHRecall$).
+    \item Random Forest: Đạt $\FOne = \RFTestFOne$, $\Precision = \RFTestPrecision$, $\Recall = \RFTestRecall$, $\AP = \RFTestAP$, $\ROCAUC = \RFTestROCAUC$. Ma trận nhầm lẫn: $TP = \RFTestTP$, $FP = \RFTestFP$, $FN = \RFTestFN$, $TN = \RFTestTN$. Mô hình chỉ nhận diện chính xác \RFTestTP\ trên tổng số \DataTestSSH\ flow tấn công SSH, tương ứng với tỷ lệ phát hiện $\text{SSH Recall} = \RFTestSSHRecall$.
     \item XGBoost:
-    Đạt $\FOne = \textbf{\XGBTestFOne}$, $\Precision = \XGBTestPrecision$, $\Recall = \XGBTestRecall$, $\AP = \XGBTestAP$, $\ROCAUC = \XGBTestROCAUC$. Ma trận nhầm lẫn gồm $TP = \XGBTestTP$, $FP = \XGBTestFP$, $FN = \XGBTestFN$, $TN = \XGBTestTN$. Tương tự Decision Tree, XGBoost không nhận diện được cuộc tấn công SSH nào ($\text{SSH Recall} = \XGBTestSSHRecall$).
+    Đạt $\FOne = \XGBTestFOne$, $\Precision = \XGBTestPrecision$, $\Recall = \XGBTestRecall$, $\AP = \XGBTestAP$, $\ROCAUC = \XGBTestROCAUC$. Ma trận nhầm lẫn gồm $TP = \XGBTestTP$, $FP = \XGBTestFP$, $FN = \XGBTestFN$, $TN = \XGBTestTN$. Tương tự Decision Tree, XGBoost không nhận diện được cuộc tấn công SSH nào ($\text{SSH Recall} = \XGBTestSSHRecall$).
 \end{itemize}
 
 Ma trận nhầm lẫn chi tiết của ba mô hình trên tập kiểm thử được trực quan hóa trên Hình \ref{fig:confusion_matrices_detailed}.
@@ -26,7 +26,7 @@ Ma trận nhầm lẫn chi tiết của ba mô hình trên tập kiểm thử đ
 \end{figure}
 
 \noindent\textbf{Ghi nhận về Support và FTP Recall trên tập Test:}
-Do tập $\Dtest$ theo thời gian diễn ra từ 14:32 đến 17:00 chiều (chỉ xuất hiện chiến dịch \SSH), số lượng mẫu hỗ trợ của \FTP\ là $0$ ($\text{FTP Support} = 0$). Theo đúng nguyên tắc trung thực học thuật đã đề ra, chỉ số \textbf{FTP Recall trên tập Test được ghi nhận là N/A (Not Applicable)}, không gán giá trị 0\% hay 100\%.
+Do tập $\Dtest$ theo thời gian diễn ra từ 14:32 đến 17:00 chiều (chỉ xuất hiện chiến dịch \SSH), số lượng mẫu hỗ trợ của \FTP\ là $0$ ($\text{FTP Support} = 0$). Theo đúng nguyên tắc trung thực học thuật đã đề ra, chỉ số FTP Recall trên tập Test được ghi nhận là N/A (Not Applicable), không gán giá trị 0\% hay 100\%.
 
 \noindent\textbf{Nhận xét kết quả:}
-Trong kịch bản đánh giá chính theo thời gian có cổng, Random Forest đạt $\FOne = \RFTestFOne$ với $\text{SSH Recall} = \RFTestSSHRecall$ (\RFTestTP/\DataTestSSH\ flow SSH), trong khi Decision Tree và XGBoost có $\FOne = \DTTestFOne$. Kết quả này cung cấp bằng chứng thực nghiệm rõ ràng cho thấy: khi chỉ được huấn luyện trên tập Train chứa biến thể \FTP, các mô hình học máy dạng cây gặp khó khăn lớn trong việc khái quát hóa sang biến thể \SSH\ xuất hiện ở phân đoạn thời gian sau trên cùng hệ thống mạng. Mặc dù tập Validation có chứa \DataValidationSSH\ mẫu SSH tham gia lựa chọn mô hình, việc không có mẫu SSH trong quá trình fit khiến tỷ lệ phát hiện SSH trên tập Test ở mức rất thấp.
+Trong kịch bản đánh giá chính theo thời gian có cổng, Random Forest đạt $\FOne = \RFTestFOne$ với $\text{SSH Recall} = \RFTestSSHRecall$ (\RFTestTP/\DataTestSSH\ flow SSH), trong khi Decision Tree và XGBoost có $\FOne = \DTTestFOne$. Kết quả cho thấy các mô hình học máy dạng cây gặp khó khăn khi áp dụng lên subtype SSH không có trong tập fit của benchmark chuẩn. Tuy nhiên, \DataValidationSSH\ mẫu SSH trong Validation và nhãn của chúng tham gia lựa chọn siêu tham số; vì vậy đây là đánh giá subtype vắng mặt trong tập fit, không phải phép thử zero-shot khép kín từ đầu đến cuối.
