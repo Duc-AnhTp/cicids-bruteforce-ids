@@ -3,12 +3,12 @@
 % PHỤ LỤC D: QUY TẮC RẼ NHÁNH CỦA CÂY QUYẾT ĐỊNH
 % ==============================================================================
 
-\chapter{Quy Tắc Rẽ Nhánh Của Cây Quyết Định}
+\chapter{Quy Tắc Rẽ Nhánh Của Decision Tree}
 \label{app:tree_rules}
 
 Dưới đây là cấu trúc logic và các quy tắc phân loại văn bản được trích xuất trực tiếp từ mô hình Decision Tree huấn luyện trên tập Train theo thời gian trong kịch bản Bóc tách Cổng mạng (\texttt{without\_port}). Khi không có đặc trưng \texttt{Destination Port}, mô hình buộc phải rẽ nhánh dựa trên hình thái thống kê gói tin với nút gốc là \texttt{Average Packet Size <= 14.12} (đối chiếu với cấu trúc cây kịch bản Có cổng tại Mục \ref{sec:tree_structure_analysis}):
 
-\begin{lstlisting}[caption={Toàn văn quy tắc rẽ nhánh cấp cao của Cây Quyết Định (max\_depth=4)}]
+\begin{lstlisting}[caption={Toàn văn quy tắc rẽ nhánh cấp cao của Decision Tree (max\_depth=4)}]
 # Top Decision Rules for DecisionTree (max_depth=4 preview)
 # Total Depth: 9, Leaves: 17
 

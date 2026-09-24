@@ -4,7 +4,7 @@
 
 \section{Phân tích khả năng giải thích}
 
-Để làm rõ hành vi dự đoán bên trong của mô hình trên tập mẫu kiểm định, nhóm áp dụng phương pháp giải thích gia tăng Shapley (\textbf{SHAP TreeExplainer} \cite{lundberg2017unified}) kết hợp với việc trích xuất cấu trúc logic của Cây Quyết Định.
+Để làm rõ hành vi dự đoán bên trong của mô hình trên tập mẫu kiểm định, nhóm áp dụng phương pháp giải thích gia tăng Shapley (SHAP TreeExplainer \cite{lundberg2017unified}) kết hợp với việc trích xuất cấu trúc logic của Decision Tree.
 
 \subsection{Phân tích tầm quan trọng đặc trưng bằng SHAP}
 Phân tích SHAP được thực hiện trên 500 mẫu đại diện từ tập kiểm định $\Dval$ đối với mô hình Random Forest theo thời gian có cổng. Bảng \ref{tab:shap_top10} liệt kê 10 đặc trưng có giá trị đóng góp trung bình tuyệt đối ($\text{Mean } |\text{SHAP}|$) lớn nhất.
@@ -13,9 +13,9 @@ Phân tích SHAP được thực hiện trên 500 mẫu đại diện từ tập
 
 Kết quả định lượng cho thấy:
 \begin{itemize}
-    \item Đặc trưng \textbf{\texttt{Destination Port}} có giá trị lớn nhất với $\text{Mean } |\text{SHAP}| = \textbf{\SHAPTopOneVal}$.
-    \item Đặc trưng xếp thứ hai là \texttt{Fwd Packet Length Std} đạt giá trị \textbf{\SHAPTopTwoVal}.
-    \item Tỷ số đóng góp giữa đặc trưng số 1 và số 2 là xấp xỉ \textbf{\SHAPRatioTopOneTwo\ lần}.
+    \item Đặc trưng \texttt{Destination Port} có giá trị lớn nhất với $\text{Mean } |\text{SHAP}| = \SHAPTopOneVal$.
+    \item Đặc trưng xếp thứ hai là \texttt{Fwd Packet Length Std} đạt giá trị \SHAPTopTwoVal.
+    \item Tỷ số đóng góp giữa đặc trưng số 1 và số 2 là xấp xỉ \SHAPRatioTopOneTwo\ lần.
 \end{itemize}
 
 Kết quả phân tích SHAP cho thấy mô hình phụ thuộc mạnh vào \texttt{Destination Port} trong kịch bản có cổng được phân tích, tận dụng cổng dịch vụ như một lối tắt phân loại quan trọng giữa lưu lượng bình thường và lưu lượng tấn công FTP (Cổng 21), như được minh họa trực quan trên biểu đồ phân bố giá trị SHAP (Hình \ref{fig:shap_summary}).
@@ -27,19 +27,19 @@ Kết quả phân tích SHAP cho thấy mô hình phụ thuộc mạnh vào \tex
 \label{fig:shap_summary}
 \end{figure}
 
-\subsection{Trích xuất cấu trúc cây quyết định}
+\subsection{Trích xuất cấu trúc Decision Tree}
 \label{sec:tree_structure_analysis}
-Quan sát cấu trúc logic của Cây Quyết Định càng làm sáng tỏ cơ chế phân nhánh này:
+Quan sát cấu trúc logic của Decision Tree càng làm sáng tỏ cơ chế phân nhánh này:
 \begin{itemize}
-    \item \textbf{Kịch bản có cổng:} Nút gốc (Root Node) phân chia dựa trên điều kiện \texttt{Destination Port <= 21.5} (Hình \ref{fig:tree_structure}). Các nhánh tiếp theo tiếp tục cô lập các flow có \texttt{Destination Port <= 20.5} (loại bỏ traffic cổng thấp) để định vị chính xác \textbf{Cổng 21 (FTP)}.
-    \item \textbf{Kịch bản không có cổng:} Khi đặc trưng cổng bị loại bỏ, cây quyết định chọn nút gốc là \texttt{Average Packet Size <= 14.12} (chi tiết quy tắc văn bản trình bày tại Phụ lục \ref{app:tree_rules}).
+    \item Kịch bản có cổng: Nút gốc phân chia dựa trên điều kiện \texttt{Destination Port <= 21.5} (Hình \ref{fig:tree_structure}). Các nhánh tiếp theo tiếp tục cô lập các flow có \texttt{Destination Port <= 20.5} (loại bỏ traffic cổng thấp) để định vị chính xác Cổng 21 (FTP).
+    \item Kịch bản không có cổng: Khi đặc trưng cổng bị loại bỏ, Decision Tree chọn nút gốc là \texttt{Average Packet Size <= 14.12} (chi tiết quy tắc văn bản trình bày tại Phụ lục \ref{app:tree_rules}).
 \end{itemize}
 
 \begin{figure}[htbp]
 \centering
 \includegraphics[width=0.95\textwidth]{experiments/figures/01_tree_structure_detailed.png}
-\caption{Cấu trúc 3 tầng đầu tiên của Cây Quyết Định minh họa ngưỡng rẽ nhánh ưu tiên tại \texttt{Destination Port $\le$ 21.5}.}
+\caption{Cấu trúc 3 tầng đầu tiên của Decision Tree minh họa ngưỡng rẽ nhánh ưu tiên tại \texttt{Destination Port $\le$ 21.5}.}
 \label{fig:tree_structure}
 \end{figure}
 
-Khi chuyển sang tập kiểm thử $\Dtest$, toàn bộ các cuộc tấn công đều diễn ra trên \textbf{Cổng 22 (SSH)}, tức là rơi vào nhánh \texttt{Destination Port > 21.5}. Tại nhánh này, vì trong tập Train mô hình chưa từng thấy cuộc tấn công nào diễn ra trên cổng $> 21$, phần lớn các nút lá tương ứng đều được gán nhãn là lưu lượng bình thường (\Normal, 0). Cấu trúc nhánh rẽ này giải thích vì sao cây quyết định không phát hiện được các flow SSH ở Cổng 22 trong kịch bản có cổng. Cần nhấn mạnh rằng SHAP và cấu trúc cây giải thích hành vi phân loại của mô hình trên tập mẫu quan sát, chứ không chứng minh quan hệ nhân quả trong môi trường mạng thực tế.
+Khi chuyển sang tập kiểm thử $\Dtest$, toàn bộ các cuộc tấn công đều diễn ra trên Cổng 22 (SSH), tức là rơi vào nhánh \texttt{Destination Port > 21.5}. Tại nhánh này, vì trong tập Train mô hình chưa từng thấy cuộc tấn công nào diễn ra trên cổng $> 21$, phần lớn các nút lá tương ứng đều được gán nhãn là lưu lượng bình thường (\Normal, 0). Cấu trúc nhánh rẽ này giải thích vì sao Decision Tree không phát hiện được các flow SSH ở Cổng 22 trong kịch bản có cổng. Cần nhấn mạnh rằng SHAP và cấu trúc cây giải thích hành vi phân loại của mô hình trên tập mẫu quan sát, chứ không chứng minh quan hệ nhân quả trong môi trường mạng thực tế.

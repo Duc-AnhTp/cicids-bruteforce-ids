@@ -6,10 +6,10 @@
 
 Khác biệt rõ rệt với kết quả hiệu năng rất thấp trên phân tách theo thời gian, kết quả của các mô hình trên tập kiểm thử phân tách ngẫu nhiên (phân tách ngẫu nhiên có cổng) đạt điểm số rất cao (xem Phần B của Bảng \ref{tab:test_comparison}):
 \begin{itemize}
-    \item \textbf{Cây Quyết Định (Decision Tree)}: Đạt $\FOne = \textbf{\DTRandomFOne}$, $\Precision = \DTRandomPrecision$, $\Recall = \DTRandomRecall$, $\AP = \DTRandomAP$, $\ROCAUC = \DTRandomROCAUC$. Tỷ lệ phát hiện đạt \DTRandomFTPRecall\ đối với FTP và \DTRandomSSHRecall\ đối với SSH.
-    \item \textbf{Rừng Ngẫu Nhiên (Random Forest)}: Đạt $\FOne = \textbf{\RFRandomFOne}$, $\Precision = \RFRandomPrecision$, $\Recall = \RFRandomRecall$, $\AP = \RFRandomAP$, $\ROCAUC = \RFRandomROCAUC$. Tỷ lệ phát hiện đạt \RFRandomFTPRecall\ đối với FTP và \RFRandomSSHRecall\ đối với SSH.
-    \item \textbf{XGBoost}:
-    Đạt $\FOne = \textbf{\XGBRandomFOne}$, $\Precision = \XGBRandomPrecision$, $\Recall = \XGBRandomRecall$, $\AP = \XGBRandomAP$, $\ROCAUC = \XGBRandomROCAUC$. Tỷ lệ phát hiện đạt \XGBRandomFTPRecall\ đối với FTP và \XGBRandomSSHRecall\ đối với SSH.
+    \item Decision Tree: Đạt $\FOne = \DTRandomFOne$, $\Precision = \DTRandomPrecision$, $\Recall = \DTRandomRecall$, $\AP = \DTRandomAP$, $\ROCAUC = \DTRandomROCAUC$. Tỷ lệ phát hiện đạt \DTRandomFTPRecall\ đối với FTP và \DTRandomSSHRecall\ đối với SSH.
+    \item Random Forest: Đạt $\FOne = \RFRandomFOne$, $\Precision = \RFRandomPrecision$, $\Recall = \RFRandomRecall$, $\AP = \RFRandomAP$, $\ROCAUC = \RFRandomROCAUC$. Tỷ lệ phát hiện đạt \RFRandomFTPRecall\ đối với FTP và \RFRandomSSHRecall\ đối với SSH.
+    \item XGBoost:
+    Đạt $\FOne = \XGBRandomFOne$, $\Precision = \XGBRandomPrecision$, $\Recall = \XGBRandomRecall$, $\AP = \XGBRandomAP$, $\ROCAUC = \XGBRandomROCAUC$. Tỷ lệ phát hiện đạt \XGBRandomFTPRecall\ đối với FTP và \XGBRandomSSHRecall\ đối với SSH.
 \end{itemize}
 
 \subsection{Đo lường định lượng độ lệch đánh giá}
@@ -17,7 +17,7 @@ Bảng \ref{tab:split_diff} trình bày sự chênh lệch trực tiếp giữa 
 
 \input{tables/generated/tab_split_diff.tex}
 
-Khoảng cách chênh lệch hiệu năng ($\Delta\FOne$) giữa Random Split và Time-based Split trên tập Validation dao động từ \textbf{0.2631 đến 0.2848}. Trên tập Test chính thức, khoảng cách này thể hiện rất rõ: đối với Random Forest, điểm F1 tăng từ \textbf{\RFTestFOne} (trên Time Split) lên \textbf{\RFRandomFOne} (trên Random Split), như được minh họa đối chiếu trên Hình \ref{fig:data_leakage_benchmark}.
+Khoảng cách chênh lệch hiệu năng ($\Delta\FOne$) giữa Random Split và Time-based Split trên tập Validation dao động từ 0.2631 đến 0.2848. Trên tập Test chính thức, khoảng cách này thể hiện rất rõ: đối với Random Forest, điểm F1 tăng từ \RFTestFOne\ (trên Time Split) lên \RFRandomFOne\ (trên Random Split), như được minh họa đối chiếu trên Hình \ref{fig:data_leakage_benchmark}.
 
 \begin{figure}[htbp]
 \centering

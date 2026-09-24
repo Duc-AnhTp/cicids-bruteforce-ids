@@ -7,8 +7,8 @@
 
 Trong quá trình đối soát thực nghiệm giữa các đường ống trong mã nguồn, nhóm phát hiện sự phân kỳ số liệu đáng chú ý đối với thuật toán XGBoost:
 \begin{itemize}
-    \item Trong benchmark chuẩn mực tại \path{artifacts/week3_week4/test_comparison.csv}, XGBoost đạt $\FOne = \textbf{0.0000}$ ($\text{SSH Recall} = 0.00\%$).
-    \item Trong kết quả tuning độc lập tại \path{experiments/w3_05_time_tuning/test_eval/test_metrics.json}, XGBoost lại đạt $\FOne = \textbf{\XGBRefitTestFOne}$ ($\text{SSH Recall} = \textbf{\XGBRefitTestSSHRecall}$).
+    \item Trong benchmark chuẩn mực tại \path{artifacts/week3_week4/test_comparison.csv}, XGBoost đạt $\FOne = 0.0000$ ($\text{SSH Recall} = 0.00\%$).
+    \item Trong kết quả tuning độc lập tại \path{experiments/w3_05_time_tuning/test_eval/test_metrics.json}, XGBoost lại đạt $\FOne = \XGBRefitTestFOne$ ($\text{SSH Recall} = \XGBRefitTestSSHRecall$).
 \end{itemize}
 
 \subsection{Truy vết nguyên nhân kỹ thuật trong mã nguồn}
@@ -48,13 +48,13 @@ Theo tài liệu đặc tả của thư viện \texttt{scikit-learn} \cite{sciki
 Nguyên nhân dẫn đến phân kỳ số liệu nằm ở thiết kế đường ống: dữ liệu Train và Validation được chủ động gộp thành $\mathbf{X}_{\text{combined}}$ trước khi truyền vào \texttt{RandomizedSearchCV}\allowbreak\texttt{.fit()}, trong khi chế độ mặc định \texttt{refit=True} khiến mô hình được huấn luyện lại trên toàn bộ tập gộp đó thay vì chỉ trên $\Xtrain$. Khi truyền cờ \texttt{--strict-train-only}, script chủ động clone cấu hình tối ưu và fit lại duy nhất trên $\Xtrain$, bảo toàn bản chất tổng quát hóa sang subtype chưa từng thấy.
 
 \subsection{Hậu quả đối với bản chất bài toán đánh giá}
-Trong khi tập $\Dtrain$ không chứa mẫu \SSH\ nào (0 flow), thì tập kiểm định $\Dval$ lại chứa \textbf{\DataValidationSSH\ flow tấn công \SSH}.
+Trong khi tập $\Dtrain$ không chứa mẫu \SSH\ nào (0 flow), thì tập kiểm định $\Dval$ lại chứa \DataValidationSSH\ flow tấn công \SSH.
 
 Khi cơ chế \texttt{refit=True} diễn ra trên tập dữ liệu gộp:
 \begin{enumerate}
     \item Mô hình XGBoost được huấn luyện trực tiếp trên \DataValidationSSH\ mẫu tấn công SSH từ tập Validation.
-    \item Bài toán đánh giá trên tập Test theo thời gian đã bị biến đổi bản chất từ \textbf{kịch bản tổng quát hóa FTP $\to$ SSH (không có SSH trong tập huấn luyện)} thành \textbf{học có giám sát trên biến thể đã biết do được huấn luyện trên \DataValidationSSH\ mẫu SSH}.
-    \item Việc được học trên \DataValidationSSH\ mẫu SSH này đã giúp XGBoost tiếp thu phân phối đặc trưng và cổng 22 của SSH, làm cho điểm số trên tập Test tăng từ \textbf{\XGBTestFOne\ lên \XGBRefitTestFOne}.
+    \item Bài toán đánh giá trên tập Test theo thời gian đã bị biến đổi bản chất từ kịch bản tổng quát hóa FTP $\to$ SSH (không có SSH trong tập huấn luyện) thành học có giám sát trên biến thể đã biết do được huấn luyện trên \DataValidationSSH\ mẫu SSH.
+    \item Việc được học trên \DataValidationSSH\ mẫu SSH này đã giúp XGBoost tiếp thu phân phối đặc trưng và cổng 22 của SSH, làm cho điểm số trên tập Test tăng từ \XGBTestFOne\ lên \XGBRefitTestFOne.
 \end{enumerate}
 
 Bảng \ref{tab:refit_comparison} tổng hợp sự đối lập giữa hai chế độ đánh giá này.
@@ -68,8 +68,8 @@ Bảng \ref{tab:refit_comparison} tổng hợp sự đối lập giữa hai ch�
 \toprule
 \textbf{Chế độ thực nghiệm} & \textbf{Dữ liệu thực tế fit mô hình} & \textbf{Mẫu SSH trong tập fit} & \textbf{Test F1-Score} & \textbf{Test SSH Recall} \\
 \midrule
-Chế độ 1: Tổng quát hóa chuẩn mực & Duy nhất Train ($\Dtrain$) & \DataTrainSSH\ mẫu & \textbf{\XGBTestFOne} & \textbf{\XGBTestSSHRecall} \\
-Chế độ 2: Pipeline gộp tập (Refit) & Train + Val ($\Dtrain \cup \Dval$) & \DataValidationSSH\ mẫu & \textbf{\XGBRefitTestFOne} & \textbf{\XGBRefitTestSSHRecall} \\
+Chế độ 1: Tổng quát hóa chuẩn mực & Duy nhất Train ($\Dtrain$) & \DataTrainSSH\ mẫu & \XGBTestFOne & \XGBTestSSHRecall \\
+Chế độ 2: Pipeline gộp tập (Refit) & Train + Val ($\Dtrain \cup \Dval$) & \DataValidationSSH\ mẫu & \XGBRefitTestFOne & \XGBRefitTestSSHRecall \\
 \bottomrule
 \end{tabular}%
 }

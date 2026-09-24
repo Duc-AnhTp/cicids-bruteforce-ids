@@ -50,7 +50,7 @@ SSH là giao thức truyền thông an toàn cung cấp kênh xác thực và đ
 
 \section{Các thuật toán học máy dạng cây}
 
-\subsection{Cây quyết định (Decision Tree)}
+\subsection{Decision Tree}
 Decision Tree \cite{quinlan1986induction} phân chia không gian đặc trưng thành các vùng siêu hình hộp rời rạc thông qua một tập hợp các quy tắc rẽ nhánh dạng bậc thang ($x_j \le \theta$).
 
 Tại mỗi nút phân chia, thuật toán tìm kiếm đặc trưng $j$ và ngưỡng $\theta$ tối ưu nhằm tối đa hóa mức giảm độ vẩn đục. Chỉ số vẩn đục phổ biến là \textbf{Gini Impurity}:
@@ -59,7 +59,7 @@ Tại mỗi nút phân chia, thuật toán tìm kiếm đặc trưng $j$ và ng�
 \end{equation}
 trong đó $p_k$ là tỷ lệ mẫu thuộc lớp $k$ tại nút đang xét. Ưu điểm nổi bật của Decision Tree là tính minh bạch và khả năng trực quan hóa cấu trúc rẽ nhánh, giúp giải thích logic phân loại. Tuy nhiên, Decision Tree đơn lẻ có phương sai cao và dễ bị quá khớp.
 
-\subsection{Rừng ngẫu nhiên (Random Forest)}
+\subsection{Random Forest}
 Random Forest \cite{breiman2001random} là phương pháp học kết hợp dựa trên kỹ thuật đóng bao. Mô hình xây dựng một tập hợp gồm $B$ cây quyết định độc lập:
 \begin{equation}
     \hat{y} = \text{mode} \left\{ T_1(\mathbf{x}), T_2(\mathbf{x}), \dots, T_B(\mathbf{x}) \right\}
