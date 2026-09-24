@@ -45,26 +45,26 @@ Như đã phân tích tại Bảng \ref{tab:dataset_splits}, trong tập $\Dtrai
 Để đảm bảo tính khách quan và khả năng đối chiếu, không gian siêu tham số được chuẩn hóa thành lưới tìm kiếm chính thức và được khóa cấu hình trong tệp lưu vết \texttt{artifacts/week3\_week4/frozen.json}. Các tham số quan trọng nhất của từng thuật toán được xác định như sau:
 
 \begin{enumerate}
-    \item \textbf{Cây Quyết Định (Decision Tree)}:
+    \item Decision Tree:
     \begin{itemize}
-        \item Tiêu chuẩn phân tách (\texttt{criterion}): Mặc định \texttt{'gini'} (đã khảo sát bổ sung \texttt{'entropy'} trong các thử nghiệm thăm dò).
-        \item Độ sâu tối đa (\texttt{max\_depth}): \texttt{[6, 8, 12, None]} (với \texttt{None} là cây phát triển hoàn toàn đến khi lá thuần nhất).
-        \item Số mẫu tối thiểu tại nút lá (\texttt{min\_samples\_leaf}): \texttt{[5, 10]}.
+        \item Tiêu chuẩn phân tách: Mặc định \texttt{'gini'} (đã khảo sát bổ sung \texttt{'entropy'} trong các thử nghiệm thăm dò).
+        \item Độ sâu tối đa: \texttt{[6, 8, 12, None]} (với \texttt{None} là cây phát triển hoàn toàn đến khi lá thuần nhất).
+        \item Số mẫu tối thiểu tại nút lá: \texttt{[5, 10]}.
     \end{itemize}
-    \item \textbf{Rừng Ngẫu Nhiên (Random Forest)}:
+    \item Random Forest:
     \begin{itemize}
-        \item Số lượng cây (\texttt{n\_estimators}): \texttt{[100, 150, 300]}.
-        \item Độ sâu tối đa (\texttt{max\_depth}): \texttt{[10, 16, None]}.
-        \item Số mẫu tối thiểu tại nút lá (\texttt{min\_samples\_leaf}): \texttt{[5]}.
-        \item Số đặc trưng tại mỗi nút (\texttt{max\_features}): \texttt{'sqrt'}.
+        \item Số lượng cây: \texttt{[100, 150, 300]}.
+        \item Độ sâu tối đa: \texttt{[10, 16, None]}.
+        \item Số mẫu tối thiểu tại nút lá: \texttt{[5]}.
+        \item Số đặc trưng tại mỗi nút: \texttt{'sqrt'}.
     \end{itemize}
-    \item \textbf{XGBoost}:
+    \item XGBoost:
     \begin{itemize}
-        \item Số lượng cây (\texttt{n\_estimators}): \texttt{[100, 200]}.
-        \item Độ sâu cây (\texttt{max\_depth}): \texttt{[3, 4, 6]}.
-        \item Tốc độ học (\texttt{learning\_rate}): \texttt{0.08}.
-        \item Tỷ lệ lấy mẫu đặc trưng (\texttt{colsample\_bytree}): \texttt{0.8}.
-        \item Tỷ lệ lấy mẫu dòng (\texttt{subsample}): \texttt{0.8}.
+        \item Số lượng cây: \texttt{[100, 200]}.
+        \item Độ sâu cây: \texttt{[3, 4, 6]}.
+        \item Tốc độ học: \texttt{0.08}.
+        \item Tỷ lệ lấy mẫu đặc trưng: \texttt{0.8}.
+        \item Tỷ lệ lấy mẫu dòng: \texttt{0.8}.
     \end{itemize}
 \end{enumerate}
 
@@ -74,23 +74,23 @@ Bên cạnh lưới chính thức trên, các thực nghiệm mở rộng (như 
 
 Trên tập kiểm định $\Dval$, các cấu hình được đánh giá theo thứ tự ưu tiên:
 \begin{enumerate}
-    \item \textbf{Ưu tiên 1}: Điểm \textbf{F1-Score} trên lớp tấn công (tại ngưỡng mặc định $\tau = 0.5$).
-    \item \textbf{Ưu tiên 2}: Điểm \textbf{Average Precision (AP)} trên đường cong Precision-Recall nếu F1 tương đương.
-    \item \textbf{Ưu tiên 3}: Tỷ lệ báo động giả \textbf{FPR} thấp hơn nếu cả F1 và AP đều xấp xỉ nhau.
+    \item Ưu tiên 1: Điểm F1-Score trên lớp tấn công (tại ngưỡng mặc định $\tau = 0.5$).
+    \item Ưu tiên 2: Điểm Average Precision trên đường cong Precision-Recall nếu F1 tương đương.
+    \item Ưu tiên 3: Tỷ lệ báo động giả FPR thấp hơn nếu cả F1 và AP đều xấp xỉ nhau.
 \end{enumerate}
 
 Mô hình đạt điểm số tối ưu trên $\Dval$ sẽ được lựa chọn làm đại diện của kịch bản đó để chuyển sang bước đánh giá trên tập kiểm thử $\Dtest$.
 
 \section{Phân định rõ hai chế độ thực nghiệm}
 
-Nhằm đảm bảo tính minh bạch khoa học và tránh việc diễn giải sai lệch kết quả, bài tập lớn phân định rõ ràng \textbf{hai chế độ thực nghiệm} độc lập đã được thực hiện:
+Nhằm đảm bảo tính minh bạch khoa học và tránh việc diễn giải sai lệch kết quả, bài tập lớn phân định rõ ràng hai chế độ thực nghiệm độc lập đã được thực hiện:
 
 \subsection{Chế độ 1: Đánh giá khả năng tổng quát hóa sang biến thể mới (kịch bản FTP \texorpdfstring{$\to$}{->} SSH)}
 Đây là giao thức đánh giá trung tâm của bài tập lớn:
 \begin{itemize}
     \item Mô hình được fit duy nhất trên tập $\Dtrain$ (chỉ chứa \FTP, không chứa mẫu \SSH\ nào).
     \item Tập $\Dval$ chứa \DataValidationSSH\ mẫu \SSH\ và được sử dụng để đánh giá phân loại, phục vụ lựa chọn cấu hình siêu tham số tốt nhất (mô hình không được huấn luyện trên tập này trong benchmark chuẩn).
-    \item Thiết lập này thể hiện khả năng \textbf{tổng quát hóa sang biến thể chưa xuất hiện trong dữ liệu huấn luyện} (với mô hình fit trên Train-only), kèm lưu ý phương pháp luận rằng sự hiện diện của SSH trong $\Dval$ hỗ trợ việc lựa chọn mô hình nên đây không phải là một quy trình zero-shot nghiêm ngặt hoàn toàn khép kín từ đầu đến cuối.
+    \item Thiết lập này thể hiện khả năng tổng quát hóa sang biến thể chưa xuất hiện trong dữ liệu huấn luyện (với mô hình fit trên Train-only), kèm lưu ý phương pháp luận rằng sự hiện diện của SSH trong $\Dval$ hỗ trợ việc lựa chọn mô hình nên đây không phải là một quy trình zero-shot nghiêm ngặt hoàn toàn khép kín từ đầu đến cuối.
     \item Sau khi chọn được tham số tốt nhất, mô hình đại diện giữ nguyên trọng số đã học từ $\Dtrain$ để đánh giá độc lập trên tập $\Dtest$ (chỉ chứa \SSH).
 \end{itemize}
 
