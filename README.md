@@ -8,10 +8,10 @@ Trọng tâm nghiên cứu là **phân tích tác động của chiến lược 
 
 ## 🎯 Câu hỏi Nghiên cứu (Research Questions)
 
-1. **RQ1 (Khả năng tổng quát hóa theo thời gian & Chuyển giao Zero-Shot)**: Khi mô hình chỉ được huấn luyện trên dữ liệu quá khứ chứa `FTP-Patator` (buổi sáng), liệu mô hình có thể phát hiện được cuộc tấn công `SSH-Patator` (buổi chiều) trong dữ liệu tương lai hay không?
+1. **RQ1 (Khả năng tổng quát hóa theo thời gian sang biến thể mới)**: Khi mô hình chỉ được huấn luyện trên dữ liệu quá khứ chứa `FTP-Patator` (buổi sáng trong tập Train), liệu mô hình có thể phát hiện được cuộc tấn công `SSH-Patator` (buổi chiều) trong dữ liệu tương lai hay không?
 2. **RQ2 (Độ lệch đánh giá của phép chia ngẫu nhiên - Optimistic Evaluation Bias)**: Việc phân chia dữ liệu ngẫu nhiên (Random Split) — vốn phổ biến trong các nghiên cứu học thuật — làm sai lệch kết quả đánh giá như thế nào do vi phạm tính độc lập thời gian giữa các flow cùng chiến dịch tấn công?
 3. **RQ3 (Độ phụ thuộc vào cổng dịch vụ - Port Ablation & Diễn giải mô hình)**: Việc đưa cổng đích (`Destination Port`) vào không gian đặc trưng ảnh hưởng như thế nào đến khả năng tổng quát hóa, và mô hình thực sự học được các đặc trưng hành vi mạng nào (thông qua SHAP và Cây quyết định)?
-4. **RQ4 (Tác động của Giao thức Huấn luyện lại - Refit Protocol Impact)**: Việc mô hình tiếp xúc với dữ liệu kiểm định thông qua cơ chế refit mặc định của các thư viện học máy làm sai lệch bản chất đánh giá từ Zero-Shot sang Supervised Learning như thế nào?
+4. **RQ4 (Tác động của Giao thức Huấn luyện lại - Refit Protocol Impact)**: Việc mô hình tiếp xúc với dữ liệu kiểm định thông qua cơ chế refit mặc định của các thư viện học máy làm sai lệch bản chất đánh giá từ tổng quát hóa sang học có giám sát trên biến thể đã biết như thế nào?
 
 ---
 
@@ -33,8 +33,8 @@ Dự án được phân chia thành 4 mảng công việc chuyên biệt với k
 
 Kết quả đối chuẩn hợp nhất trên tập Test mở đúng một lần (`artifacts/week3_week4/test_comparison.csv`):
 
-### 1. Kịch bản Thời gian (Time-based Split) — Thử thách Zero-Shot Transfer
-> **Điều kiện**: Huấn luyện **chỉ trên tập Train** (trước 10:00, 100% `FTP-Patator`). Đánh giá trên tập **Test** (sau 14:30, 100% `SSH-Patator`).
+### 1. Kịch bản Thời gian (Time-based Split) — Tổng quát hóa sang biến thể mới
+> **Điều kiện**: Huấn luyện **chỉ trên tập Train** (trước 10:00, 100% `FTP-Patator`). Đánh giá trên tập **Test** (sau 14:30, 100% `SSH-Patator`). Tập Validation (chứa 1,886 SSH) chỉ dùng chọn cấu hình tối ưu.
 
 | Mô hình | Không gian đặc trưng | Test Accuracy | Precision (Attack) | Recall (Attack) | F1-Score (Attack) | SSH Recall | FTP Recall | Nhận xét học thuật |
 |---|---|:---:|:---:|:---:|:---:|:---:|:---:|---|
@@ -142,8 +142,8 @@ cicids-bruteforce-ids/
 ├── notebooks/
 │   ├── TV2_DecisionTree_W3-01_W3-02.ipynb
 │   └── TV3_RandomForest_W3-03_W3-04.ipynb
-├── reports/                    # Chuyên khảo báo cáo khoa học 9 chương (LaTeX)
-│   ├── chapters/               # 01_gioi_thieu đến 09_ket_luan
+├── reports/                    # Chuyên khảo báo cáo khoa học 7 chương (LaTeX chuẩn HUCE)
+│   ├── chapters/               # 01_gioi_thieu đến 07_ket_luan (kèm các bản thảo lưu trữ)
 │   ├── config/                 # typography, packages, generated_metrics.tex
 │   ├── tables/generated/       # Bảng LaTeX tự động đồng bộ từ artifacts
 │   ├── Makefile                # make pdf, make metrics, make clean

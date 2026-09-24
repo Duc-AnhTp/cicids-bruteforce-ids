@@ -4,7 +4,7 @@
 
 \section{Kết quả đánh giá và lựa chọn mô hình trên tập kiểm định}
 
-Quá trình tìm kiếm siêu tham số trên tập kiểm định $\Dval$ mang lại các kết quả định lượng chi tiết được tổng hợp trong Bảng \ref{tab:validation_winners}. Không gian siêu tham số và bộ tham số tối ưu được khóa của toàn bộ 12 kịch bản mô hình được thống kê đầy đủ tại Phụ lục \ref{app:hyperparameters}. Trong thiết lập này, tập $\Dval$ chứa 2,418 mẫu \FTP\ và 1,886 mẫu \SSH, được sử dụng thuần túy để tính toán các độ đo phục vụ việc lựa chọn cấu hình mô hình tối ưu; mô hình hoàn toàn không được cập nhật trọng số trên tập này trong benchmark chuẩn mực.
+Quá trình tìm kiếm siêu tham số trên tập kiểm định $\Dval$ mang lại các kết quả định lượng chi tiết được tổng hợp trong Bảng \ref{tab:validation_winners}. Không gian siêu tham số và bộ tham số tối ưu được khóa của toàn bộ 12 kịch bản mô hình được thống kê đầy đủ tại Phụ lục \ref{app:hyperparameters}. Trong thiết lập này, tập $\Dval$ chứa \DataValidationFTP\ mẫu \FTP\ và \DataValidationSSH\ mẫu \SSH, được sử dụng thuần túy để tính toán các độ đo phục vụ việc lựa chọn cấu hình mô hình tối ưu; mô hình hoàn toàn không được cập nhật trọng số trên tập này trong benchmark chuẩn mực.
 
 \input{tables/generated/tab_validation_winners.tex}
 
@@ -19,6 +19,6 @@ Trong kịch bản đánh giá chính theo thời gian có cổng:
 \end{enumerate}
 
 \noindent\textbf{Quyết định lựa chọn mô hình đại diện:}
-Mặc dù Random Forest và XGBoost đạt điểm F1 xấp xỉ ngang nhau ($0.7181$) và cùng có tỷ lệ báo động giả cực thấp ($\FPR \le 10^{-5}$), Random Forest có chỉ số Average Precision cao hơn ($\AP = \textbf{\WinnerValAP}$ so với $0.6045$ của XGBoost). Điều này cho thấy chất lượng xếp hạng (ranking) các mẫu dương trên dải ngưỡng phân loại của Random Forest tốt hơn theo độ đo AP.
+Mặc dù Random Forest và XGBoost đạt điểm F1 xấp xỉ ngang nhau ($0.7181$) và cùng có tỷ lệ báo động giả cực thấp ($\FPR \le 10^{-5}$), Random Forest có chỉ số Average Precision cao hơn ($\AP = \textbf{\WinnerValAP}$ so với $0.6045$ của XGBoost). Điều này cho thấy chất lượng xếp hạng các mẫu dương trên dải ngưỡng phân loại của Random Forest tốt hơn theo độ đo AP.
 
 Do đó, theo thứ tự ưu tiên lựa chọn đã thiết lập, \textbf{Random Forest (\texttt{time/with\_port})} được chọn là mô hình đại diện ưu tú nhất của kịch bản chính để làm trọng tâm phân tích sâu và giải thích suy luận qua SHAP, bên cạnh việc đối chuẩn đồng thời cả ba thuật toán trên tập kiểm thử $\Dtest$.

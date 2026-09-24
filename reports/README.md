@@ -21,12 +21,12 @@ reports/
 │   └── generated_metrics.tex      # TỰ ĐỘNG: Sổ đăng ký macro số liệu từ artifact
 │
 ├── frontmatter/                   # Các trang thủ tục đầu báo cáo
-│   ├── titlepage.tex              # Trang bìa chuẩn HUCE
+│   ├── titlepage.tex              # Trang bìa chuẩn HUCE (Lớp 68CS2)
 │   ├── declaration.tex            # Lời cam đoan tính trung thực học thuật
+│   ├── contributions.tex          # Bảng phân công nhiệm vụ, sản phẩm bàn giao & cam kết đóng góp
 │   ├── acknowledgement.tex        # Lời cảm ơn
-│   ├── abstract_vi.tex            # Tóm tắt báo cáo tiếng Việt
-│   ├── abstract_en.tex            # Tóm tắt báo cáo tiếng Anh (Abstract)
-│   └── abbreviations.tex          # Bảng danh mục chữ viết tắt
+│   ├── abstract_vi.tex            # Tóm tắt báo cáo tiếng Việt (cô đọng vừa vặn 1 trang A4)
+│   └── abbreviations.tex          # Danh mục chữ viết tắt & Bảng đối chiếu thuật ngữ Anh - Việt
 │
 ├── chapters/                      # Các chương báo cáo (Chương 1 đến 7)
 │   ├── 01_gioi_thieu.tex          # Chương 1: Giới thiệu & Đặt vấn đề

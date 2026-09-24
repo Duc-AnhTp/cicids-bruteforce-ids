@@ -1,16 +1,18 @@
 % ==============================================================================
 % reports/frontmatter/abbreviations.tex
-% Danh mục ký hiệu và chữ viết tắt
+% Danh mục ký hiệu, chữ viết tắt và bảng đối chiếu thuật ngữ Anh - Việt
 % ==============================================================================
 
-\chapter*{Danh Mục Ký Hiệu và Chữ Viết Tắt}
-\markboth{Danh Mục Ký Hiệu và Chữ Viết Tắt}{Danh Mục Ký Hiệu và Chữ Viết Tắt}
-\addcontentsline{toc}{chapter}{Danh Mục Ký Hiệu và Chữ Viết Tắt}
+\chapter*{Danh Mục Ký Hiệu, Chữ Viết Tắt và Thuật Ngữ}
+\markboth{Danh Mục Ký Hiệu, Chữ Viết Tắt và Thuật Ngữ}{Danh Mục Ký Hiệu, Chữ Viết Tắt và Thuật Ngữ}
+\addcontentsline{toc}{chapter}{Danh Mục Ký Hiệu, Chữ Viết Tắt và Thuật Ngữ}
 
 \noindent\textbf{Quy ước biểu diễn số liệu:}\\
 Trong toàn bộ báo cáo này, các giá trị định lượng được biểu diễn thống nhất theo quy chuẩn khoa học quốc tế: sử dụng dấu chấm (\texttt{.}) làm dấu phân cách phần thập phân (ví dụ: $0.7181$, $99.97\%$) và dấu phẩy (\texttt{,}) làm dấu phân cách các lớp hàng nghìn (ví dụ: $140,425$ luồng, $445,888$ bản ghi).
 
-\vspace{0.4cm}
+\vspace{0.3cm}
+
+\section*{1. Danh mục chữ viết tắt (Acronyms and Abbreviations)}
 
 \begin{longtable}{lp{11.5cm}}
 \toprule
@@ -24,34 +26,71 @@ Trong toàn bộ báo cáo này, các giá trị định lượng được biể
 \bottomrule
 \endfoot
 
-\textbf{AP} & Average Precision (Độ chính xác trung bình có trọng số trên dải ngưỡng phân loại) \\
+\textbf{AP} & Average Precision (Độ chính xác trung bình trên dải ngưỡng phân loại) \\
 \textbf{CIC} & Canadian Institute for Cybersecurity (Viện An ninh mạng Canada) \\
 \textbf{CSV} & Comma-Separated Values (Định dạng tệp dữ liệu phân tách bằng dấu phẩy) \\
 \textbf{DPI} & Deep Packet Inspection (Kỹ thuật phân tích gói tin sâu) \\
 \textbf{DT} & Decision Tree (Cây quyết định) \\
 \textbf{EDA} & Exploratory Data Analysis (Khám phá và phân tích dữ liệu ban đầu) \\
-\textbf{FN} & False Negative (Số lượng mẫu tấn công bị phân loại nhầm là bình thường) \\
-\textbf{FP} & False Positive (Số lượng mẫu bình thường bị cảnh báo nhầm là tấn công) \\
+\textbf{FN} & False Negative (Số lượng mẫu tấn công bị bỏ sót) \\
+\textbf{FP} & False Positive (Số lượng mẫu bình thường bị cảnh báo nhầm) \\
 \textbf{FPR} & False Positive Rate (Tỷ lệ báo động giả trên tổng số lưu lượng bình thường) \\
-\textbf{FTP} & File Transfer Protocol (Giao thức truyền tệp tin, Cổng mặc định 21) \\
-\textbf{IAT} & Inter-Arrival Time (Khoảng thời gian giữa các gói tin liên tiếp trong một flow) \\
+\textbf{FTP} & File Transfer Protocol (Giao thức truyền tệp tin, Cổng 21) \\
+\textbf{IAT} & Inter-Arrival Time (Khoảng thời gian đến giữa các gói tin liên tiếp) \\
 \textbf{i.i.d.} & Independent and Identically Distributed (Độc lập và cùng phân phối xác suất) \\
 \textbf{IDS} & Intrusion Detection System (Hệ thống phát hiện xâm nhập) \\
 \textbf{IP} & Internet Protocol (Giao thức mạng Internet) \\
 \textbf{IPS} & Intrusion Prevention System (Hệ thống ngăn ngừa xâm nhập mạng) \\
 \textbf{ML} & Machine Learning (Học máy) \\
-\textbf{MLOps} & Machine Learning Operations (Quy trình vận hành và triển khai học máy) \\
+\textbf{MLOps} & Machine Learning Operations (Quy trình kỹ nghệ vận hành học máy) \\
 \textbf{NIDS} & Network Intrusion Detection System (Hệ thống phát hiện xâm nhập mạng) \\
 \textbf{PR} & Precision-Recall (Đường cong tương quan giữa Độ chính xác và Độ thu hồi) \\
 \textbf{RF} & Random Forest (Rừng ngẫu nhiên) \\
 \textbf{ROC} & Receiver Operating Characteristic (Đường cong đặc trưng hoạt động của bộ thu) \\
 \textbf{RQ} & Research Question (Câu hỏi nghiên cứu) \\
 \textbf{SHA-256} & Secure Hash Algorithm 256-bit (Thuật toán mã hóa băm an toàn 256-bit) \\
-\textbf{SHAP} & SHapley Additive exPlanations (Phương pháp giải thích dự đoán dựa trên lý thuyết trò chơi) \\
-\textbf{SMOTE} & Synthetic Minority Over-sampling Technique (Kỹ thuật tổng hợp mẫu thiểu số nhân tạo) \\
-\textbf{SSH} & Secure Shell (Giao thức truyền thông an toàn và điều khiển từ xa, Cổng mặc định 22) \\
+\textbf{SHAP} & SHapley Additive exPlanations (Phương pháp giải thích suy luận học máy) \\
+\textbf{SMOTE} & Synthetic Minority Over-sampling Technique (Kỹ thuật tổng hợp mẫu thiểu số) \\
+\textbf{SSH} & Secure Shell (Giao thức truyền thông an toàn và điều khiển từ xa, Cổng 22) \\
 \textbf{TCP} & Transmission Control Protocol (Giao thức điều khiển truyền vận) \\
 \textbf{TN} & True Negative (Số lượng mẫu bình thường được phân loại đúng) \\
 \textbf{TP} & True Positive (Số lượng mẫu tấn công được phát hiện chính xác) \\
 \textbf{XGB} & eXtreme Gradient Boosting (Thuật toán tăng cường độ dốc cực đại) \\
+\end{longtable}
+
+\vspace{0.2cm}
+
+\section*{2. Bảng đối chiếu thuật ngữ chuyên ngành Anh -- Việt (Glossary)}
+
+\begin{longtable}{p{5.5cm}p{9.0cm}}
+\toprule
+\textbf{Thuật ngữ tiếng Anh} & \textbf{Thuật ngữ tiếng Việt tương đương \& Giải thích} \\
+\midrule
+\endfirsthead
+\toprule
+\textbf{Thuật ngữ tiếng Anh} & \textbf{Thuật ngữ tiếng Việt tương đương \& Giải thích} \\
+\midrule
+\endhead
+\bottomrule
+\endfoot
+
+\textbf{Anomaly Detection} & Phát hiện bất thường (phương pháp xác định các hành vi lệch chuẩn) \\
+\textbf{Completed-Flow Classification} & Phân loại luồng mạng đã hoàn tất (trích xuất đặc trưng sau khi luồng kết thúc) \\
+\textbf{Cross-Subtype Generalization} & Khả năng tổng quát hóa sang biến thể mới chưa từng thấy khi huấn luyện \\
+\textbf{Data Leakage} & Rò rỉ dữ liệu giữa tập huấn luyện, kiểm định hoặc kiểm thử \\
+\textbf{Distribution Shift / Drift} & Sự dịch chuyển phân phối dữ liệu hoặc đặc trưng theo thời gian \\
+\textbf{Early Flow Classification} & Phân loại luồng sớm (trích xuất đặc trưng thống kê chỉ từ $N$ gói đầu tiên) \\
+\textbf{Interpolation-like Evaluation} & Đánh giá mang tính chất nội suy trên các mẫu có độ trùng lặp cao \\
+\textbf{Optimistic Evaluation Bias} & Độ lệch đánh giá quá lạc quan (điểm số cao phi thực tế do rò rỉ hoặc chia ngẫu nhiên) \\
+\textbf{Port Ablation} & Thực nghiệm bóc tách / loại bỏ đặc trưng cổng dịch vụ mạng \\
+\textbf{Purge and Embargo} & Kỹ thuật làm sạch ranh giới (Purge) và vùng đệm cách ly thời gian (Embargo) \\
+\textbf{Refit Protocol} & Giao thức huấn luyện lại mô hình trên dữ liệu gộp sau khi chọn tham số \\
+\textbf{Seen-Subtype Supervised} & Học có giám sát trên biến thể đã biết trước \\
+\textbf{Shortcut Feature / Learning} & Lối tắt phân loại (mô hình dựa dẫm vào đặc trưng bề mặt thay vì bản chất) \\
+\textbf{Signature-based IDS} & Hệ thống phát hiện xâm nhập dựa trên tập luật hoặc chữ ký tĩnh \\
+\textbf{Single-Open Test Protocol} & Giao thức mở tập kiểm thử duy nhất một lần để tránh overfitting \\
+\textbf{Stratified Random Split} & Phân chia dữ liệu ngẫu nhiên phân tầng \\
+\textbf{Temporal Split} & Phân chia dữ liệu theo thứ tự trình tự thời gian thực tế \\
+\textbf{TreeExplainer} & Thuật toán tính toán giá trị Shapley tối ưu hóa cho mô hình dạng cây \\
+\textbf{Within-Campaign Similarity} & Tương quan nội bộ chiến dịch (các luồng cùng một đợt tấn công có phân phối tương tự) \\
 \end{longtable}

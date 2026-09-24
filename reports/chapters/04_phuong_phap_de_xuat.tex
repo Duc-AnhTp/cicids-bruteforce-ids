@@ -11,7 +11,7 @@
 Nhằm đảm bảo tính khách quan và kiểm soát nguy cơ rò rỉ dữ liệu, hệ thống thực nghiệm được thiết kế theo kiến trúc đường ống gồm 5 giai đoạn độc lập:
 \begin{enumerate}
     \item \textbf{Giai đoạn 1: Chuẩn bị dữ liệu và phân tách}: Áp dụng phục hồi dòng thời gian và thuật toán Purge/Embargo để chia tách dữ liệu thành Train, Validation và Test độc lập.
-    \item \textbf{Giai đoạn 2: Tiền xử lý chỉ học từ tập Train}: Loại bỏ các đặc trưng hằng số và khớp (fit) bộ điền giá trị thiếu (median) duy nhất trên $\Dtrain$.
+    \item \textbf{Giai đoạn 2: Tiền xử lý chỉ học từ tập Train}: Loại bỏ các đặc trưng hằng số và khớp bộ điền giá trị thiếu theo trung vị duy nhất trên $\Dtrain$.
     \item \textbf{Giai đoạn 3: Tinh chỉnh siêu tham số}: Tìm kiếm cấu hình tối ưu của 3 mô hình cây trên không gian $\Dtrain \times \Dval$.
     \item \textbf{Giai đoạn 4: Đóng băng cấu hình}: Khóa tham số và cấu hình tốt nhất vào tệp siêu dữ liệu \texttt{frozen.json}.
     \item \textbf{Giai đoạn 5: Mở kiểm thử một lần duy nhất}: Đánh giá hiệu năng tổng quát hóa trên $\Dtest$ mà không tinh chỉnh lại bất kỳ tham số nào.
@@ -47,8 +47,8 @@ Trong phân tích chuỗi thời gian mạng, một flow có thời điểm bắ
 
 Tại mỗi mốc thời gian cắt $T_{\text{cutoff}}$, nguy cơ rò rỉ thông tin xảy ra khi:
 \begin{enumerate}
-    \item \textbf{Flow vắt ngang ranh giới (Boundary Crossing)}: Flow bắt đầu trước $T_{\text{cutoff}}$ nhưng kết thúc sau $T_{\text{cutoff}}$ ($s < T_{\text{cutoff}}$ và $e \ge T_{\text{cutoff}}$). Nếu giữ lại, thông tin của tương lai đã rò rỉ vào quá khứ. Giải pháp là \textbf{Purge} (loại bỏ hoàn toàn các flow này).
-    \item \textbf{Flow diễn ra ngay sau ranh giới}: Để tránh các ảnh hưởng trễ của các kết nối TCP vừa đóng, một khoảng đệm an toàn (Embargo buffer) $g = 120\text{s}$ được áp dụng ngay sau mốc cắt. Mọi flow bắt đầu trong khoảng $[T_{\text{cutoff}}, T_{\text{cutoff}} + g)$ đều bị loại bỏ.
+    \item \textbf{Flow vắt ngang ranh giới}: Flow bắt đầu trước $T_{\text{cutoff}}$ nhưng kết thúc sau $T_{\text{cutoff}}$ ($s < T_{\text{cutoff}}$ và $e \ge T_{\text{cutoff}}$). Nếu giữ lại, thông tin của tương lai đã rò rỉ vào quá khứ. Giải pháp là \textbf{Purge} (loại bỏ hoàn toàn các flow này).
+    \item \textbf{Flow diễn ra ngay sau ranh giới}: Để tránh các ảnh hưởng trễ của các kết nối TCP vừa đóng, một khoảng đệm an toàn Embargo $g = 120\text{s}$ được áp dụng ngay sau mốc cắt. Mọi flow bắt đầu trong khoảng $[T_{\text{cutoff}}, T_{\text{cutoff}} + g)$ đều bị loại bỏ.
 \end{enumerate}
 
 Việc lựa chọn các tham số $q = 60\text{s}$ và $g = 120\text{s}$ là quyết định thiết kế bảo thủ nhằm hạn chế tối đa rủi ro flow kéo dài hoặc lưu lượng phản hồi trễ vi phạm ranh giới phân tách.
@@ -62,19 +62,19 @@ Với hai mốc cắt thời gian được xác định từ trước:
 Thuật toán Purge và Embargo đã loại bỏ tổng cộng \textbf{\DataPurgedRows\ dòng} ranh giới không an toàn (xem Bảng \ref{tab:dataset_splits}), giúp phân tách ranh giới thời gian rõ ràng giữa các tập dữ liệu.
 
 \subsection{Chiến lược đối chứng: Phân tách ngẫu nhiên}
-Để làm cơ sở đối chứng đo lường hiện tượng độ lệch đánh giá quá lạc quan (\textit{optimistic evaluation bias}), một phân vùng đối chứng được phân chia ngẫu nhiên theo phương pháp phân tầng (Stratified Random Split) với tỷ lệ số lượng mẫu tương ứng: Train ($20.6\%$), Validation ($46.5\%$) và Test ($32.9\%$). Phép chia này phân bổ ngẫu nhiên các flow mà không xét đến thứ tự thời gian. Trong bối cảnh dữ liệu mạng, cách tiếp cận này có thể tạo ra độ lệch đánh giá quá lạc quan do các flow có tương quan mạnh từ cùng một chiến dịch tấn công (tương quan nội bộ chiến dịch -- \textit{within-campaign similarity}) được phân bố đồng thời vào cả ba tập, dẫn đến một đánh giá mang tính chất nội suy (\textit{interpolation-like evaluation}) thay vì phản ánh năng lực khái quát hóa thực tế.
+Để làm cơ sở đối chứng đo lường hiện tượng độ lệch đánh giá quá lạc quan, một phân vùng đối chứng được phân chia ngẫu nhiên phân tầng với tỷ lệ số lượng mẫu tương ứng: Train ($20.6\%$), Validation ($46.5\%$) và Test ($32.9\%$). Phép chia này phân bổ ngẫu nhiên các flow mà không xét đến thứ tự thời gian. Trong bối cảnh dữ liệu mạng, cách tiếp cận này có thể tạo ra độ lệch đánh giá quá lạc quan do các flow có tương quan mạnh từ cùng một chiến dịch tấn công (tương quan nội bộ chiến dịch) được phân bố đồng thời vào cả ba tập, dẫn đến một đánh giá mang tính chất nội suy thay vì phản ánh năng lực khái quát hóa thực tế.
 
 \section{Quy trình tiền xử lý độc lập trên tập train}
 
 Một nguyên tắc quan trọng trong thiết kế đường ống MLOps là \textbf{bộ tiền xử lý không được học tham số từ dữ liệu tương lai}. Toàn bộ các bước học tham số tiền xử lý được thực hiện trên tập $\Dtrain$ theo quy trình chuẩn hóa:
 \begin{enumerate}
     \item \textbf{Loại bỏ đặc trưng hằng số}: Thuật toán kiểm tra phương sai của từng đặc trưng trên $\Dtrain$. Có \FeatConstantDropped\ đặc trưng có giá trị không đổi (phương sai bằng 0) trên $\Dtrain$ (bao gồm các cờ hiếm như \texttt{Bwd PSH Flags}, \texttt{Fwd URG Flags}, \texttt{CWE Flag Count} và các trường bulk). Danh sách \FeatConstantDropped\ cột này được lưu lại và áp dụng loại bỏ đồng bộ trên $\Dval$ và $\Dtest$.
-    \item \textbf{Điền giá trị thiếu (Missing Imputation)}: Khởi tạo \texttt{SimpleImputer} với chiến lược trung vị (\texttt{strategy='median'}). Giá trị trung vị của từng đặc trưng được tính toán duy nhất trên $\Dtrain$, sau đó được dùng để điền các giá trị NaN trên cả ba tập $\Dtrain$, $\Dval$ và $\Dtest$.
+    \item \textbf{Điền giá trị thiếu}: Khởi tạo \texttt{SimpleImputer} với chiến lược trung vị (\texttt{strategy='median'}). Giá trị trung vị của từng đặc trưng được tính toán duy nhất trên $\Dtrain$, sau đó được dùng để điền các giá trị NaN trên cả ba tập $\Dtrain$, $\Dval$ và $\Dtest$.
 \end{enumerate}
 
 \section{Nguyên tắc đóng băng mô hình}
 
-Để hạn chế nguy cơ tinh chỉnh siêu tham số lặp đi lặp lại trên tập Test (rò rỉ thông tin tập kiểm thử qua quá trình thử nghiệm), nhóm áp dụng quy tắc mở kiểm thử một lần duy nhất (\textit{Single-Open Test Protocol}):
+Để hạn chế nguy cơ tinh chỉnh siêu tham số lặp đi lặp lại trên tập Test (rò rỉ thông tin tập kiểm thử qua quá trình thử nghiệm), nhóm áp dụng quy tắc mở kiểm thử một lần duy nhất:
 \begin{itemize}
     \item Toàn bộ quá trình thử nghiệm, tìm kiếm siêu tham số và lựa chọn mô hình đại diện được thực hiện hoàn toàn trên tập $\Dtrain$ và $\Dval$.
     \item Cấu hình tốt nhất sau đó được xuất ra tệp cấu hình \texttt{frozen.json} và tính mã băm SHA-256 xác thực.

@@ -89,8 +89,8 @@ Nhằm đảm bảo tính minh bạch khoa học và tránh việc diễn giải
 Đây là giao thức đánh giá trung tâm của bài tập lớn:
 \begin{itemize}
     \item Mô hình được fit duy nhất trên tập $\Dtrain$ (chỉ chứa \FTP, không chứa mẫu \SSH\ nào).
-    \item Tập $\Dval$ chứa 1,886 mẫu \SSH\ và được sử dụng để đánh giá phân loại, phục vụ lựa chọn cấu hình siêu tham số tốt nhất (mô hình không được huấn luyện trên tập này trong benchmark chuẩn).
-    \item Thiết lập này thể hiện khả năng \textbf{tổng quát hóa sang biến thể chưa xuất hiện trong dữ liệu huấn luyện} (\textit{unseen-subtype generalization from Train-only fitting}), kèm lưu ý phương pháp luận rằng sự hiện diện của SSH trong $\Dval$ hỗ trợ việc lựa chọn mô hình nên đây không phải là một quy trình zero-shot nghiêm ngặt hoàn toàn khép kín từ đầu đến cuối.
+    \item Tập $\Dval$ chứa \DataValidationSSH\ mẫu \SSH\ và được sử dụng để đánh giá phân loại, phục vụ lựa chọn cấu hình siêu tham số tốt nhất (mô hình không được huấn luyện trên tập này trong benchmark chuẩn).
+    \item Thiết lập này thể hiện khả năng \textbf{tổng quát hóa sang biến thể chưa xuất hiện trong dữ liệu huấn luyện} (với mô hình fit trên Train-only), kèm lưu ý phương pháp luận rằng sự hiện diện của SSH trong $\Dval$ hỗ trợ việc lựa chọn mô hình nên đây không phải là một quy trình zero-shot nghiêm ngặt hoàn toàn khép kín từ đầu đến cuối.
     \item Sau khi chọn được tham số tốt nhất, mô hình đại diện giữ nguyên trọng số đã học từ $\Dtrain$ để đánh giá độc lập trên tập $\Dtest$ (chỉ chứa \SSH).
 \end{itemize}
 
@@ -99,7 +99,7 @@ Nhằm đảm bảo tính minh bạch khoa học và tránh việc diễn giải
 \begin{itemize}
     \item Thiết kế pipeline: Train và Validation được chủ động gộp thành $\mathbf{X}_{\text{combined}} = \Xtrain \cup \Xval$ (thông qua lệnh \texttt{pd.concat([X\_train, X\_val])}) trước khi truyền vào hàm tìm kiếm siêu tham số.
     \item Thư viện scikit-learn \cite{scikit_learn_refit} hoạt động đúng đặc tả với cờ mặc định \texttt{refit=True} (khi không bật cờ \texttt{--strict-train-only}): sau khi tìm kiếm tham số tối ưu bằng phân tách tùy biến, mô hình tốt nhất được huấn luyện lại trên toàn bộ dữ liệu đầu vào đã truyền vào (\textbf{toàn bộ tập gộp $\mathbf{X}_{\text{combined}}$}).
-    \item Vì $\mathbf{X}_{\text{val}}$ có chứa 1,886 mẫu \SSH, mô hình trong chế độ này được huấn luyện có giám sát trên các mẫu SSH trước khi bước vào tập Test.
+    \item Vì $\mathbf{X}_{\text{val}}$ có chứa \DataValidationSSH\ mẫu \SSH, mô hình trong chế độ này được huấn luyện có giám sát trên các mẫu SSH trước khi bước vào tập Test.
     \item Chế độ này được sử dụng như một nghiên cứu điển hình về MLOps tại Mục \ref{sec:results_refit} (Chương 6) để làm rõ ảnh hưởng của thiết kế pipeline và hành vi của thư viện đối với tính hợp lệ của bài toán đánh giá.
 \end{itemize}
 

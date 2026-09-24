@@ -324,7 +324,7 @@ def main():
         t3.append(f"{mname} & Thời gian & {scen} & {r['accuracy']:.4f} & {r['precision_attack']:.4f} & {r['recall_attack']:.4f} & \\textbf{{{r['f1_attack']:.4f}}} & {r['average_precision']:.4f} & {r['roc_auc']:.4f} & {ftp_rec} & {ssh_rec} \\\\")
     t3.extend([
         r"\midrule",
-        r"\multicolumn{11}{l}{\textbf{B. Thực nghiệm đối chứng: Phân tách ngẫu nhiên (đối chứng rò rỉ dữ liệu)}} \\",
+        r"\multicolumn{11}{l}{\textbf{B. Thực nghiệm đối chứng: Phân tách ngẫu nhiên (độ lệch đánh giá quá lạc quan do tương quan nội bộ chiến dịch)}} \\",
     ])
     for _, r in test_comp[test_comp["split"] == "random"].iterrows():
         mname = name_map.get(r["model"], r["model"])
@@ -431,6 +431,35 @@ def main():
         f.write("\n".join(t6) + "\n")
 
     print(f"Generated all tables in {out_tbl} successfully!")
+
+    # Auto compile report PDF directly with xelatex + biber
+    import subprocess
+    import shutil
+    reports_dir = Path(__file__).resolve().parents[2] / "reports"
+    print(f"\n==> Bat dau bien dich bao cao LaTeX tai {reports_dir} su dung xelatex + biber...")
+    try:
+        cmd_xe = ["xelatex", "-interaction=nonstopmode", "-file-line-error", "main.tex"]
+        print("--> Chay xelatex (pass 1)...")
+        r1 = subprocess.run(cmd_xe, cwd=reports_dir, capture_output=True, text=True, encoding="utf-8", errors="ignore")
+        if shutil.which("biber"):
+            print("--> Chay biber main...")
+            rb = subprocess.run(["biber", "main"], cwd=reports_dir, capture_output=True, text=True, encoding="utf-8", errors="ignore")
+            if rb.returncode != 0:
+                print("Biber output:\n", rb.stdout[-600:])
+        print("--> Chay xelatex (pass 2)...")
+        r2 = subprocess.run(cmd_xe, cwd=reports_dir, capture_output=True, text=True, encoding="utf-8", errors="ignore")
+        print("--> Chay xelatex (pass 3)...")
+        r3 = subprocess.run(cmd_xe, cwd=reports_dir, capture_output=True, text=True, encoding="utf-8", errors="ignore")
+
+        pdf_path = reports_dir / "main.pdf"
+        if pdf_path.exists():
+            print(f"==> Bien dich HOAN TAT VA THANH CONG! File PDF: {pdf_path} ({pdf_path.stat().st_size:,} bytes)")
+        else:
+            print(f"==> Khong tim thay main.pdf sau khi bien dich.")
+            if r3.stderr:
+                print("Error stderr:", r3.stderr[-500:])
+    except Exception as e:
+        print(f"Loi khi bien dich: {e}")
 
 
 if __name__ == "__main__":
