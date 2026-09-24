@@ -10,7 +10,7 @@
 
 Tập dữ liệu CICIDS2017 \cite{sharafaldin2018generating,cicids2017dataset} được xây dựng bởi Viện An ninh mạng Canada (CIC), Đại học New Brunswick (UNB). Đây là một trong những bộ dữ liệu chuẩn mực và được sử dụng rộng rãi để nghiên cứu và đánh giá các hệ thống phát hiện xâm nhập mạng.
 
-Tập dữ liệu ghi lại lưu lượng mạng trong 5 ngày làm việc liên tiếp (từ thứ Hai 03/07/2017 đến thứ Sáu 07/07/2017) trên hạ tầng mạng mô phỏng gồm mạng nạn nhân và mạng tấn công bên ngoài. Trong đó, ngày thứ Ba (Tuesday, 04/07/2017) được dành riêng để thực hiện các kịch bản tấn công dò quét mật khẩu (Brute Force):
+Tập dữ liệu ghi lại lưu lượng mạng trong 5 ngày làm việc liên tiếp (từ thứ Hai 03/07/2017 đến thứ Sáu 07/07/2017) trên hạ tầng mạng mô phỏng gồm mạng nạn nhân và mạng tấn công bên ngoài. Trong đó, ngày thứ Ba (Tuesday, 04/07/2017) được dành riêng để thực hiện các kịch bản tấn công Brute Force:
 \begin{itemize}
     \item \textbf{Tấn công buổi sáng}: \FTP\ thực hiện dò quét mật khẩu dịch vụ FTP (Cổng 21) từ 09:20 đến 10:20.
     \item \textbf{Tấn công buổi chiều}: \SSH\ thực hiện dò quét mật khẩu dịch vụ SSH (Cổng 22) từ 14:00 đến 15:00.
@@ -51,11 +51,11 @@ Trong quá trình khám phá dữ liệu (EDA), chúng tôi nhận thấy trong 
     \end{cases}
 \end{equation}
 
-\noindent\textbf{Nguyên tắc kiểm soát rò rỉ dữ liệu:} Đây là một quy tắc tái dựng của pipeline dự án, được thiết lập hoàn toàn độc lập với nhãn tấn công (\texttt{Label}) và cổng đích (\texttt{Destination Port}), chỉ dựa trên phân tích dòng thời gian của toàn bộ traffic trong ngày Tuesday (thời gian làm việc từ 8:30 sáng đến 17:00 chiều).
+\noindent\textbf{Nguyên tắc kiểm soát rò rỉ dữ liệu:} Đây là một quy tắc tái dựng của pipeline dự án, được thiết lập hoàn toàn độc lập với nhãn tấn công và cổng đích, chỉ dựa trên phân tích dòng thời gian của toàn bộ traffic trong ngày Tuesday (thời gian làm việc từ 8:30 sáng đến 17:00 chiều).
 
 \section{Định Nghĩa Bài Toán và Không Gian Nhãn}
 
-Bài tập lớn định nghĩa bài toán phân loại là \textbf{phân loại nhị phân} nhằm nhận diện lưu lượng bất thường:
+Bài tập lớn định nghĩa bài toán phân loại là phân loại nhị phân nhằm nhận diện lưu lượng bất thường:
 \begin{equation}
     y = \begin{cases}
         0 & \text{nếu flow là lưu lượng bình thường (\BENIGN)} \\
@@ -67,19 +67,19 @@ Chi tiết ánh xạ nhãn được trình bày trong Bảng \ref{tab:label_mapp
 
 \input{tables/manual/tab_label_mapping.tex}
 
-Mặc dù bài toán phân loại chính là nhị phân, thông tin chi tiết về dạng tấn công (\texttt{Subtype}) vẫn được bảo toàn trong một cột siêu dữ liệu riêng biệt để theo dõi tỷ lệ phát hiện chi tiết từng biến thể tấn công.
+Mặc dù bài toán phân loại chính là nhị phân, thông tin chi tiết về dạng tấn công vẫn được bảo toàn trong một cột siêu dữ liệu riêng biệt để theo dõi tỷ lệ phát hiện chi tiết từng biến thể tấn công.
 
 \section{Quy Trình Làm Sạch Dữ Liệu Thô}
 
 Tệp dữ liệu thô trải qua các bước làm sạch kỹ thuật:
 \begin{enumerate}
-    \item \textbf{Loại bỏ flow có thời lượng không hợp lệ}: Loại bỏ \DataInvalidDurationRows\ bản ghi có $\text{Flow Duration} \le 0$ hoặc bị thiếu (NaN).
-    \item \textbf{Loại bỏ bản ghi trùng lặp}: Loại bỏ \DataDuplicatesRows\ dòng bản ghi trùng lặp hoàn toàn trên tất cả các cột dữ liệu.
-    \item \textbf{Loại bỏ cột đặc trưng trùng lặp}: Cột \texttt{Fwd Header Length.1} có giá trị trùng lặp 100\% với cột \texttt{Fwd Header Length} được loại bỏ khỏi không gian đặc trưng.
-    \item \textbf{Xử lý giá trị vô cùng}: Có \DataInfinityValues\ giá trị vô cùng ($\pm\infty$, chủ yếu phát sinh do phép chia cho thời lượng bằng 0 trong các cột \texttt{Flow Bytes/s} và \texttt{Flow Packets/s}) được chuyển đổi thành giá trị \texttt{NaN} để xử lý qua bộ điền giá trị thiếu.
+    \item Loại bỏ flow có thời lượng không hợp lệ: Loại bỏ \DataInvalidDurationRows\ bản ghi có $\text{Flow Duration} \le 0$ hoặc bị thiếu (NaN).
+    \item Loại bỏ bản ghi trùng lặp: Loại bỏ \DataDuplicatesRows\ dòng bản ghi trùng lặp hoàn toàn trên tất cả các cột dữ liệu.
+    \item Loại bỏ cột đặc trưng trùng lặp: Cột \texttt{Fwd Header Length.1} có giá trị trùng lặp 100\% với cột \texttt{Fwd Header Length} được loại bỏ khỏi không gian đặc trưng.
+    \item Xử lý giá trị vô cùng: Có \DataInfinityValues\ giá trị vô cùng ($\pm\infty$, chủ yếu phát sinh do phép chia cho thời lượng bằng 0 trong các cột \texttt{Flow Bytes/s} và \texttt{Flow Packets/s}) được chuyển đổi thành giá trị \texttt{NaN} để xử lý qua bộ điền giá trị thiếu.
 \end{enumerate}
 
-Sau khi làm sạch kỹ thuật, tổng số bản ghi hợp lệ đưa vào quy trình phân tách là \textbf{\DataCleanRows\ dòng}.
+Sau khi làm sạch kỹ thuật, tổng số bản ghi hợp lệ đưa vào quy trình phân tách là \DataCleanRows\ dòng.
 
 \section{Dòng Thời Gian Tấn Công Thực Tế và Phân Bổ Mẫu}
 
@@ -89,9 +89,9 @@ Bảng \ref{tab:dataset_splits} tổng hợp chi tiết số lượng mẫu và 
 
 Phân tích dòng thời gian cho thấy đặc điểm phân bố tự nhiên của dữ liệu CICIDS2017 Tuesday:
 \begin{itemize}
-    \item \textbf{Tập Train} ($e < 10:00$): Chứa \DataTrainBenign\ mẫu bình thường và \DataTrainFTP\ mẫu \FTP. \textbf{Không có mẫu \SSH\ nào (0 mẫu)}.
-    \item \textbf{Tập Validation} ($10:02 \le s$ và $e < 14:30$): Chứa đoạn kết của chiến dịch FTP (\DataValidationFTP\ mẫu) và giai đoạn đầu của chiến dịch SSH (\DataValidationSSH\ mẫu).
-    \item \textbf{Tập Test} ($s \ge 14:32$): Chứa \DataTestBenign\ mẫu bình thường và \DataTestSSH\ mẫu \SSH. \textbf{Không có mẫu \FTP\ nào (0 mẫu)}.
+    \item Tập Train ($e < 10:00$): Chứa \DataTrainBenign\ mẫu bình thường và \DataTrainFTP\ mẫu \FTP. Không có mẫu \SSH\ nào (0 mẫu).
+    \item Tập Validation ($10:02 \le s$ và $e < 14:30$): Chứa đoạn kết của chiến dịch FTP (\DataValidationFTP\ mẫu) và giai đoạn đầu của chiến dịch SSH (\DataValidationSSH\ mẫu).
+    \item Tập Test ($s \ge 14:32$): Chứa \DataTestBenign\ mẫu bình thường và \DataTestSSH\ mẫu \SSH. Không có mẫu \FTP\ nào (0 mẫu).
 \end{itemize}
 
-Đặc tính phân bố này tạo ra bài toán đánh giá khả năng \textbf{tổng quát hóa sang biến thể mới (kịch bản FTP $\to$ SSH)}. Trong thiết lập này, mô hình hoàn toàn không được huấn luyện trên mẫu \SSH\ nào trong tập Train; tập Validation chứa \DataValidationSSH\ mẫu SSH tham gia vào quá trình lựa chọn siêu tham số, trước khi mô hình được đánh giá độc lập trên tập Test chỉ chứa biến thể SSH.
+Đặc tính phân bố này tạo ra bài toán đánh giá khả năng tổng quát hóa sang biến thể mới (kịch bản FTP $\to$ SSH). Trong thiết lập này, mô hình hoàn toàn không được huấn luyện trên mẫu \SSH\ nào trong tập Train; tập Validation chứa \DataValidationSSH\ mẫu SSH tham gia vào quá trình lựa chọn siêu tham số, trước khi mô hình được đánh giá độc lập trên tập Test chỉ chứa biến thể SSH.

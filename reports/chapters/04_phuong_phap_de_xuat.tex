@@ -29,7 +29,7 @@ Chi tiết chính sách quản lý đặc trưng được trình bày trong Bả
 \input{tables/manual/tab_feature_schema.tex}
 
 \subsection{Thực nghiệm bóc tách cổng dịch vụ}
-Cổng dịch vụ đích (\texttt{Destination Port}) có giá trị bằng 21 cho giao thức FTP và 22 cho giao thức SSH. Để trả lời câu hỏi nghiên cứu RQ3 xem mô hình có bị phụ thuộc thái quá vào số cổng hay không, nhóm thiết kế hai nhánh không gian đặc trưng song song:
+Cổng dịch vụ đích có giá trị bằng 21 cho giao thức FTP và 22 cho giao thức SSH. Để trả lời câu hỏi nghiên cứu RQ3 xem mô hình có bị phụ thuộc thái quá vào số cổng hay không, nhóm thiết kế hai nhánh không gian đặc trưng song song:
 \begin{enumerate}
     \item \textbf{Nhánh có cổng} (\texttt{with\_port}, \FeatWithPortCount\ đặc trưng): Bao gồm trường \texttt{Destination Port} kết hợp với toàn bộ các đặc trưng thống kê hành vi luồng mạng.
     \item \textbf{Nhánh không có cổng} (\texttt{without\_port}, \FeatWithoutPortCount\ đặc trưng): Loại bỏ hoàn toàn trường \texttt{Destination Port}, buộc mô hình chỉ dựa vào các đặc trưng thống kê gói tin như kích thước, khoảng thời gian IAT, cờ TCP và độ dài tiêu đề gói tin.
@@ -66,10 +66,10 @@ Thuật toán Purge và Embargo đã loại bỏ tổng cộng \textbf{\DataPurg
 
 \section{Quy trình tiền xử lý độc lập trên tập train}
 
-Một nguyên tắc quan trọng trong thiết kế đường ống MLOps là \textbf{bộ tiền xử lý không được học tham số từ dữ liệu tương lai}. Toàn bộ các bước học tham số tiền xử lý được thực hiện trên tập $\Dtrain$ theo quy trình chuẩn hóa:
+Một nguyên tắc quan trọng trong thiết kế đường ống MLOps là bộ tiền xử lý không được học tham số từ dữ liệu tương lai. Toàn bộ các bước học tham số tiền xử lý được thực hiện trên tập $\Dtrain$ theo quy trình chuẩn hóa:
 \begin{enumerate}
-    \item \textbf{Loại bỏ đặc trưng hằng số}: Thuật toán kiểm tra phương sai của từng đặc trưng trên $\Dtrain$. Có \FeatConstantDropped\ đặc trưng có giá trị không đổi (phương sai bằng 0) trên $\Dtrain$ (bao gồm các cờ hiếm như \texttt{Bwd PSH Flags}, \texttt{Fwd URG Flags}, \texttt{CWE Flag Count} và các trường bulk). Danh sách \FeatConstantDropped\ cột này được lưu lại và áp dụng loại bỏ đồng bộ trên $\Dval$ và $\Dtest$.
-    \item \textbf{Điền giá trị thiếu}: Khởi tạo \texttt{SimpleImputer} với chiến lược trung vị (\texttt{strategy='median'}). Giá trị trung vị của từng đặc trưng được tính toán duy nhất trên $\Dtrain$, sau đó được dùng để điền các giá trị NaN trên cả ba tập $\Dtrain$, $\Dval$ và $\Dtest$.
+    \item Loại bỏ đặc trưng hằng số: Thuật toán kiểm tra phương sai của từng đặc trưng trên $\Dtrain$. Có \FeatConstantDropped\ đặc trưng có giá trị không đổi (phương sai bằng 0) trên $\Dtrain$ (bao gồm các cờ hiếm như \texttt{Bwd PSH Flags}, \texttt{Fwd URG Flags}, \texttt{CWE Flag Count} và các trường bulk). Danh sách \FeatConstantDropped\ cột này được lưu lại và áp dụng loại bỏ đồng bộ trên $\Dval$ và $\Dtest$.
+    \item Điền giá trị thiếu: Khởi tạo \texttt{SimpleImputer} với chiến lược trung vị (\texttt{strategy='median'}). Giá trị trung vị của từng đặc trưng được tính toán duy nhất trên $\Dtrain$, sau đó được dùng để điền các giá trị NaN trên cả ba tập $\Dtrain$, $\Dval$ và $\Dtest$.
 \end{enumerate}
 
 \section{Nguyên tắc đóng băng mô hình}

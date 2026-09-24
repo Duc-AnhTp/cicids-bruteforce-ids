@@ -9,7 +9,7 @@
 \section{Bản chất lưu lượng mạng và cơ chế phân tích luồng}
 
 \subsection{Khái niệm luồng mạng}
-Theo chuẩn RFC 7011 (IPFIX) \cite{rfc7011}, một luồng mạng (Flow) được định nghĩa là một tập hợp các gói tin hoặc khung truyền đi qua một điểm quan sát trong một khoảng thời gian nhất định và chia sẻ chung một bộ thuộc tính nhận dạng đặc trưng. Trong thực tế và trong bối cảnh bài tập lớn này, bộ 5 thuộc tính nhận dạng truyền thống là cách nhận dạng flow phổ biến được sử dụng:
+Theo chuẩn RFC 7011 (IPFIX) \cite{rfc7011}, một luồng mạng được định nghĩa là một tập hợp các gói tin hoặc khung truyền đi qua một điểm quan sát trong một khoảng thời gian nhất định và chia sẻ chung một bộ thuộc tính nhận dạng đặc trưng. Trong thực tế và trong bối cảnh bài tập lớn này, bộ 5 thuộc tính nhận dạng truyền thống là cách nhận dạng flow phổ biến được sử dụng:
 \begin{equation}
     \text{Flow 5-Tuple} = \langle \text{Source IP}, \text{Destination IP}, \text{Source Port}, \text{Destination Port}, \text{Protocol} \rangle
 \end{equation}
@@ -18,7 +18,7 @@ Theo chuẩn RFC 7011 (IPFIX) \cite{rfc7011}, một luồng mạng (Flow) đư�
 Công cụ CICFlowMeter \cite{sharafaldin2018generating} thực hiện tổng hợp các gói tin thuộc cùng một 5-Tuple theo cả hai hướng truyền thông (hướng đi từ máy khách đến máy chủ, và hướng về từ máy chủ tới máy khách) để tạo thành một luồng hai chiều. Một flow được coi là kết thúc khi xảy ra một trong các điều kiện sau:
 \begin{enumerate}
     \item Xuất hiện cờ điều khiển đóng kết nối TCP (\texttt{FIN} hoặc \texttt{RST}).
-    \item Khoảng thời gian không có gói tin mới vượt quá ngưỡng chờ không hoạt động (Inactivity Timeout, mặc định 15 đến 60 giây).
+    \item Khoảng thời gian không có gói tin mới vượt quá ngưỡng chờ không hoạt động (mặc định 15 đến 60 giây).
     \item Tổng thời lượng của flow vượt quá thời gian tối đa cho phép (Flow Timeout).
 \end{enumerate}
 
@@ -45,15 +45,15 @@ SSH là giao thức truyền thông an toàn cung cấp kênh xác thực và đ
 \begin{itemize}
     \item Trước khi quá trình gửi thông tin xác thực diễn ra, client và server trải qua pha bắt tay mật mã: trao đổi phiên bản giao thức, thương lượng thuật toán mã hóa đối xứng, trao đổi khóa và xác thực khóa công khai của host.
     \item Quá trình xác thực mật khẩu diễn ra hoàn toàn bên trong kênh đã được bảo vệ.
-    \item \textbf{Đặc trưng thống kê}: Pha trao đổi khóa mật mã làm phát sinh các gói tin có kích thước lớn hơn đáng kể so với FTP. Cấu trúc bắt tay khiến các chỉ số về kích thước gói tin trung bình (\texttt{Packet Length Mean}) và thời gian trễ giữa các gói tin (\texttt{Flow IAT}) của SSH có phân phối thống kê khác biệt so với FTP.
+    \item Đặc trưng thống kê: Pha trao đổi khóa mật mã làm phát sinh các gói tin có kích thước lớn hơn đáng kể so với FTP. Cấu trúc bắt tay khiến các chỉ số về kích thước gói tin trung bình (\texttt{Packet Length Mean}) và thời gian trễ giữa các gói tin (\texttt{Flow IAT}) của SSH có phân phối thống kê khác biệt so với FTP.
 \end{itemize}
 
 \section{Các thuật toán học máy dạng cây}
 
 \subsection{Cây quyết định (Decision Tree)}
-Cây quyết định phân loại (Decision Tree \cite{quinlan1986induction}) phân chia không gian đặc trưng thành các vùng siêu hình hộp rời rạc thông qua một tập hợp các quy tắc rẽ nhánh dạng bậc thang ($x_j \le \theta$).
+Decision Tree \cite{quinlan1986induction} phân chia không gian đặc trưng thành các vùng siêu hình hộp rời rạc thông qua một tập hợp các quy tắc rẽ nhánh dạng bậc thang ($x_j \le \theta$).
 
-Tại mỗi nút phân chia, thuật toán tìm kiếm đặc trưng $j$ và ngưỡng $\theta$ tối ưu nhằm tối đa hóa mức giảm độ vẩn đục (Impurity Reduction). Chỉ số vẩn đục phổ biến là \textbf{Gini Impurity}:
+Tại mỗi nút phân chia, thuật toán tìm kiếm đặc trưng $j$ và ngưỡng $\theta$ tối ưu nhằm tối đa hóa mức giảm độ vẩn đục. Chỉ số vẩn đục phổ biến là \textbf{Gini Impurity}:
 \begin{equation}
     I_G(p) = 1 - \sum_{k=0}^{1} p_k^2
 \end{equation}
@@ -115,12 +115,12 @@ Chỉ số Accuracy tổng thể:
 \begin{equation}
     \text{Accuracy} = \frac{TP + TN}{TP + TN + FP + FN}
 \end{equation}
-có thể gây hiểu nhầm nghiêm trọng nếu được sử dụng độc lập trên dữ liệu mất cân bằng. Giả sử tập kiểm thử có $97.4\%$ mẫu bình thường và $2.6\%$ mẫu tấn công (như tập Test CICIDS2017 Tuesday). Một bộ phân loại tầm thường luôn dự đoán mọi flow là bình thường ($TP=0, FP=0$) sẽ đạt ngay \textbf{Accuracy = 97.4\%} mặc dù không phát hiện được bất kỳ cuộc tấn công nào (\textbf{Recall = 0.0\%}). Do đó, F1-Score, đường cong Precision-Recall và Average Precision là các chỉ số đánh giá cần thiết.
+có thể gây hiểu nhầm nghiêm trọng nếu được sử dụng độc lập trên dữ liệu mất cân bằng. Giả sử tập kiểm thử có $97.4\%$ mẫu bình thường và $2.6\%$ mẫu tấn công (như tập Test CICIDS2017 Tuesday). Một bộ phân loại tầm thường luôn dự đoán mọi flow là bình thường ($TP=0, FP=0$) sẽ đạt ngay Accuracy = 97.4\% mặc dù không phát hiện được bất kỳ cuộc tấn công nào (Recall = 0.0\%). Do đó, F1-Score, đường cong Precision-Recall và Average Precision là các chỉ số đánh giá cần thiết.
 
-\subsection{Đường cong Precision-Recall (PR) và Average Precision (AP)}
+\subsection{Đường cong Precision-Recall và Average Precision}
 Như Davis và Goadrich \cite{davis2006relationship} đã chỉ ra, trên các tập dữ liệu mất cân bằng lớp, đường cong ROC có thể tạo ra cảm nhận quá lạc quan do đại lượng $TN$ trong mẫu số của $FPR$ rất lớn. Đường cong Precision-Recall biểu diễn sự đánh đổi giữa Precision và Recall khi thay đổi ngưỡng phân loại $\tau \in [0, 1]$.
 
-Theo đặc tả của scikit-learn \cite{scikit_learn_ap}, chỉ số \textbf{Average Precision (AP)} được tính bằng giá trị trung bình có trọng số của Precision theo mức tăng Recall giữa các ngưỡng:
+Theo đặc tả của scikit-learn \cite{scikit_learn_ap}, chỉ số Average Precision được tính bằng giá trị trung bình có trọng số của Precision theo mức tăng Recall giữa các ngưỡng:
 \begin{equation}
     \text{AP} = \sum_{n} (R_n - R_{n-1}) P_n
 \end{equation}
